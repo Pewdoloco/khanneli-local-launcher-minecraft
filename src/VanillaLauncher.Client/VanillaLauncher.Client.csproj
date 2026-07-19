@@ -1,0 +1,29 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <RootNamespace>VanillaLauncher.Client</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Update="appsettings.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <!--
+      appsettings.default.json (по-настоящему пустой шаблон) встраивается в сборку как
+      fallback (см. AppConfig.Load) — на случай, если внешний appsettings.json не попал в
+      релиз (было ровно так с 26.1.2-b1 в VanillaLauncher-localServer, см. CHANGELOG.md).
+      Это репозиторий "движка" (docs/TASK_PATH_AUTODETECT.md, "Модель распространения") —
+      здесь appsettings.json тоже пустой, без значений конкретного модпака: адаптация под
+      модпак (пути, ManifestUrl, GitHubOwner/Repo и т.д.) делается локально через экран
+      "Настройки" в Admin-режиме уже собранного exe, не правкой этого файла в репозитории.
+    -->
+    <EmbeddedResource Include="appsettings.default.json">
+      <LogicalName>VanillaLauncher.Client.appsettings.default.json</LogicalName>
+    </EmbeddedResource>
+  </ItemGroup>
+
+</Project>

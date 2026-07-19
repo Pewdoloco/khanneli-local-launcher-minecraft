@@ -1,0 +1,47 @@
+name: Engine release
+
+# Публикует "чистый" exe движка — только код + встроенный по-настоящему пустой
+# appsettings.default.json (см. docs/ARCHITECTURE.md, "Модель движок/модпак"). Отдельная
+# нумерация тегов (engine-vX.Y.Z), не пересекается с версиями релизов конкретного модпака
+# (те публикуются из Admin-режима через PublishPipeline, из отдельного репозитория модпака,
+# не через этот workflow).
+#
+# Сознательно НЕ прикладывает appsettings.json к релизу отдельным ассетом — только exe.
+# appsettings.json в этом репозитории и так пустой (движок ни к какому модпаку не привязан),
+# но раз в исходниках лежит "рабочая копия для локальной разработки", а не гарантированно
+# пустой файл, безопаснее не тащить её в публичный релиз вообще: единственное, что реально
+# получает пользователь — сам exe с truly-empty embedded-фоллбеком.
+
+on:
+  push:
+    tags:
+      - "engine-v*"
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-release:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "8.0.x"
+
+      - name: dotnet publish (self-contained win-x64 single file)
+        run: >
+          dotnet publish src/VanillaLauncher.Client.UI/VanillaLauncher.Client.UI.csproj
+          -c Release -r win-x64 --self-contained true
+          -p:PublishSingleFile=true
+          -o publish
+
+      - name: Upload exe to GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "${{ github.ref_name }}" `
+            "publish/VanillaLauncher.exe" `
+            --title "${{ github.ref_name }}" `
+            --generate-notes

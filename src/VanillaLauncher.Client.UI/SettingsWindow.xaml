@@ -1,0 +1,89 @@
+<Window x:Class="VanillaLauncher.Client.UI.SettingsWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:VanillaLauncher.Client.UI"
+        mc:Ignorable="d"
+        Title="VanillaLauncher — Настройки" Height="720" Width="560"
+        WindowStartupLocation="CenterOwner">
+    <Grid Margin="16">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <ScrollViewer Grid.Row="0" VerticalScrollBarVisibility="Auto">
+            <StackPanel>
+                <TextBlock Text="Настройки видны и редактируются только в Admin-режиме — обычный пользователь сюда не попадает."
+                           TextWrapping="Wrap" Foreground="Gray" Margin="0,0,0,12" />
+
+                <TextBlock Text="Путь клиентской сборки (ProfileRoot)" FontWeight="Bold" Margin="0,0,0,4" />
+                <Grid Margin="0,0,0,4">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <TextBox x:Name="ProfileRootTextBox" Grid.Column="0" Padding="4" Margin="0,0,8,0" />
+                    <Button Grid.Column="1" Content="Обзор..." Padding="10,4" Click="BrowseProfileRoot_Click" />
+                </Grid>
+                <TextBlock Text="Ожидаемое имя папки сборки (для автопоиска)" Margin="0,4,0,4" />
+                <TextBox x:Name="ClientFolderNameTextBox" Padding="4" Margin="0,0,0,4" />
+                <TextBlock Text="Корни поиска клиента (по одному пути на строку)" Margin="0,4,0,4" />
+                <TextBox x:Name="ClientSearchRootsTextBox" Padding="4" Margin="0,0,0,4"
+                         AcceptsReturn="True" TextWrapping="Wrap" Height="50" />
+                <Button Content="Найти автоматически" Padding="10,4" HorizontalAlignment="Left" Margin="0,0,0,16"
+                        Click="AutoDetectClient_Click" />
+
+                <TextBlock Text="Путь серверной директории (ServerDirectory)" FontWeight="Bold" Margin="0,0,0,4" />
+                <Grid Margin="0,0,0,4">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <TextBox x:Name="ServerDirectoryTextBox" Grid.Column="0" Padding="4" Margin="0,0,8,0" />
+                    <Button Grid.Column="1" Content="Обзор..." Padding="10,4" Click="BrowseServerDirectory_Click" />
+                </Grid>
+                <TextBlock Text="Ожидаемое имя папки сервера (для автопоиска, рядом с .exe)" Margin="0,4,0,4" />
+                <TextBox x:Name="ServerFolderNameTextBox" Padding="4" Margin="0,0,0,4" />
+                <TextBlock Text="Доп. корни поиска сервера (по одному пути на строку; папка рядом с .exe проверяется всегда)" Margin="0,4,0,4" TextWrapping="Wrap" />
+                <TextBox x:Name="ServerSearchRootsTextBox" Padding="4" Margin="0,0,0,4"
+                         AcceptsReturn="True" TextWrapping="Wrap" Height="50" />
+                <Button Content="Найти автоматически" Padding="10,4" HorizontalAlignment="Left" Margin="0,0,0,16"
+                        Click="AutoDetectServer_Click" />
+
+                <TextBlock Text="Имя .bat-файла сервера (ServerBatFileName)" FontWeight="Bold" Margin="0,0,0,4" />
+                <TextBox x:Name="ServerBatFileNameTextBox" Padding="4" Margin="0,0,0,16" />
+
+                <TextBlock Text="ManifestUrl" FontWeight="Bold" Margin="0,0,0,4" />
+                <TextBox x:Name="ManifestUrlTextBox" Padding="4" Margin="0,0,0,16" />
+
+                <TextBlock Text="GitHubOwner" FontWeight="Bold" Margin="0,0,0,4" />
+                <TextBox x:Name="GitHubOwnerTextBox" Padding="4" Margin="0,0,0,16" />
+
+                <TextBlock Text="GitHubRepo" FontWeight="Bold" Margin="0,0,0,4" />
+                <TextBox x:Name="GitHubRepoTextBox" Padding="4" Margin="0,0,0,16" />
+
+                <TextBlock Text="IncludeFolders (по одной папке на строку)" FontWeight="Bold" Margin="0,0,0,4" />
+                <TextBox x:Name="IncludeFoldersTextBox" Padding="4" Margin="0,0,0,16"
+                         AcceptsReturn="True" TextWrapping="Wrap" Height="60" />
+
+                <TextBlock Text="ServerExcludeMods (по одному имени файла на строку)" FontWeight="Bold" Margin="0,0,0,4" />
+                <TextBox x:Name="ServerExcludeModsTextBox" Padding="4" Margin="0,0,0,16"
+                         AcceptsReturn="True" TextWrapping="Wrap" Height="100"
+                         VerticalScrollBarVisibility="Auto" />
+
+                <TextBlock Text="MaxBackupsToKeep" FontWeight="Bold" Margin="0,0,0,4" />
+                <TextBox x:Name="MaxBackupsToKeepTextBox" Padding="4" Margin="0,0,0,8" Width="80" HorizontalAlignment="Left" />
+
+                <TextBlock x:Name="ErrorText" Foreground="Red" TextWrapping="Wrap"
+                           Margin="0,8,0,0" Visibility="Collapsed" />
+            </StackPanel>
+        </ScrollViewer>
+
+        <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,12,0,0">
+            <Button Content="Отмена" Padding="12,6" Margin="0,0,8,0" IsCancel="True" Click="CancelButton_Click" />
+            <Button Content="Сохранить" Padding="12,6" IsDefault="True" Click="SaveButton_Click" />
+        </StackPanel>
+    </Grid>
+</Window>

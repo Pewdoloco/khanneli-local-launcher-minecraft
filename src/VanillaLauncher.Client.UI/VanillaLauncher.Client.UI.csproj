@@ -1,0 +1,37 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <UseWPF>true</UseWPF>
+    <RootNamespace>VanillaLauncher.Client.UI</RootNamespace>
+    <AssemblyName>VanillaLauncher</AssemblyName>
+  </PropertyGroup>
+
+  <!--
+    Настройки только для `dotnet publish` (см. docs/ARCHITECTURE.md, раздел "Публикация exe").
+    Не в основной PropertyGroup: если RuntimeIdentifier/SelfContained завязаны безусловно,
+    обычный `dotnet build`/`dotnet run` тоже станет self-contained win-x64 сборкой — это
+    меняет путь выхода (bin/Debug/net8.0-windows/win-x64/ вместо .../net8.0-windows/) и ломает
+    все скрипты и тесты, которые ходят в bin/Debug/net8.0-windows/ напрямую, плюс сильно
+    замедляет каждую итерацию разработки.
+  -->
+  <PropertyGroup Condition="'$(PublishSingleFile)' == 'true'">
+    <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
+    <EnableCompressionInSingleFile>true</EnableCompressionInSingleFile>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\VanillaLauncher.Client\VanillaLauncher.Client.csproj" />
+    <ProjectReference Include="..\VanillaLauncher.Admin\VanillaLauncher.Admin.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="..\VanillaLauncher.Client\appsettings.json" Link="appsettings.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
+</Project>
