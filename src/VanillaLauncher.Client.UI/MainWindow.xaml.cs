@@ -10,10 +10,12 @@ public partial class MainWindow : Window
     private readonly HttpClient _http = new();
     private AppConfig? _config;
     private List<FilePlanItem>? _plan;
+    private EngineUpdateInfo? _engineUpdateInfo;
 
     public MainWindow()
     {
         InitializeComponent();
+        Title = $"VanillaLauncher {EngineVersion.Current}";
         Loaded += async (_, _) => await InitializeAsync();
     }
 
@@ -193,6 +195,85 @@ public partial class MainWindow : Window
         {
             Owner = this
         }.Show();
+    }
+
+    private async void CheckEngineUpdateButton_Click(object sender, RoutedEventArgs e)
+    {
+        _config ??= AppConfig.Load();
+
+        if (string.IsNullOrWhiteSpace(_config.EngineGitHubOwner) || string.IsNullOrWhiteSpace(_config.EngineGitHubRepo))
+        {
+            EngineStatusText.Text = "EngineGitHubOwner/EngineGitHubRepo не заданы в Настройках — проверка обновлений лаунчера недоступна.";
+            return;
+        }
+
+        CheckEngineUpdateButton.IsEnabled = false;
+        UpdateEngineButton.IsEnabled = false;
+        EngineStatusText.Text = "Проверка обновлений лаунчера...";
+        Log("Проверка обновлений лаунчера...");
+
+        try
+        {
+            _engineUpdateInfo = await EngineSelfUpdater.CheckForUpdateAsync(
+                _http, _config.EngineGitHubOwner, _config.EngineGitHubRepo, EngineVersion.Current);
+
+            if (_engineUpdateInfo.IsUpdateAvailable)
+            {
+                EngineStatusText.Text = $"Доступно обновление лаунчера: {_engineUpdateInfo.LatestVersion} (у вас {EngineVersion.Current}).";
+                Log($"Найдено обновление лаунчера: {_engineUpdateInfo.LatestVersion} (сейчас {EngineVersion.Current}).");
+                UpdateEngineButton.IsEnabled = true;
+            }
+            else
+            {
+                EngineStatusText.Text = $"У вас последняя версия лаунчера ({EngineVersion.Current}).";
+                Log($"Обновлений лаунчера не найдено (у вас {EngineVersion.Current}).");
+            }
+        }
+        catch (Exception ex)
+        {
+            EngineStatusText.Text = "Ошибка проверки обновлений лаунчера.";
+            Log($"Ошибка проверки обновлений лаунчера: {ex.Message}");
+        }
+        finally
+        {
+            CheckEngineUpdateButton.IsEnabled = true;
+        }
+    }
+
+    private async void UpdateEngineButton_Click(object sender, RoutedEventArgs e)
+    {
+        if (_engineUpdateInfo is not { IsUpdateAvailable: true, DownloadUrl: not null })
+            return;
+
+        var confirm = MessageBox.Show(
+            $"Доступна новая версия лаунчера: {_engineUpdateInfo.LatestVersion} (у вас {EngineVersion.Current}).\n" +
+            "Лаунчер скачает обновление, закроется и перезапустится с новой версией. Продолжить?",
+            "Обновление лаунчера",
+            MessageBoxButton.YesNo,
+            MessageBoxImage.Question,
+            MessageBoxResult.No);
+
+        if (confirm != MessageBoxResult.Yes)
+            return;
+
+        CheckEngineUpdateButton.IsEnabled = false;
+        UpdateEngineButton.IsEnabled = false;
+        EngineStatusText.Text = "Скачивание обновления лаунчера...";
+        Log("Скачивание обновления лаунчера...");
+
+        try
+        {
+            await EngineSelfUpdater.PrepareAndLaunchUpdateAsync(_http, _engineUpdateInfo.DownloadUrl);
+            Log("Обновление скачано — лаунчер перезапускается.");
+            Application.Current.Shutdown();
+        }
+        catch (Exception ex)
+        {
+            EngineStatusText.Text = "Ошибка обновления лаунчера.";
+            Log($"Ошибка обновления лаунчера: {ex.Message}");
+            CheckEngineUpdateButton.IsEnabled = true;
+            UpdateEngineButton.IsEnabled = true;
+        }
     }
 
     private void AdminButton_Click(object sender, RoutedEventArgs e)

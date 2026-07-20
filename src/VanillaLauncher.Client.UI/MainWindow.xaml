@@ -13,6 +13,7 @@
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
 
@@ -35,8 +36,16 @@
                     Margin="8,0,0,0" Visibility="Collapsed" Click="SelectProfileRootButton_Click" />
         </StackPanel>
 
-        <TextBlock Grid.Row="3" Text="Журнал:" FontWeight="Bold" Margin="0,0,0,4" />
+        <StackPanel Grid.Row="3" Orientation="Horizontal" Margin="0,0,0,8">
+            <Button x:Name="CheckEngineUpdateButton" Content="Проверить обновление лаунчера" Padding="12,6" Margin="0,0,8,0"
+                    Click="CheckEngineUpdateButton_Click" />
+            <Button x:Name="UpdateEngineButton" Content="Обновить лаунчер" Padding="12,6" IsEnabled="False"
+                    Click="UpdateEngineButton_Click" />
+            <TextBlock x:Name="EngineStatusText" VerticalAlignment="Center" Margin="12,0,0,0" TextWrapping="Wrap" Foreground="Gray" />
+        </StackPanel>
 
-        <ListBox x:Name="LogList" Grid.Row="4" />
+        <TextBlock Grid.Row="4" Text="Журнал:" FontWeight="Bold" Margin="0,0,0,4" />
+
+        <ListBox x:Name="LogList" Grid.Row="5" />
     </Grid>
 </Window>

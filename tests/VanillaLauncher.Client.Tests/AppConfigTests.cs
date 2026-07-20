@@ -136,6 +136,35 @@ public class AppConfigTests : IDisposable
     }
 
     [Fact]
+    public void Load_MissingEngineGitHubFields_DefaultToNull()
+    {
+        // EngineGitHubOwner/Repo (репозиторий движка для самообновления) - отдельные поля от
+        // GitHubOwner/Repo (репозиторий модпака для публикации контента); в их отсутствие
+        // кнопка проверки обновлений лаунчера должна просто быть недоступна, не падать.
+        WriteAppSettings("""{ "ManifestUrl": "https://example.invalid/manifest.json", "ProfileRoot": "C:\\somewhere" }""");
+
+        var config = AppConfig.Load(_dir);
+
+        Assert.Null(config.EngineGitHubOwner);
+        Assert.Null(config.EngineGitHubRepo);
+    }
+
+    [Fact]
+    public void Save_PreservesEngineGitHubFields()
+    {
+        WriteAppSettings("""{ "ManifestUrl": "https://example.invalid/manifest.json", "ProfileRoot": "C:\\old" }""");
+        var config = AppConfig.Load(_dir);
+
+        config.EngineGitHubOwner = "Pewdoloco";
+        config.EngineGitHubRepo = "khanneli-local-launcher-minecraft";
+        config.Save();
+
+        var reloaded = AppConfig.Load(_dir);
+        Assert.Equal("Pewdoloco", reloaded.EngineGitHubOwner);
+        Assert.Equal("khanneli-local-launcher-minecraft", reloaded.EngineGitHubRepo);
+    }
+
+    [Fact]
     public void Save_WithoutLoad_Throws()
     {
         var config = new AppConfig { ManifestUrl = "https://x", ProfileRoot = "C:\\x" };

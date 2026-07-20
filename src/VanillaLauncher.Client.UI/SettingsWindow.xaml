@@ -65,6 +65,13 @@
                 <TextBlock Text="GitHubRepo" FontWeight="Bold" Margin="0,0,0,4" />
                 <TextBox x:Name="GitHubRepoTextBox" Padding="4" Margin="0,0,0,16" />
 
+                <TextBlock Text="Репозиторий движка для самообновления лаунчера (EngineGitHubOwner/EngineGitHubRepo)"
+                           FontWeight="Bold" Margin="0,0,0,4" TextWrapping="Wrap" />
+                <TextBlock Text="Отдельно от GitHubOwner/GitHubRepo выше: там — куда публикуется контент модпака, здесь — откуда качать новую версию самого exe. Пусто = кнопка «Проверить обновление лаунчера» отключена."
+                           Margin="0,0,0,4" TextWrapping="Wrap" Foreground="Gray" />
+                <TextBox x:Name="EngineGitHubOwnerTextBox" Padding="4" Margin="0,0,0,4" />
+                <TextBox x:Name="EngineGitHubRepoTextBox" Padding="4" Margin="0,0,0,16" />
+
                 <TextBlock Text="IncludeFolders (по одной папке на строку)" FontWeight="Bold" Margin="0,0,0,4" />
                 <TextBox x:Name="IncludeFoldersTextBox" Padding="4" Margin="0,0,0,16"
                          AcceptsReturn="True" TextWrapping="Wrap" Height="60" />

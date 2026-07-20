@@ -30,6 +30,27 @@ jobs:
         with:
           dotnet-version: "8.0.x"
 
+      # EngineSelfUpdater (см. src/VanillaLauncher.Client/EngineSelfUpdater.cs) сравнивает
+      # версию из тега engine-vX.Y.Z с константой EngineVersion.Current, зашитой в exe.
+      # Если их забыли обновить синхронно, самообновление либо никогда не найдёт "новую"
+      # версию (константа не бампнута), либо наоборот. Проваливаем публикацию заранее,
+      # а не выясняем это постфактум у живых пользователей.
+      - name: Verify EngineVersion.Current matches tag
+        shell: pwsh
+        run: |
+          $tagVersion = "${{ github.ref_name }}" -replace '^engine-v', ''
+          $match = Select-String -Path 'src/VanillaLauncher.Client/EngineVersion.cs' -Pattern 'Current = "(.*?)"'
+          if (-not $match) {
+            Write-Error "Не удалось найти EngineVersion.Current в src/VanillaLauncher.Client/EngineVersion.cs"
+            exit 1
+          }
+          $codeVersion = $match.Matches[0].Groups[1].Value
+          if ($tagVersion -ne $codeVersion) {
+            Write-Error "Версия в теге ($tagVersion) не совпадает с EngineVersion.Current в коде ($codeVersion). Обнови константу перед тегом."
+            exit 1
+          }
+          Write-Host "OK: тег и EngineVersion.Current совпадают ($codeVersion)"
+
       - name: dotnet publish (self-contained win-x64 single file)
         run: >
           dotnet publish src/VanillaLauncher.Client.UI/VanillaLauncher.Client.UI.csproj

@@ -43,6 +43,16 @@ public sealed class AppConfig
     public string AdminGuideShort { get; set; } = DefaultGuides.AdminShort;
     public string AdminGuideFull { get; set; } = DefaultGuides.AdminFull;
 
+    // Репозиторий ДВИЖКА (не модпака) для самообновления exe (см. EngineSelfUpdater) —
+    // сознательно отдельные поля от GitHubOwner/GitHubRepo выше: те указывают, куда
+    // публикуются релизы модпака (контент), эти — откуда качать новую версию самого
+    // лаунчера. У реального деплоя обычно один и тот же владелец, но разные репозитории
+    // (например, GitHubOwner/Repo = модпак-репозиторий, EngineGitHubOwner/Repo =
+    // khanneli-local-launcher-minecraft). Пусто по умолчанию — без них кнопка проверки
+    // обновлений лаунчера просто сообщает, что не настроена, ничего не ломая.
+    public string? EngineGitHubOwner { get; set; }
+    public string? EngineGitHubRepo { get; set; }
+
     /// <summary>
     /// Отличает "движок ещё не адаптирован под модпак" (свежий/пустой конфиг — ни один
     /// друг ещё ничего не выбирал) от "у конкретного пользователя просто другой путь".

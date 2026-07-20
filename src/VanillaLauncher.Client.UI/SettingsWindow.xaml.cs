@@ -30,6 +30,8 @@ public partial class SettingsWindow : Window
         ManifestUrlTextBox.Text = _config.ManifestUrl;
         GitHubOwnerTextBox.Text = _config.GitHubOwner ?? string.Empty;
         GitHubRepoTextBox.Text = _config.GitHubRepo ?? string.Empty;
+        EngineGitHubOwnerTextBox.Text = _config.EngineGitHubOwner ?? string.Empty;
+        EngineGitHubRepoTextBox.Text = _config.EngineGitHubRepo ?? string.Empty;
         IncludeFoldersTextBox.Text = JoinLines(_config.IncludeFolders);
         ServerExcludeModsTextBox.Text = JoinLines(_config.ServerExcludeMods);
         MaxBackupsToKeepTextBox.Text = _config.MaxBackupsToKeep.ToString();
@@ -138,6 +140,8 @@ public partial class SettingsWindow : Window
         _config.ManifestUrl = ManifestUrlTextBox.Text.Trim();
         _config.GitHubOwner = NullIfEmpty(GitHubOwnerTextBox.Text);
         _config.GitHubRepo = NullIfEmpty(GitHubRepoTextBox.Text);
+        _config.EngineGitHubOwner = NullIfEmpty(EngineGitHubOwnerTextBox.Text);
+        _config.EngineGitHubRepo = NullIfEmpty(EngineGitHubRepoTextBox.Text);
         _config.IncludeFolders = SplitLines(IncludeFoldersTextBox.Text);
         _config.ServerExcludeMods = SplitLines(ServerExcludeModsTextBox.Text);
         _config.MaxBackupsToKeep = maxBackups;
