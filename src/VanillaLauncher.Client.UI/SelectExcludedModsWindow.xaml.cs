@@ -1,6 +1,7 @@
 using System.IO;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
 
 namespace VanillaLauncher.Client.UI;
 
@@ -10,10 +11,21 @@ namespace VanillaLauncher.Client.UI;
 /// того чтобы вписывать имена файлов вручную. Модальный намеренно (в отличие от GuideWindow) —
 /// это быстрый разовый выбор внутри уже открытого SettingsWindow, а не справочный материал,
 /// который нужно держать открытым параллельно с остальной работой.
+///
+/// Список постранично (по <see cref="PageSize"/> строк, как список игр в библиотеке Steam) +
+/// поиск по имени файла — модпаки легко содержат 70-100+ модов, один сплошной скроллящийся
+/// список неудобно и просматривать, и находить в нём конкретный файл. Отмеченное состояние
+/// хранится отдельно от того, что сейчас отрисовано на экране (<see cref="_checkedNames"/>),
+/// иначе переключение страницы/поиска сбрасывало бы чекбоксы вне видимой страницы.
 /// </summary>
 public partial class SelectExcludedModsWindow : Window
 {
-    private readonly HashSet<string> _initiallyExcluded;
+    private const int PageSize = 10;
+
+    private readonly HashSet<string> _checkedNames;
+    private List<string> _allJarNames = new();
+    private List<string> _filteredJarNames = new();
+    private int _currentPage;
 
     public List<string> SelectedExcludedMods { get; private set; } = new();
 
@@ -26,7 +38,7 @@ public partial class SelectExcludedModsWindow : Window
     public SelectExcludedModsWindow(string? defaultFolder, IEnumerable<string> currentlyExcluded)
     {
         InitializeComponent();
-        _initiallyExcluded = new HashSet<string>(currentlyExcluded, StringComparer.OrdinalIgnoreCase);
+        _checkedNames = new HashSet<string>(currentlyExcluded, StringComparer.OrdinalIgnoreCase);
 
         if (!string.IsNullOrWhiteSpace(defaultFolder))
         {
@@ -48,49 +60,99 @@ public partial class SelectExcludedModsWindow : Window
 
     private void ScanFolder(string folder)
     {
-        ModsListBox.Items.Clear();
-        ScannedFileNames = new List<string>();
         ErrorText.Visibility = Visibility.Collapsed;
+        SearchTextBox.Text = string.Empty;
+        _allJarNames = new List<string>();
 
         if (!Directory.Exists(folder))
         {
             ErrorText.Text = "Папка не найдена.";
             ErrorText.Visibility = Visibility.Visible;
+            ApplyFilterAndRender();
             return;
         }
 
-        var jarNames = Directory.EnumerateFiles(folder, "*.jar", SearchOption.TopDirectoryOnly)
+        _allJarNames = Directory.EnumerateFiles(folder, "*.jar", SearchOption.TopDirectoryOnly)
             .Select(Path.GetFileName)
             .OfType<string>()
             .OrderBy(name => name, StringComparer.OrdinalIgnoreCase)
             .ToList();
 
-        ScannedFileNames = jarNames;
+        ScannedFileNames = _allJarNames;
 
-        foreach (var name in jarNames)
-        {
-            ModsListBox.Items.Add(new CheckBox
-            {
-                Content = name,
-                IsChecked = _initiallyExcluded.Contains(name),
-                Margin = new Thickness(2)
-            });
-        }
-
-        if (jarNames.Count == 0)
+        if (_allJarNames.Count == 0)
         {
             ErrorText.Text = "В папке нет .jar файлов.";
             ErrorText.Visibility = Visibility.Visible;
         }
+
+        ApplyFilterAndRender();
+    }
+
+    private void SearchButton_Click(object sender, RoutedEventArgs e) => ApplyFilterAndRender();
+
+    private void SearchTextBox_KeyDown(object sender, KeyEventArgs e)
+    {
+        if (e.Key == Key.Enter)
+            ApplyFilterAndRender();
+    }
+
+    private void ApplyFilterAndRender()
+    {
+        var query = SearchTextBox.Text.Trim();
+        _filteredJarNames = string.IsNullOrEmpty(query)
+            ? _allJarNames
+            : _allJarNames.Where(name => name.Contains(query, StringComparison.OrdinalIgnoreCase)).ToList();
+
+        _currentPage = 0;
+        RenderPage();
+    }
+
+    private void RenderPage()
+    {
+        ModsListBox.Items.Clear();
+
+        var pageCount = Math.Max(1, (int)Math.Ceiling(_filteredJarNames.Count / (double)PageSize));
+        _currentPage = Math.Clamp(_currentPage, 0, pageCount - 1);
+
+        foreach (var name in _filteredJarNames.Skip(_currentPage * PageSize).Take(PageSize))
+        {
+            var checkBox = new CheckBox
+            {
+                Content = name,
+                IsChecked = _checkedNames.Contains(name),
+                Margin = new Thickness(2)
+            };
+            checkBox.Checked += (_, _) => _checkedNames.Add(name);
+            checkBox.Unchecked += (_, _) => _checkedNames.Remove(name);
+            ModsListBox.Items.Add(checkBox);
+        }
+
+        PageInfoText.Text = _filteredJarNames.Count == 0
+            ? "Ничего не найдено"
+            : $"Страница {_currentPage + 1} из {pageCount} ({_filteredJarNames.Count} файлов)";
+
+        PrevPageButton.IsEnabled = _currentPage > 0;
+        NextPageButton.IsEnabled = _currentPage < pageCount - 1;
+    }
+
+    private void PrevPageButton_Click(object sender, RoutedEventArgs e)
+    {
+        _currentPage--;
+        RenderPage();
+    }
+
+    private void NextPageButton_Click(object sender, RoutedEventArgs e)
+    {
+        _currentPage++;
+        RenderPage();
     }
 
     private void ApplyButton_Click(object sender, RoutedEventArgs e)
     {
-        SelectedExcludedMods = ModsListBox.Items
-            .OfType<CheckBox>()
-            .Where(cb => cb.IsChecked == true)
-            .Select(cb => (string)cb.Content)
-            .ToList();
+        // _checkedNames — источник истины по всем страницам/поиску, а не только по тому,
+        // что отрисовано на экране сейчас (см. класс-комментарий).
+        SelectedExcludedMods = _checkedNames.Where(name => _allJarNames.Contains(name, StringComparer.OrdinalIgnoreCase)).ToList();
         DialogResult = true;
     }
 

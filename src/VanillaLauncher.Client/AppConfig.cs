@@ -22,12 +22,16 @@ public sealed class AppConfig
     // См. docs/ARCHITECTURE.md — почему это отдельный список, а не автоопределение.
     public List<string> ServerExcludeMods { get; set; } = new();
 
-    // Автоопределение путей (docs/TASK_PATH_AUTODETECT.md). Ожидаемые имена папок и корни
-    // поиска — настройки, а не захардкоженные строки, чтобы один и тот же движок подходил
-    // под любой модпак без правки кода. Пусто по умолчанию — только конфигурация конкретного
-    // модпака заполняет реальные имена/пути.
+    // Автоопределение путей (docs/TASK_PATH_AUTODETECT.md). Ожидаемые имена папок — настройка,
+    // а не захардкоженная строка (пусто по умолчанию — только конфигурация конкретного
+    // модпака знает реальное имя папки сборки). Корни поиска клиента, наоборот, заведены с
+    // непустым generic-дефолтом: %USERPROFILE%\curseforge\Instances — это стандартный путь
+    // установки CurseForge-приложения, не специфичный ни для какого модпака (как и
+    // ServerBatFileName/IncludeFolders выше) и раскрывается PathAutoDetectService в реальный
+    // путь на машине КАЖДОГО игрока независимо от имени пользователя/диска. Админ может
+    // дописать/заменить свои через "Настройки", если структура папок другая.
     public string? ClientFolderName { get; set; }
-    public List<string> ClientSearchRoots { get; set; } = new();
+    public List<string> ClientSearchRoots { get; set; } = new() { @"%USERPROFILE%\curseforge\Instances" };
     public string? ServerFolderName { get; set; }
     public List<string> ServerSearchRoots { get; set; } = new();
 

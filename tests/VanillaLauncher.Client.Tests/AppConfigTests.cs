@@ -38,6 +38,17 @@ public class AppConfigTests : IDisposable
     }
 
     [Fact]
+    public void Load_MissingExternalFile_DefaultsClientSearchRootsToCurseForgeConvention()
+    {
+        // generic-дефолт (не значение конкретного модпака) — стандартный путь установки
+        // CurseForge, раскрывается PathAutoDetectService в реальный путь на машине игрока.
+        var config = AppConfig.Load(_dir);
+
+        var root = Assert.Single(config.ClientSearchRoots);
+        Assert.Equal(@"%USERPROFILE%\curseforge\Instances", root);
+    }
+
+    [Fact]
     public void Load_MissingExternalFile_ThenSave_CreatesLocalFile()
     {
         var config = AppConfig.Load(_dir);

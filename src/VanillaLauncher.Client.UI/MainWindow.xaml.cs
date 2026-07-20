@@ -64,7 +64,6 @@ public partial class MainWindow : Window
                 StatusText.Text = "Не найдена папка сборки Minecraft — укажи её вручную.";
                 Log($"Папка «{_config.ProfileRoot}» не существует на этой машине, автоопределение не нашло совпадений.");
                 CheckButton.IsEnabled = false;
-                SelectProfileRootButton.Visibility = Visibility.Visible;
                 return;
             }
         }
@@ -72,14 +71,24 @@ public partial class MainWindow : Window
         await CheckForUpdatesAsync();
     }
 
+    /// <summary>
+    /// Кнопка "Сменить папку сборки" видна и активна всегда, не только при первом
+    /// запуске/ошибке автопоиска — игрок может пересобрать инстанс в другом месте или
+    /// просто ошибиться при выборе и должен иметь возможность поправить путь сам, не прося
+    /// администратора отредактировать appsettings.json за него.
+    /// </summary>
     private void SelectProfileRootButton_Click(object sender, RoutedEventArgs e)
     {
+        _config ??= AppConfig.Load();
+
         if (!PromptForProfileRoot())
             return;
 
-        SelectProfileRootButton.Visibility = Visibility.Collapsed;
-        CheckButton.IsEnabled = true;
-        _ = CheckForUpdatesAsync();
+        if (_config.IsConfigured)
+        {
+            CheckButton.IsEnabled = true;
+            _ = CheckForUpdatesAsync();
+        }
     }
 
     private bool PromptForProfileRoot()
@@ -190,8 +199,9 @@ public partial class MainWindow : Window
 
         // Show(), не ShowDialog() — окно инструкции не должно мешать проверять/качать
         // обновления, пока открыто. Owner проставлен только ради z-order/сворачивания вместе
-        // с главным окном, к модальности отношения не имеет.
-        new GuideWindow("Инструкция — Клиент", _config.ClientGuideShort, _config.ClientGuideFull)
+        // с главным окном; от блокировки чужими ShowDialog() защищает WM_ENABLE hook внутри
+        // самого GuideWindow (см. его комментарий) — Owner тут ни при чём.
+        new GuideWindow(_config, GuideRole.Client)
         {
             Owner = this
         }.Show();

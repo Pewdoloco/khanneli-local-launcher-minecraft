@@ -1,4 +1,5 @@
 using System.Windows;
+using System.Windows.Controls;
 using VanillaLauncher.Client;
 
 namespace VanillaLauncher.Client.UI;
@@ -119,11 +120,49 @@ public partial class SettingsWindow : Window
         ServerExcludeModsTextBox.Text = JoinLines(merged);
     }
 
+    // Ключ Tag кнопки -> (textbox, компактная высота, увеличенная высота "для удобства
+    // печати"). WorldBackupService требует MaxBackupsToKeep >= 1 (см. AdminWindow) — тут
+    // высоты касаются только полей руководств, но заодно рядом лежит и валидация того же
+    // рода для MaxBackupsToKeep ниже в SaveButton_Click.
+    private (System.Windows.Controls.TextBox TextBox, double Compact, double Expanded) GetGuideField(string key) => key switch
+    {
+        "ClientShort" => (ClientGuideShortTextBox, 80, 320),
+        "ClientFull" => (ClientGuideFullTextBox, 140, 380),
+        "AdminShort" => (AdminGuideShortTextBox, 80, 320),
+        "AdminFull" => (AdminGuideFullTextBox, 140, 380),
+        _ => throw new InvalidOperationException($"Неизвестное поле руководства: {key}")
+    };
+
+    /// <summary>
+    /// Поля руководств read-only по умолчанию — случайный клик/ввод текста в это поле,
+    /// пока правишь соседние настройки, иначе легко бы испортил инструкцию незаметно.
+    /// "Редактировать" снимает read-only и увеличивает поле для удобной печати; "Готово"
+    /// возвращает оба свойства обратно, не сохраняя (сохранение — только общей кнопкой
+    /// "Сохранить" внизу окна, как и у всех остальных полей).
+    /// </summary>
+    private void ToggleGuideEdit_Click(object sender, RoutedEventArgs e)
+    {
+        var button = (Button)sender;
+        var key = (string)button.Tag;
+        var (textBox, compact, expanded) = GetGuideField(key);
+
+        var startEditing = textBox.IsReadOnly;
+        textBox.IsReadOnly = !startEditing;
+        textBox.Height = startEditing ? expanded : compact;
+        button.Content = startEditing ? "Готово" : "Редактировать";
+
+        if (startEditing)
+            textBox.Focus();
+    }
+
     private void SaveButton_Click(object sender, RoutedEventArgs e)
     {
-        if (!int.TryParse(MaxBackupsToKeepTextBox.Text, out var maxBackups) || maxBackups < 0)
+        if (!int.TryParse(MaxBackupsToKeepTextBox.Text, out var maxBackups) || maxBackups < 1)
         {
-            ErrorText.Text = "MaxBackupsToKeep должен быть целым числом ≥ 0.";
+            // WorldBackupService.ctor бросает ArgumentOutOfRangeException при < 1 — сверяем
+            // здесь ту же границу, чтобы не пропустить в конфиг значение, которое сломает
+            // "Пересоздать мир" при первом же клике в AdminWindow.
+            ErrorText.Text = "MaxBackupsToKeep должен быть целым числом ≥ 1 (нужно хранить хотя бы один бэкап).";
             ErrorText.Visibility = Visibility.Visible;
             return;
         }

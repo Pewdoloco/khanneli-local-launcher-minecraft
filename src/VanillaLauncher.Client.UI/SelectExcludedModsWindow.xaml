@@ -5,14 +5,16 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:VanillaLauncher.Client.UI"
         mc:Ignorable="d"
-        Title="Выбрать моды для ServerExcludeMods" Height="520" Width="480"
+        Title="Выбрать моды для ServerExcludeMods" Height="560" Width="480"
         WindowStartupLocation="CenterOwner">
     <Grid Margin="16">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
@@ -27,11 +29,35 @@
             <Button Grid.Column="1" Content="Обзор..." Padding="10,4" Click="BrowseFolder_Click" />
         </Grid>
 
-        <TextBlock Grid.Row="2" Text="Отметь моды, которые НЕ должны попадать на сервер:"
-                    Margin="0,0,0,4" TextWrapping="Wrap" />
-        <ListBox x:Name="ModsListBox" Grid.Row="3" Margin="0,0,0,8" />
+        <Grid Grid.Row="2" Margin="0,0,0,8">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            <TextBox x:Name="SearchTextBox" Grid.Column="0" Padding="4" Margin="0,0,8,0"
+                     KeyDown="SearchTextBox_KeyDown" />
+            <Button Grid.Column="1" Content="Найти" Padding="10,4" Click="SearchButton_Click" />
+        </Grid>
 
-        <StackPanel Grid.Row="4" Orientation="Horizontal" HorizontalAlignment="Right">
+        <TextBlock Grid.Row="3" Text="Отметь моды, которые НЕ должны попадать на сервер:"
+                    Margin="0,0,0,4" TextWrapping="Wrap" />
+        <ListBox x:Name="ModsListBox" Grid.Row="4" Margin="0,0,0,8" />
+
+        <Grid Grid.Row="5" Margin="0,0,0,8">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            <Button x:Name="PrevPageButton" Grid.Column="0" Content="◀ Пред." Padding="10,4"
+                    Click="PrevPageButton_Click" />
+            <TextBlock x:Name="PageInfoText" Grid.Column="1" HorizontalAlignment="Center"
+                       VerticalAlignment="Center" />
+            <Button x:Name="NextPageButton" Grid.Column="2" Content="След. ▶" Padding="10,4"
+                    Click="NextPageButton_Click" />
+        </Grid>
+
+        <StackPanel Grid.Row="6" Orientation="Horizontal" HorizontalAlignment="Right">
             <TextBlock x:Name="ErrorText" Foreground="Red" TextWrapping="Wrap" Margin="0,0,8,0"
                        VerticalAlignment="Center" Visibility="Collapsed" />
             <Button Content="Отмена" Padding="12,6" Margin="0,0,8,0" IsCancel="True" Click="CancelButton_Click" />

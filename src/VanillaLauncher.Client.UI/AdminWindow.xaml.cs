@@ -85,7 +85,7 @@ public partial class AdminWindow : Window
     {
         // Show(), не ShowDialog() — можно продолжать управлять сервером, пока инструкция
         // открыта (например, сверяться с ней во время публикации обновления).
-        new GuideWindow("Инструкция — Администратор", _config.AdminGuideShort, _config.AdminGuideFull)
+        new GuideWindow(_config, GuideRole.Admin)
         {
             Owner = this
         }.Show();

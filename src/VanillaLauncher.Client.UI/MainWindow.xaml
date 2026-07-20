@@ -32,8 +32,8 @@
                     Click="GuideButton_Click" />
             <Button x:Name="AdminButton" Content="Режим администратора" Padding="12,6" Margin="8,0,0,0"
                     Click="AdminButton_Click" />
-            <Button x:Name="SelectProfileRootButton" Content="Выбрать папку сборки" Padding="12,6"
-                    Margin="8,0,0,0" Visibility="Collapsed" Click="SelectProfileRootButton_Click" />
+            <Button x:Name="SelectProfileRootButton" Content="Сменить папку сборки" Padding="12,6"
+                    Margin="8,0,0,0" Click="SelectProfileRootButton_Click" />
         </StackPanel>
 
         <StackPanel Grid.Row="3" Orientation="Horizontal" Margin="0,0,0,8">

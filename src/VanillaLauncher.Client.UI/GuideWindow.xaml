@@ -5,22 +5,40 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:VanillaLauncher.Client.UI"
         mc:Ignorable="d"
-        Title="Инструкция" Height="560" Width="600"
+        Title="Инструкция" Height="600" Width="620"
         WindowStartupLocation="CenterOwner">
     <Grid Margin="16">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
 
-        <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,12">
-            <RadioButton x:Name="ShortRadio" Content="Краткое" GroupName="GuideLength" Margin="0,0,16,0"
-                         IsChecked="True" Checked="ModeRadio_Checked" />
-            <RadioButton x:Name="FullRadio" Content="Полное" GroupName="GuideLength"
-                         Checked="ModeRadio_Checked" />
+        <!--
+          Крупный, явно выделенный переключатель роли — чтобы не спутать, чью инструкцию
+          читаешь. Оба варианта доступны из любого окна лаунчера: сам текст не секретный,
+          играть в "у клиента только клиентское" смысла нет, а любопытному игроку полезно
+          понимать, что вообще умеет Admin-режим.
+        -->
+        <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,12" HorizontalAlignment="Center">
+            <RadioButton x:Name="ClientRoleRadio" GroupName="GuideRole" Margin="0,0,24,0"
+                         Checked="RoleOrLength_Changed">
+                <TextBlock Text="Пользователь" FontSize="20" FontWeight="Bold" />
+            </RadioButton>
+            <RadioButton x:Name="AdminRoleRadio" GroupName="GuideRole"
+                         Checked="RoleOrLength_Changed">
+                <TextBlock Text="Администратор" FontSize="20" FontWeight="Bold" />
+            </RadioButton>
         </StackPanel>
 
-        <TextBox x:Name="GuideTextBox" Grid.Row="1"
+        <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="0,0,0,12" HorizontalAlignment="Center">
+            <RadioButton x:Name="ShortRadio" Content="Краткое" GroupName="GuideLength" Margin="0,0,16,0"
+                         IsChecked="True" Checked="RoleOrLength_Changed" />
+            <RadioButton x:Name="FullRadio" Content="Полное" GroupName="GuideLength"
+                         Checked="RoleOrLength_Changed" />
+        </StackPanel>
+
+        <TextBox x:Name="GuideTextBox" Grid.Row="2"
                  IsReadOnly="True" TextWrapping="Wrap" AcceptsReturn="True"
                  VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled"
                  FontFamily="Consolas" Padding="8" Background="White" BorderThickness="1" />
