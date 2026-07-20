@@ -182,6 +182,19 @@ public partial class MainWindow : Window
         await CheckForUpdatesAsync();
     }
 
+    private void GuideButton_Click(object sender, RoutedEventArgs e)
+    {
+        _config ??= AppConfig.Load();
+
+        // Show(), не ShowDialog() — окно инструкции не должно мешать проверять/качать
+        // обновления, пока открыто. Owner проставлен только ради z-order/сворачивания вместе
+        // с главным окном, к модальности отношения не имеет.
+        new GuideWindow("Инструкция — Клиент", _config.ClientGuideShort, _config.ClientGuideFull)
+        {
+            Owner = this
+        }.Show();
+    }
+
     private void AdminButton_Click(object sender, RoutedEventArgs e)
     {
         _config ??= AppConfig.Load();

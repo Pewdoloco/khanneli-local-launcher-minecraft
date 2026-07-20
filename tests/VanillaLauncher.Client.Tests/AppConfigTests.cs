@@ -105,6 +105,37 @@ public class AppConfigTests : IDisposable
     }
 
     [Fact]
+    public void Load_MissingGuideFields_FallsBackToGenericDefaults()
+    {
+        // Гайды - generic-дефолт движка (см. DefaultGuides), не значение конкретного
+        // модпака - поэтому, в отличие от ManifestUrl/ProfileRoot, JSON без этих полей
+        // должен получить непустой, осмысленный текст, а не пустую строку.
+        WriteAppSettings("""{ "ManifestUrl": "https://example.invalid/manifest.json", "ProfileRoot": "C:\\somewhere" }""");
+
+        var config = AppConfig.Load(_dir);
+
+        Assert.False(string.IsNullOrWhiteSpace(config.ClientGuideShort));
+        Assert.False(string.IsNullOrWhiteSpace(config.ClientGuideFull));
+        Assert.False(string.IsNullOrWhiteSpace(config.AdminGuideShort));
+        Assert.False(string.IsNullOrWhiteSpace(config.AdminGuideFull));
+    }
+
+    [Fact]
+    public void Save_PreservesCustomGuideText()
+    {
+        WriteAppSettings("""{ "ManifestUrl": "https://example.invalid/manifest.json", "ProfileRoot": "C:\\old" }""");
+        var config = AppConfig.Load(_dir);
+
+        config.ClientGuideShort = "Кастомная краткая инструкция клиента.";
+        config.AdminGuideFull = "Кастомная полная инструкция админа.";
+        config.Save();
+
+        var reloaded = AppConfig.Load(_dir);
+        Assert.Equal("Кастомная краткая инструкция клиента.", reloaded.ClientGuideShort);
+        Assert.Equal("Кастомная полная инструкция админа.", reloaded.AdminGuideFull);
+    }
+
+    [Fact]
     public void Save_WithoutLoad_Throws()
     {
         var config = new AppConfig { ManifestUrl = "https://x", ProfileRoot = "C:\\x" };

@@ -1,0 +1,41 @@
+<Window x:Class="VanillaLauncher.Client.UI.SelectExcludedModsWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:VanillaLauncher.Client.UI"
+        mc:Ignorable="d"
+        Title="Выбрать моды для ServerExcludeMods" Height="520" Width="480"
+        WindowStartupLocation="CenterOwner">
+    <Grid Margin="16">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <TextBlock Grid.Row="0" Text="Папка с модами (обычно ProfileRoot\mods):"
+                    Margin="0,0,0,4" TextWrapping="Wrap" />
+        <Grid Grid.Row="1" Margin="0,0,0,8">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            <TextBox x:Name="FolderTextBox" Grid.Column="0" Padding="4" Margin="0,0,8,0" />
+            <Button Grid.Column="1" Content="Обзор..." Padding="10,4" Click="BrowseFolder_Click" />
+        </Grid>
+
+        <TextBlock Grid.Row="2" Text="Отметь моды, которые НЕ должны попадать на сервер:"
+                    Margin="0,0,0,4" TextWrapping="Wrap" />
+        <ListBox x:Name="ModsListBox" Grid.Row="3" Margin="0,0,0,8" />
+
+        <StackPanel Grid.Row="4" Orientation="Horizontal" HorizontalAlignment="Right">
+            <TextBlock x:Name="ErrorText" Foreground="Red" TextWrapping="Wrap" Margin="0,0,8,0"
+                       VerticalAlignment="Center" Visibility="Collapsed" />
+            <Button Content="Отмена" Padding="12,6" Margin="0,0,8,0" IsCancel="True" Click="CancelButton_Click" />
+            <Button Content="Применить" Padding="12,6" IsDefault="True" Click="ApplyButton_Click" />
+        </StackPanel>
+    </Grid>
+</Window>

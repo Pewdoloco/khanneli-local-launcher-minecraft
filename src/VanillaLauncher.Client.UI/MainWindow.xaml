@@ -27,7 +27,9 @@
                     Click="CheckButton_Click" />
             <Button x:Name="UpdateButton" Content="Обновить" Padding="12,6" IsEnabled="False"
                     Click="UpdateButton_Click" />
-            <Button x:Name="AdminButton" Content="Режим администратора" Padding="12,6" Margin="24,0,0,0"
+            <Button x:Name="GuideButton" Content="Инструкция" Padding="12,6" Margin="24,0,0,0"
+                    Click="GuideButton_Click" />
+            <Button x:Name="AdminButton" Content="Режим администратора" Padding="12,6" Margin="8,0,0,0"
                     Click="AdminButton_Click" />
             <Button x:Name="SelectProfileRootButton" Content="Выбрать папку сборки" Padding="12,6"
                     Margin="8,0,0,0" Visibility="Collapsed" Click="SelectProfileRootButton_Click" />

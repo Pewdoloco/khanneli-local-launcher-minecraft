@@ -100,4 +100,57 @@ public class PathAutoDetectServiceTests : IDisposable
 
         Assert.Null(result);
     }
+
+    [Fact]
+    public void TryFind_ExpandsEnvironmentVariableInRoot()
+    {
+        const string varName = "VLC_TEST_ROOT_" + nameof(TryFind_ExpandsEnvironmentVariableInRoot);
+        Environment.SetEnvironmentVariable(varName, _dir);
+        try
+        {
+            var expected = Directory.CreateDirectory(Path.Combine(_dir, "VanillaScary")).FullName;
+
+            var result = PathAutoDetectService.TryFind("VanillaScary", new[] { $"%{varName}%" });
+
+            Assert.Equal(expected, result);
+        }
+        finally
+        {
+            Environment.SetEnvironmentVariable(varName, null);
+        }
+    }
+
+    [Fact]
+    public void TryFind_ExpandsEnvironmentVariableInsideLongerPath()
+    {
+        const string varName = "VLC_TEST_ROOT_" + nameof(TryFind_ExpandsEnvironmentVariableInsideLongerPath);
+        Environment.SetEnvironmentVariable(varName, _dir);
+        try
+        {
+            var instancesRoot = Directory.CreateDirectory(Path.Combine(_dir, "curseforge", "Instances")).FullName;
+            var expected = Directory.CreateDirectory(Path.Combine(instancesRoot, "VanillaScary")).FullName;
+
+            var result = PathAutoDetectService.TryFind("VanillaScary", new[] { $"%{varName}%\\curseforge\\Instances" });
+
+            Assert.Equal(expected, result);
+        }
+        finally
+        {
+            Environment.SetEnvironmentVariable(varName, null);
+        }
+    }
+
+    [Fact]
+    public void TryFind_UnknownEnvironmentVariable_LeftLiteral_SkipsRootWithoutThrowing()
+    {
+        // Environment.ExpandEnvironmentVariables не бросает на нераспознанном "%имя%" — просто
+        // оставляет строку как есть, которая затем не существует на диске и тихо пропускается.
+        var expected = Directory.CreateDirectory(Path.Combine(_dir, "VanillaScary")).FullName;
+
+        var result = PathAutoDetectService.TryFind(
+            "VanillaScary",
+            new[] { "%VLC_DOES_NOT_EXIST_AS_ENV_VAR%", _dir });
+
+        Assert.Equal(expected, result);
+    }
 }

@@ -31,6 +31,18 @@ public sealed class AppConfig
     public string? ServerFolderName { get; set; }
     public List<string> ServerSearchRoots { get; set; } = new();
 
+    // Текст встроенного окна "Инструкция" (GuideWindow) — краткая/полная версия на роль.
+    // В отличие от путей/ManifestUrl, дефолт здесь не пустой: это общая для любого модпака
+    // инструкция по самому движку (кнопки, онбординг, автопоиск), не содержит ничего
+    // специфичного для конкретной сборки — как и ServerBatFileName/IncludeFolders выше,
+    // это разумный generic-дефолт, а не "значение конкретного модпака". Админ может
+    // переписать текст под свой модпак через экран "Настройки" (например, добавить прямые
+    // инструкции по подключению к серверу), не трогая код.
+    public string ClientGuideShort { get; set; } = DefaultGuides.ClientShort;
+    public string ClientGuideFull { get; set; } = DefaultGuides.ClientFull;
+    public string AdminGuideShort { get; set; } = DefaultGuides.AdminShort;
+    public string AdminGuideFull { get; set; } = DefaultGuides.AdminFull;
+
     /// <summary>
     /// Отличает "движок ещё не адаптирован под модпак" (свежий/пустой конфиг — ни один
     /// друг ещё ничего не выбирал) от "у конкретного пользователя просто другой путь".

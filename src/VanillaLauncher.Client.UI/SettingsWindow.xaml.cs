@@ -33,6 +33,11 @@ public partial class SettingsWindow : Window
         IncludeFoldersTextBox.Text = JoinLines(_config.IncludeFolders);
         ServerExcludeModsTextBox.Text = JoinLines(_config.ServerExcludeMods);
         MaxBackupsToKeepTextBox.Text = _config.MaxBackupsToKeep.ToString();
+
+        ClientGuideShortTextBox.Text = _config.ClientGuideShort;
+        ClientGuideFullTextBox.Text = _config.ClientGuideFull;
+        AdminGuideShortTextBox.Text = _config.AdminGuideShort;
+        AdminGuideFullTextBox.Text = _config.AdminGuideFull;
     }
 
     private static string JoinLines(IEnumerable<string> values) => string.Join(Environment.NewLine, values);
@@ -90,6 +95,28 @@ public partial class SettingsWindow : Window
         }
     }
 
+    private void PickExcludedMods_Click(object sender, RoutedEventArgs e)
+    {
+        var defaultFolder = string.IsNullOrWhiteSpace(ProfileRootTextBox.Text)
+            ? null
+            : System.IO.Path.Combine(ProfileRootTextBox.Text, "mods");
+
+        var currentlyExcluded = SplitLines(ServerExcludeModsTextBox.Text);
+        var picker = new SelectExcludedModsWindow(defaultFolder, currentlyExcluded) { Owner = this };
+
+        if (picker.ShowDialog() != true)
+            return;
+
+        // Пикер управляет только теми записями, что реально нашёл в просканированной папке —
+        // введённые вручную имена для модов из другой папки (например, старый список из
+        // appsettings.json до первого использования пикера) не трогаем и не теряем.
+        var scanned = new HashSet<string>(picker.ScannedFileNames, StringComparer.OrdinalIgnoreCase);
+        var preserved = currentlyExcluded.Where(name => !scanned.Contains(name));
+        var merged = preserved.Concat(picker.SelectedExcludedMods).Distinct(StringComparer.OrdinalIgnoreCase);
+
+        ServerExcludeModsTextBox.Text = JoinLines(merged);
+    }
+
     private void SaveButton_Click(object sender, RoutedEventArgs e)
     {
         if (!int.TryParse(MaxBackupsToKeepTextBox.Text, out var maxBackups) || maxBackups < 0)
@@ -114,6 +141,11 @@ public partial class SettingsWindow : Window
         _config.IncludeFolders = SplitLines(IncludeFoldersTextBox.Text);
         _config.ServerExcludeMods = SplitLines(ServerExcludeModsTextBox.Text);
         _config.MaxBackupsToKeep = maxBackups;
+
+        _config.ClientGuideShort = ClientGuideShortTextBox.Text;
+        _config.ClientGuideFull = ClientGuideFullTextBox.Text;
+        _config.AdminGuideShort = AdminGuideShortTextBox.Text;
+        _config.AdminGuideFull = AdminGuideFullTextBox.Text;
 
         _config.Save();
         DialogResult = true;

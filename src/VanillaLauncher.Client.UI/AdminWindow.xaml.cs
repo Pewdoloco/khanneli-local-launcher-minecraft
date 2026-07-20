@@ -81,6 +81,16 @@ public partial class AdminWindow : Window
         }
     }
 
+    private void GuideButton_Click(object sender, RoutedEventArgs e)
+    {
+        // Show(), не ShowDialog() — можно продолжать управлять сервером, пока инструкция
+        // открыта (например, сверяться с ней во время публикации обновления).
+        new GuideWindow("Инструкция — Администратор", _config.AdminGuideShort, _config.AdminGuideFull)
+        {
+            Owner = this
+        }.Show();
+    }
+
     private ServerProcessController EnsureController()
     {
         if (_controller is null)
