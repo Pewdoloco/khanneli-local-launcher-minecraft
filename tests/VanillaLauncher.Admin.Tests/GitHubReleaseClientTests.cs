@@ -46,17 +46,41 @@ public class GitHubReleaseClientTests
     [Fact]
     public async Task UploadAssetAsync_PostsToResolvedUploadUrl_WithNameAndContent()
     {
-        var fake = new FakeHttpMessageHandler(_ => FakeHttpMessageHandler.Json(HttpStatusCode.Created, "{}"));
+        var fake = new FakeHttpMessageHandler(_ => FakeHttpMessageHandler.Json(HttpStatusCode.Created, """
+            {"browser_download_url": "https://github.com/o/r/releases/download/v1/mods_a.jar"}
+            """));
         using var http = new HttpClient(fake);
         var client = new GitHubReleaseClient(http, "o", "r", "tok");
         var release = new GitHubRelease(1, "https://uploads.github.com/repos/o/r/releases/1/assets{?name,label}", "https://github.com/o/r/releases/tag/v1");
 
-        await client.UploadAssetAsync(release, "mods_a.jar", Encoding.UTF8.GetBytes("fake-jar-bytes"));
+        var downloadUrl = await client.UploadAssetAsync(release, "mods_a.jar", Encoding.UTF8.GetBytes("fake-jar-bytes"));
 
         var (request, body) = Assert.Single(fake.Requests);
         Assert.Equal("https://uploads.github.com/repos/o/r/releases/1/assets?name=mods_a.jar", request.RequestUri!.ToString());
         Assert.Equal("application/octet-stream", request.Content!.Headers.ContentType!.MediaType);
         Assert.Equal("fake-jar-bytes", body);
+        Assert.Equal("https://github.com/o/r/releases/download/v1/mods_a.jar", downloadUrl);
+    }
+
+    /// <summary>
+    /// GitHub переименовывает ассеты при сохранении (например, заменяет пробелы на
+    /// точки в имени файла) — возвращаемый browser_download_url может отличаться от
+    /// того, что мы предполагали бы по исходному assetName. Клиент должен отдавать
+    /// именно то, что вернул GitHub, а не собирать ссылку сам.
+    /// </summary>
+    [Fact]
+    public async Task UploadAssetAsync_GitHubRenamesAsset_ReturnsActualDownloadUrl()
+    {
+        var fake = new FakeHttpMessageHandler(_ => FakeHttpMessageHandler.Json(HttpStatusCode.Created, """
+            {"browser_download_url": "https://github.com/o/r/releases/download/v1/mods_Dangerous.Fabric.-.1.5.1.jar"}
+            """));
+        using var http = new HttpClient(fake);
+        var client = new GitHubReleaseClient(http, "o", "r", "tok");
+        var release = new GitHubRelease(1, "https://uploads.github.com/repos/o/r/releases/1/assets{?name,label}", "https://github.com/o/r/releases/tag/v1");
+
+        var downloadUrl = await client.UploadAssetAsync(release, "mods_Dangerous Fabric - 1.5.1.jar", Encoding.UTF8.GetBytes("x"));
+
+        Assert.Equal("https://github.com/o/r/releases/download/v1/mods_Dangerous.Fabric.-.1.5.1.jar", downloadUrl);
     }
 
     [Fact]

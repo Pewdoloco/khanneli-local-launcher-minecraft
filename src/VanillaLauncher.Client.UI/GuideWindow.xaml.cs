@@ -27,9 +27,14 @@ public partial class GuideWindow : Window
         _config = config;
 
         if (defaultRole == GuideRole.Admin)
+        {
             AdminRoleRadio.IsChecked = true;
+        }
         else
+        {
             ClientRoleRadio.IsChecked = true;
+            AdminRoleRadio.Visibility = Visibility.Collapsed;
+        }
 
         UpdateText();
     }

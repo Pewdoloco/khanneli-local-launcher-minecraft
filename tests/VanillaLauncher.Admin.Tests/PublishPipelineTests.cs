@@ -64,7 +64,9 @@ public class PublishPipelineTests : IDisposable
                     {"id": 1, "upload_url": "https://uploads.github.com/repos/o/r/releases/1/assets{?name,label}", "html_url": "https://github.com/o/r/releases/tag/v1"}
                     """);
             }
-            return FakeHttpMessageHandler.Json(HttpStatusCode.Created, "{}");
+            return FakeHttpMessageHandler.Json(HttpStatusCode.Created, """
+                {"browser_download_url": "https://github.com/o/r/releases/download/v1/asset"}
+                """);
         });
         var http = new HttpClient(fake);
         return new ReleasePublisher(new GitHubReleaseClient(http, "o", "r", "tok"));

@@ -27,6 +27,12 @@ public partial class SelectExcludedModsWindow : Window
     private List<string> _filteredJarNames = new();
     private int _currentPage;
 
+    /// <summary>Моды, у которых fabric.mod.json честно объявляет "environment": "client" —
+    /// автоматически предотмечаются как исключения при сканировании (см. ScanFolder). Не
+    /// ловит моды, которые лгут в метаданных (например, better_tab заявляет "*", хотя на
+    /// деле клиентский) — те по-прежнему только вручную, см. AdminGuide.</summary>
+    private HashSet<string> _autoDetectedClientOnly = new(StringComparer.OrdinalIgnoreCase);
+
     public List<string> SelectedExcludedMods { get; private set; } = new();
 
     /// <summary>Все .jar, найденные при последнем сканировании — не только отмеченные.
@@ -80,11 +86,21 @@ public partial class SelectExcludedModsWindow : Window
 
         ScannedFileNames = _allJarNames;
 
+        _autoDetectedClientOnly = new HashSet<string>(
+            _allJarNames.Where(name => FabricModEnvironmentReader.IsClientOnly(Path.Combine(folder, name))),
+            StringComparer.OrdinalIgnoreCase);
+        _checkedNames.UnionWith(_autoDetectedClientOnly);
+
         if (_allJarNames.Count == 0)
         {
             ErrorText.Text = "В папке нет .jar файлов.";
             ErrorText.Visibility = Visibility.Visible;
         }
+
+        AutoDetectSummaryText.Text = _autoDetectedClientOnly.Count == 0
+            ? "Моды с честным \"environment\": \"client\" в метаданных не найдены — не значит, что клиентских модов нет, часть из них не декларирует это поле вообще."
+            : $"Автоматически отмечено как client-only по метаданным (\"environment\": \"client\"): {_autoDetectedClientOnly.Count}. " +
+              "Часть модов заявляет универсальность (\"*\"), но на деле клиентская и падает на сервере — это НЕ определяется автоматически, проверяй запуском сервера.";
 
         ApplyFilterAndRender();
     }
@@ -117,9 +133,18 @@ public partial class SelectExcludedModsWindow : Window
 
         foreach (var name in _filteredJarNames.Skip(_currentPage * PageSize).Take(PageSize))
         {
+            // CheckBox.Content рендерится через AccessText — одиночное "_" в имени файла
+            // (обычное дело для fabric-модов, например better_tab-...) читалось бы как
+            // маркер мнемоники и пропадало бы из отображаемого текста. "__" — стандартный
+            // способ показать буквальный "_". _checkedNames/name ниже не трогаем — реальное
+            // имя файла для ServerExcludeMods берётся из замыкания, а не из Content.
+            var displayName = name.Replace("_", "__");
+            if (_autoDetectedClientOnly.Contains(name))
+                displayName += "  [авто: environment=client]";
+
             var checkBox = new CheckBox
             {
-                Content = name,
+                Content = displayName,
                 IsChecked = _checkedNames.Contains(name),
                 Margin = new Thickness(2)
             };

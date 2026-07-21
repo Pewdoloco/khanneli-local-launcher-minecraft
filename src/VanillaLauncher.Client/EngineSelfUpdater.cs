@@ -34,8 +34,10 @@ public static class EngineSelfUpdater
         if (!response.IsSuccessStatusCode)
         {
             var body = await response.Content.ReadAsStringAsync(ct);
+            var hint = GitHubApiErrorTranslator.TryGetHint(response.StatusCode, body);
+            var hintSuffix = hint is null ? string.Empty : $"\nПодсказка: {hint}";
             throw new InvalidOperationException(
-                $"GitHub API: не удалось проверить обновления движка ({(int)response.StatusCode} {response.StatusCode}): {body}");
+                $"GitHub API: не удалось проверить обновления движка ({(int)response.StatusCode} {response.StatusCode}): {body}{hintSuffix}");
         }
 
         var json = await response.Content.ReadAsStringAsync(ct);

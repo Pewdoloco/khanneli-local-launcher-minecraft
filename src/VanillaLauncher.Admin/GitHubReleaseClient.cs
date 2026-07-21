@@ -1,6 +1,7 @@
 using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
+using VanillaLauncher.Client;
 
 namespace VanillaLauncher.Admin;
 
@@ -54,7 +55,15 @@ public sealed class GitHubReleaseClient
             root.GetProperty("html_url").GetString() ?? string.Empty);
     }
 
-    public async Task UploadAssetAsync(GitHubRelease release, string assetName, byte[] content, CancellationToken ct = default)
+    /// <summary>
+    /// Возвращает реальный browser_download_url загруженного ассета. GitHub может
+    /// переименовать assetName при сохранении — например, заменяет пробелы на точки
+    /// ("Dangerous Fabric - 1.5.1.jar" -> "Dangerous.Fabric.-.1.5.1.jar"), поэтому
+    /// URL, заранее посчитанный из исходного имени файла, не всегда совпадает с
+    /// настоящим (см. ReleasePublisher — манифест должен использовать то, что вернул
+    /// GitHub, а не пересобирать ссылку самостоятельно).
+    /// </summary>
+    public async Task<string> UploadAssetAsync(GitHubRelease release, string assetName, byte[] content, CancellationToken ct = default)
     {
         // upload_url приходит в формате "https://uploads.github.com/.../assets{?name,label}" — берём часть до "{"
         var uploadUrl = release.UploadUrlTemplate.Split('{')[0];
@@ -66,6 +75,10 @@ public sealed class GitHubReleaseClient
 
         using var response = await _http.SendAsync(request, ct);
         await EnsureSuccessAsync(response, $"загрузка ассета {assetName}", ct);
+
+        var json = await response.Content.ReadAsStringAsync(ct);
+        using var doc = JsonDocument.Parse(json);
+        return doc.RootElement.GetProperty("browser_download_url").GetString()!;
     }
 
     private void ApplyHeaders(HttpRequestMessage request)
@@ -82,6 +95,9 @@ public sealed class GitHubReleaseClient
             return;
 
         var body = await response.Content.ReadAsStringAsync(ct);
-        throw new InvalidOperationException($"GitHub API: не удалось выполнить '{action}' ({(int)response.StatusCode} {response.StatusCode}): {body}");
+        var hint = GitHubApiErrorTranslator.TryGetHint(response.StatusCode, body);
+        var hintSuffix = hint is null ? string.Empty : $"\nПодсказка: {hint}";
+        throw new InvalidOperationException(
+            $"GitHub API: не удалось выполнить '{action}' ({(int)response.StatusCode} {response.StatusCode}): {body}{hintSuffix}");
     }
 }

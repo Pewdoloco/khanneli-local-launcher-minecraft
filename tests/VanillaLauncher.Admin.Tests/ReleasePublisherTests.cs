@@ -34,7 +34,14 @@ public class ReleasePublisherTests : IDisposable
                     {"id": 7, "upload_url": "https://uploads.github.com/repos/o/r/releases/7/assets{?name,label}", "html_url": "https://github.com/o/r/releases/tag/v1"}
                     """);
             }
-            return FakeHttpMessageHandler.Json(HttpStatusCode.Created, "{}");
+
+            // Реальный GitHub может переименовать assetName при сохранении, но для этого
+            // теста имена простые (без пробелов) — считаем, что он вернул тот же assetName,
+            // как и было бы с настоящим GitHub. См. UploadAssetAsync_GitHubRenamesAsset_*
+            // в GitHubReleaseClientTests для случая, когда имена расходятся.
+            var name = Uri.UnescapeDataString(req.RequestUri!.Query.TrimStart('?').Split('=')[1]);
+            return FakeHttpMessageHandler.Json(HttpStatusCode.Created,
+                $$"""{"browser_download_url": "https://github.com/o/r/releases/download/v1/{{name}}"}""");
         });
         using var http = new HttpClient(fake);
         var client = new GitHubReleaseClient(http, "o", "r", "tok");

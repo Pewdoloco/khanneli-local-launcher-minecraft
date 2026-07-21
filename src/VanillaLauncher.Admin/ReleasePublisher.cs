@@ -31,6 +31,11 @@ public sealed class ReleasePublisher
 
         var downloadBaseUrl = BuildAssetDownloadBaseUrl(release);
 
+        // urlForPath даёт предварительную ссылку, пока файл ещё не загружен — она
+        // перезаписывается ниже настоящим browser_download_url после аплоада, потому
+        // что GitHub может переименовать ассет (например, заменить пробелы на точки),
+        // и предсказанная заранее ссылка тогда не совпадёт с реальной (см.
+        // GitHubReleaseClient.UploadAssetAsync).
         var manifest = await ManifestGenerator.GenerateAsync(
             sourceRoot,
             includeFolders,
@@ -45,7 +50,7 @@ public sealed class ReleasePublisher
             var assetName = ManifestGenerator.FlattenPathForAssetName(entry.Path);
             progress?.Report($"Загрузка: {assetName}");
             var bytes = await File.ReadAllBytesAsync(Path.Combine(sourceRoot, entry.Path), ct);
-            await _client.UploadAssetAsync(release, assetName, bytes, ct);
+            entry.Url = await _client.UploadAssetAsync(release, assetName, bytes, ct);
         }
 
         progress?.Report("Загрузка manifest.json...");

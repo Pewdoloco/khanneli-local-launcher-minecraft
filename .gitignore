@@ -3,3 +3,4 @@ obj/
 *.user
 manifest-test/
 admin-auth.json
+publish/

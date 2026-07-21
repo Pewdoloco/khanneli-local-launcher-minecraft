@@ -13,6 +13,7 @@
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
@@ -41,9 +42,11 @@
 
         <TextBlock Grid.Row="3" Text="Отметь моды, которые НЕ должны попадать на сервер:"
                     Margin="0,0,0,4" TextWrapping="Wrap" />
-        <ListBox x:Name="ModsListBox" Grid.Row="4" Margin="0,0,0,8" />
+        <TextBlock x:Name="AutoDetectSummaryText" Grid.Row="4" Margin="0,0,0,4" TextWrapping="Wrap"
+                   Foreground="Gray" FontStyle="Italic" />
+        <ListBox x:Name="ModsListBox" Grid.Row="5" Margin="0,0,0,8" />
 
-        <Grid Grid.Row="5" Margin="0,0,0,8">
+        <Grid Grid.Row="6" Margin="0,0,0,8">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto" />
                 <ColumnDefinition Width="*" />
@@ -57,7 +60,7 @@
                     Click="NextPageButton_Click" />
         </Grid>
 
-        <StackPanel Grid.Row="6" Orientation="Horizontal" HorizontalAlignment="Right">
+        <StackPanel Grid.Row="7" Orientation="Horizontal" HorizontalAlignment="Right">
             <TextBlock x:Name="ErrorText" Foreground="Red" TextWrapping="Wrap" Margin="0,0,8,0"
                        VerticalAlignment="Center" Visibility="Collapsed" />
             <Button Content="Отмена" Padding="12,6" Margin="0,0,8,0" IsCancel="True" Click="CancelButton_Click" />
