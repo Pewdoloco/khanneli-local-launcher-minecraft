@@ -84,10 +84,13 @@ public sealed class AppConfig
         var path = Path.Combine(dir, FileName);
 
         // Внешний appsettings.json может отсутствовать — например, к релизу приложили
-        // только exe и забыли файл конфига рядом (было ровно так с 26.1.2-b1). В этом
-        // случае используем встроенный в сборку дефолт, чтобы программа хотя бы
-        // запустилась, а не падала с "файл не найден" у человека, который просто скачал exe.
-        var json = File.Exists(path) ? File.ReadAllText(path) : ReadEmbeddedDefault();
+        // только exe и забыли файл конфига рядом (было ровно так с 26.1.2-b1), или файл
+        // удалили вручную (см. ClientGuide — "удали appsettings.json и перезапусти" как
+        // способ сброса). В этом случае используем встроенный в сборку дефолт, чтобы
+        // программа хотя бы запустилась, а не падала с "файл не найден" у человека,
+        // который просто скачал exe.
+        var fileExisted = File.Exists(path);
+        var json = fileExisted ? File.ReadAllText(path) : ReadEmbeddedDefault();
 
         var config = JsonSerializer.Deserialize<AppConfig>(json, new JsonSerializerOptions
         {
@@ -103,6 +106,23 @@ public sealed class AppConfig
         // настроено" и "настроено, но путь не найден на этой машине" — дело вызывающей
         // стороны через IsConfigured, а не повод бросать исключение здесь.
         config._loadedFromDirectory = dir;
+
+        // Файл на диске сам собой не появлялся, если его не было — Save() до сих пор ничего
+        // не вызывал в этом пути, поэтому "удали appsettings.json и перезапусти" из
+        // ClientGuide не работало (файла не было ни до, ни после перезапуска). Дописываем
+        // фоллбек на диск сразу же — best-effort: если папка недоступна на запись (тот же
+        // случай, ради которого вообще есть embedded-фоллбек), тихо продолжаем в памяти,
+        // не роняя запуск.
+        if (!fileExisted)
+        {
+            try
+            {
+                config.Save();
+            }
+            catch (IOException) { }
+            catch (UnauthorizedAccessException) { }
+        }
+
         return config;
     }
 

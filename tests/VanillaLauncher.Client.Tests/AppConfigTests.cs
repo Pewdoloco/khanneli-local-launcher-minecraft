@@ -61,6 +61,36 @@ public class AppConfigTests : IDisposable
     }
 
     [Fact]
+    public void Load_MissingExternalFile_WritesEmbeddedDefaultToDiskImmediately()
+    {
+        // Раньше appsettings.json появлялся на диске только после явного Save() где-то в UI
+        // (например, после выбора ProfileRoot) — если файл удалить и просто перезапустить exe
+        // ничего не делая, он на диске не появлялся никогда, хотя ClientGuide советует "удали
+        // appsettings.json и перезапусти" как способ сброса. Load() теперь сам пишет фоллбек
+        // на диск сразу же, без отдельного Save().
+        var path = Path.Combine(_dir, "appsettings.json");
+        Assert.False(File.Exists(path));
+
+        AppConfig.Load(_dir);
+
+        Assert.True(File.Exists(path));
+    }
+
+    [Fact]
+    public void Load_ExistingExternalFile_DoesNotOverwriteIt()
+    {
+        // Самоисцеление касается только ОТСУТСТВУЮЩЕГО файла — если файл уже есть (обычный
+        // случай), Load() не должен его трогать/перезаписывать своими правками.
+        WriteAppSettings("""{"ManifestUrl": "https://example.com/manifest.json", "ProfileRoot": "C:\\builds\\pack"}""");
+        var path = Path.Combine(_dir, "appsettings.json");
+        var before = File.GetLastWriteTimeUtc(path);
+
+        AppConfig.Load(_dir);
+
+        Assert.Equal(before, File.GetLastWriteTimeUtc(path));
+    }
+
+    [Fact]
     public void Load_MissingManifestUrl_DoesNotThrow_ButIsNotConfigured()
     {
         // Пустой/частичный ManifestUrl/GitHubOwner/GitHubRepo — валидное состояние
