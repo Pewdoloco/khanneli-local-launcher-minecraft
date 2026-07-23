@@ -28,6 +28,8 @@
                     Click="CheckButton_Click" />
             <Button x:Name="UpdateButton" Content="Обновить" Padding="12,6" IsEnabled="False"
                     Click="UpdateButton_Click" />
+            <Button x:Name="SetupButton" Content="Настроить лаунчер" Padding="12,6" Margin="0,0,8,0"
+                    Visibility="Collapsed" Click="SetupButton_Click" />
             <Button x:Name="GuideButton" Content="Инструкция" Padding="12,6" Margin="24,0,0,0"
                     Click="GuideButton_Click" />
             <Button x:Name="AdminButton" Content="Режим администратора" Padding="12,6" Margin="8,0,0,0"

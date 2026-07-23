@@ -44,13 +44,27 @@ public partial class MainWindow : Window
             // Отличаем "движок ещё не адаптирован под модпак" (ManifestUrl/GitHubOwner/
             // GitHubRepo пустые — свежий, ненастроенный exe) от "у этого игрока просто
             // другой путь" ниже. См. AppConfig.IsConfigured и docs/TASK_PATH_AUTODETECT.md.
-            StatusText.Text = "Лаунчер не настроен под модпак. Обратись к администратору.";
+            // "Настроить лаунчер" даёт игроку самому вписать GitHubOwner/GitHubRepo (не
+            // секретные, просто координаты репозитория) — не через Admin-режим, админу не
+            // нужно пересобирать и рассылать exe+appsettings.json каждому другу заново.
+            StatusText.Text = "Лаунчер не настроен под модпак. Нажми «Настроить лаунчер» и впиши данные от администратора, либо обратись к нему за готовым appsettings.json.";
             Log("ManifestUrl/GitHubOwner/GitHubRepo не заданы — это неадаптированная сборка движка.");
             CheckButton.IsEnabled = false;
+            SetupButton.Visibility = Visibility.Visible;
             return;
         }
 
-        if (!System.IO.Directory.Exists(_config.ProfileRoot))
+        await ProceedWithConfiguredClientAsync();
+    }
+
+    /// <summary>
+    /// Общее продолжение после того, как GitHubOwner/GitHubRepo/ManifestUrl уже на месте —
+    /// неважно, были ли они в appsettings.json с самого начала или их только что вписал
+    /// игрок через SetupButton_Click.
+    /// </summary>
+    private async Task ProceedWithConfiguredClientAsync()
+    {
+        if (!System.IO.Directory.Exists(_config!.ProfileRoot))
         {
             var detected = PathAutoDetectService.TryFind(_config.ClientFolderName, _config.ClientSearchRoots);
             if (detected is not null)
@@ -68,7 +82,21 @@ public partial class MainWindow : Window
             }
         }
 
+        CheckButton.IsEnabled = true;
         await CheckForUpdatesAsync();
+    }
+
+    private async void SetupButton_Click(object sender, RoutedEventArgs e)
+    {
+        _config ??= AppConfig.Load();
+
+        var setup = new ClientSetupWindow(_config) { Owner = this };
+        if (setup.ShowDialog() != true)
+            return;
+
+        SetupButton.Visibility = Visibility.Collapsed;
+        Log($"Настроено вручную: GitHubOwner={_config.GitHubOwner}, GitHubRepo={_config.GitHubRepo}.");
+        await ProceedWithConfiguredClientAsync();
     }
 
     /// <summary>
@@ -211,11 +239,12 @@ public partial class MainWindow : Window
     {
         _config ??= AppConfig.Load();
 
-        if (string.IsNullOrWhiteSpace(_config.EngineGitHubOwner) || string.IsNullOrWhiteSpace(_config.EngineGitHubRepo))
-        {
-            EngineStatusText.Text = "EngineGitHubOwner/EngineGitHubRepo не заданы в Настройках — проверка обновлений лаунчера недоступна.";
-            return;
-        }
+        // Фоллбек на канонический репозиторий движка, если поля не заданы явно — чтобы
+        // самообновление работало без отдельной настройки EngineGitHubOwner/EngineGitHubRepo
+        // для любого модпака на этом движке. Явно заданное значение в конфиге (например, у
+        // форка со своим движком) фоллбек не перезаписывает и не игнорирует.
+        var owner = string.IsNullOrWhiteSpace(_config.EngineGitHubOwner) ? EngineRepositoryDefaults.Owner : _config.EngineGitHubOwner;
+        var repo = string.IsNullOrWhiteSpace(_config.EngineGitHubRepo) ? EngineRepositoryDefaults.Repo : _config.EngineGitHubRepo;
 
         CheckEngineUpdateButton.IsEnabled = false;
         UpdateEngineButton.IsEnabled = false;
@@ -225,7 +254,7 @@ public partial class MainWindow : Window
         try
         {
             _engineUpdateInfo = await EngineSelfUpdater.CheckForUpdateAsync(
-                _http, _config.EngineGitHubOwner, _config.EngineGitHubRepo, EngineVersion.Current);
+                _http, owner, repo, EngineVersion.Current);
 
             if (_engineUpdateInfo.IsUpdateAvailable)
             {

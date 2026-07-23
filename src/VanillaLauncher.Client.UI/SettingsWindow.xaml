@@ -28,6 +28,8 @@
                     <Button Grid.Column="1" Content="Обзор..." Padding="10,4" Click="BrowseProfileRoot_Click" />
                 </Grid>
                 <TextBlock Text="Ожидаемое имя папки сборки (для автопоиска)" Margin="0,4,0,4" />
+                <TextBlock TextWrapping="Wrap" Foreground="Gray" Margin="0,0,0,4"
+                           Text="Только ИМЯ папки (не путь), например VanillaScary — так называется папка инстанса в CurseForge/твоём лаунчере у КАЖДОГО игрока, независимо от диска и имени пользователя. Лаунчер ищет прямую подпапку с таким именем (без учёта регистра) в каждом из корней ниже по порядку — не рекурсивно, вложенные глубже подпапки не проверяются. Пусто — автопоиск клиента отключён, каждый игрок будет указывать путь вручную (кнопка «Обзор» в его окне)." />
                 <TextBox x:Name="ClientFolderNameTextBox" Padding="4" Margin="0,0,0,4" />
                 <TextBlock Text="Корни поиска клиента (по одному пути на строку; можно использовать переменные окружения, например %USERPROFILE%\curseforge\Instances — у каждого друга свой пользователь/диск)"
                            Margin="0,4,0,4" TextWrapping="Wrap" />
@@ -46,6 +48,8 @@
                     <Button Grid.Column="1" Content="Обзор..." Padding="10,4" Click="BrowseServerDirectory_Click" />
                 </Grid>
                 <TextBlock Text="Ожидаемое имя папки сервера (для автопоиска, рядом с .exe)" Margin="0,4,0,4" />
+                <TextBlock TextWrapping="Wrap" Foreground="Gray" Margin="0,0,0,4"
+                           Text="Только ИМЯ папки сервера (не путь) — актуально, если лаунчер лежит не прямо в папке сервера, а рядом с ней (например, обе — подпапки одной общей папки). Работает так же, как имя папки клиента выше: прямая подпапка, без учёта регистра, не рекурсивно. Папка рядом с самим exe проверяется всегда, даже если это поле пустое." />
                 <TextBox x:Name="ServerFolderNameTextBox" Padding="4" Margin="0,0,0,4" />
                 <TextBlock Text="Доп. корни поиска сервера (по одному пути на строку, тоже с поддержкой %VAR%; папка рядом с .exe проверяется всегда)" Margin="0,4,0,4" TextWrapping="Wrap" />
                 <TextBox x:Name="ServerSearchRootsTextBox" Padding="4" Margin="0,0,0,4"
