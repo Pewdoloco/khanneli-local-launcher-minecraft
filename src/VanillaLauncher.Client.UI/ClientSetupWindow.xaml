@@ -24,22 +24,25 @@
         </Grid.RowDefinitions>
 
         <TextBlock Grid.Row="0" TextWrapping="Wrap" Margin="0,0,0,12"
-                    Text="Эти значения тебе должен сообщить администратор сервера — не придумывай их сам. Это не пароль и не секрет, обычно просто пара слов текстом в чате." />
+                    Text="Эти значения тебе должен сообщить администратор сервера — не придумывай их сам. Это не пароль и не секрет, обычно просто пара слов текстом в чате. Поля со звёздочкой (*) обязательны." />
 
-        <TextBlock Grid.Row="1" Text="GitHubOwner (владелец репозитория)" FontWeight="Bold" Margin="0,0,0,4" />
+        <TextBlock Grid.Row="1" Text="GitHubOwner (владелец репозитория) *" FontWeight="Bold" Margin="0,0,0,4" />
         <TextBlock Grid.Row="2" TextWrapping="Wrap" Foreground="Gray" Margin="0,0,0,4"
                     Text="Имя пользователя или организации на GitHub, например Pewdoloco." />
-        <TextBox x:Name="GitHubOwnerTextBox" Grid.Row="3" Padding="4" Margin="0,0,0,12" />
+        <TextBox x:Name="GitHubOwnerTextBox" Grid.Row="3" Padding="4" Margin="0,0,0,12"
+                 local:Watermark.Hint="Pewdoloco" />
 
-        <TextBlock Grid.Row="4" Text="GitHubRepo (репозиторий модпака)" FontWeight="Bold" Margin="0,0,0,4" />
+        <TextBlock Grid.Row="4" Text="GitHubRepo (репозиторий модпака) *" FontWeight="Bold" Margin="0,0,0,4" />
         <TextBlock Grid.Row="5" TextWrapping="Wrap" Foreground="Gray" Margin="0,0,0,4"
                     Text="Имя репозитория, например VanillaLauncher-localServer. Если прислали ссылку целиком (https://github.com/Owner/Repo) — можно вставить как есть, лишнее уберётся само при сохранении." />
-        <TextBox x:Name="GitHubRepoTextBox" Grid.Row="6" Padding="4" Margin="0,0,0,12" />
+        <TextBox x:Name="GitHubRepoTextBox" Grid.Row="6" Padding="4" Margin="0,0,0,12"
+                 local:Watermark.Hint="VanillaLauncher-localServer" />
 
         <TextBlock Grid.Row="7" Text="Имя папки сборки (необязательно)" FontWeight="Bold" Margin="0,0,0,4" />
         <TextBlock Grid.Row="8" TextWrapping="Wrap" Foreground="Gray" Margin="0,0,0,4"
                     Text="Имя ТОЛЬКО папки твоей сборки Minecraft (не весь путь) — например, VanillaScary. Лаунчер сам поищет папку с таким именем внутри стандартного пути CurseForge и не будет спрашивать её вручную, если найдёт. Можно оставить пустым — тогда лаунчер один раз спросит папку сборки отдельным диалогом (кнопка «Обзор»), дальше запомнит выбор." />
-        <TextBox x:Name="ClientFolderNameTextBox" Grid.Row="9" Padding="4" Margin="0,0,0,8" />
+        <TextBox x:Name="ClientFolderNameTextBox" Grid.Row="9" Padding="4" Margin="0,0,0,8"
+                 local:Watermark.Hint="VanillaScary" />
 
         <TextBlock x:Name="ErrorText" Grid.Row="10" Foreground="Red" TextWrapping="Wrap"
                     VerticalAlignment="Top" Visibility="Collapsed" />

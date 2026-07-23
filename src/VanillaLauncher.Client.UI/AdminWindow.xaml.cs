@@ -9,7 +9,6 @@ public partial class AdminWindow : Window
 {
     private readonly AppConfig _config;
     private ServerProcessController? _controller;
-    private string _versionWatermarkText = "например: 1.2.3";
 
     public AdminWindow(AppConfig config)
     {
@@ -17,15 +16,14 @@ public partial class AdminWindow : Window
         _config = config;
         RefreshServerDirectoryState();
 
-        VersionTextBox.TextChanged += (_, _) => ApplyVersionWatermarkIfEmpty();
-        ApplyVersionWatermarkIfEmpty();
+        Watermark.SetHint(VersionTextBox, "например: 1.2.3");
         _ = LoadLastPublishedVersionAsync();
     }
 
     /// <summary>
-    /// Показывает тег последнего опубликованного релиза серым текстом внутри пустого поля
-    /// "Версия релиза" — чтобы не лезть на github.com/{owner}/{repo}/releases каждый раз,
-    /// когда нужно вспомнить, что публиковалось прошлый раз. Best-effort: публичный GET без
+    /// Показывает тег последнего опубликованного релиза водяным знаком в поле "Версия
+    /// релиза" — чтобы не лезть на github.com/{owner}/{repo}/releases каждый раз, когда
+    /// нужно вспомнить, что публиковалось прошлый раз. Best-effort: публичный GET без
     /// токена, тихо оставляет generic-подсказку при любой ошибке/отсутствии релизов —
     /// показ версии не настолько важен, чтобы падать или мешать остальному окну.
     /// </summary>
@@ -51,37 +49,11 @@ public partial class AdminWindow : Window
             var tag = doc.RootElement.GetProperty("tag_name").GetString();
 
             if (!string.IsNullOrWhiteSpace(tag))
-            {
-                _versionWatermarkText = $"было: {tag}";
-                ApplyVersionWatermarkIfEmpty();
-            }
+                Watermark.SetHint(VersionTextBox, $"было: {tag}");
         }
         catch
         {
             // сеть недоступна/репозиторий ещё не создан и т.п. — остаётся generic-подсказка
-        }
-    }
-
-    private void ApplyVersionWatermarkIfEmpty()
-    {
-        if (string.IsNullOrEmpty(VersionTextBox.Text))
-        {
-            var hint = new System.Windows.Controls.TextBlock
-            {
-                Text = _versionWatermarkText,
-                Foreground = Brushes.Gray,
-                Margin = new Thickness(4, 0, 0, 0)
-            };
-            VersionTextBox.Background = new VisualBrush(hint)
-            {
-                AlignmentX = AlignmentX.Left,
-                AlignmentY = AlignmentY.Center,
-                Stretch = Stretch.None
-            };
-        }
-        else
-        {
-            VersionTextBox.ClearValue(System.Windows.Controls.Control.BackgroundProperty);
         }
     }
 
@@ -364,11 +336,20 @@ public partial class AdminWindow : Window
                 serverExcludeFileNames: _config.ServerExcludeMods);
 
             StatusText.Text = $"Опубликовано: {version}.";
+
+            // Пассивного обновления StatusText/лога недостаточно — та же причина, что и у
+            // явного окна после "Остановить сервер" (см. StopButton_Click): легко пропустить,
+            // если не смотреть на окно именно в момент завершения долгой публикации.
+            MessageBox.Show(
+                $"Релиз «{version}» опубликован. Сервер остановлен — запусти его сам, когда будешь готов.",
+                "VanillaLauncher — Admin", MessageBoxButton.OK, MessageBoxImage.Information);
         }
         catch (Exception ex)
         {
             StatusText.Text = "Ошибка публикации.";
             Log($"Ошибка: {ex.Message}");
+            MessageBox.Show($"Публикация не удалась: {ex.Message}", "VanillaLauncher — Admin",
+                MessageBoxButton.OK, MessageBoxImage.Error);
         }
         finally
         {
