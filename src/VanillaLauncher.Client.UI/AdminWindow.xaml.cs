@@ -1,4 +1,5 @@
 using System.Windows;
+using System.Windows.Media;
 using VanillaLauncher.Admin;
 using VanillaLauncher.Client;
 
@@ -8,12 +9,80 @@ public partial class AdminWindow : Window
 {
     private readonly AppConfig _config;
     private ServerProcessController? _controller;
+    private string _versionWatermarkText = "например: 1.2.3";
 
     public AdminWindow(AppConfig config)
     {
         InitializeComponent();
         _config = config;
         RefreshServerDirectoryState();
+
+        VersionTextBox.TextChanged += (_, _) => ApplyVersionWatermarkIfEmpty();
+        ApplyVersionWatermarkIfEmpty();
+        _ = LoadLastPublishedVersionAsync();
+    }
+
+    /// <summary>
+    /// Показывает тег последнего опубликованного релиза серым текстом внутри пустого поля
+    /// "Версия релиза" — чтобы не лезть на github.com/{owner}/{repo}/releases каждый раз,
+    /// когда нужно вспомнить, что публиковалось прошлый раз. Best-effort: публичный GET без
+    /// токена, тихо оставляет generic-подсказку при любой ошибке/отсутствии релизов —
+    /// показ версии не настолько важен, чтобы падать или мешать остальному окну.
+    /// </summary>
+    private async Task LoadLastPublishedVersionAsync()
+    {
+        if (string.IsNullOrWhiteSpace(_config.GitHubOwner) || string.IsNullOrWhiteSpace(_config.GitHubRepo))
+            return;
+
+        try
+        {
+            using var http = new System.Net.Http.HttpClient();
+            http.DefaultRequestHeaders.UserAgent.ParseAdd("VanillaLauncher-Admin");
+            http.DefaultRequestHeaders.Accept.Add(
+                new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("application/vnd.github+json"));
+
+            var url = $"https://api.github.com/repos/{_config.GitHubOwner}/{_config.GitHubRepo}/releases/latest";
+            using var response = await http.GetAsync(url);
+            if (!response.IsSuccessStatusCode)
+                return;
+
+            var json = await response.Content.ReadAsStringAsync();
+            using var doc = System.Text.Json.JsonDocument.Parse(json);
+            var tag = doc.RootElement.GetProperty("tag_name").GetString();
+
+            if (!string.IsNullOrWhiteSpace(tag))
+            {
+                _versionWatermarkText = $"было: {tag}";
+                ApplyVersionWatermarkIfEmpty();
+            }
+        }
+        catch
+        {
+            // сеть недоступна/репозиторий ещё не создан и т.п. — остаётся generic-подсказка
+        }
+    }
+
+    private void ApplyVersionWatermarkIfEmpty()
+    {
+        if (string.IsNullOrEmpty(VersionTextBox.Text))
+        {
+            var hint = new System.Windows.Controls.TextBlock
+            {
+                Text = _versionWatermarkText,
+                Foreground = Brushes.Gray,
+                Margin = new Thickness(4, 0, 0, 0)
+            };
+            VersionTextBox.Background = new VisualBrush(hint)
+            {
+                AlignmentX = AlignmentX.Left,
+                AlignmentY = AlignmentY.Center,
+                Stretch = Stretch.None
+            };
+        }
+        else
+        {
+            VersionTextBox.ClearValue(System.Windows.Controls.Control.BackgroundProperty);
+        }
     }
 
     /// <summary>
@@ -145,7 +214,15 @@ public partial class AdminWindow : Window
             Log("Сервер не ответил на stop за отведённое время — возможно, завис.");
             StopButton.IsEnabled = true;
         }
-        // При успешной остановке StatusText/кнопки обновит обработчик Exited.
+        else
+        {
+            // Пассивного обновления StatusText/кнопок обработчиком Exited недостаточно —
+            // легко пропустить, если не смотреть на окно в этот момент. Явное окно, чтобы
+            // администратор точно знал, что сервер уже остановлен, а не завис где-то.
+            MessageBox.Show("Сервер остановлен.", "VanillaLauncher — Admin",
+                MessageBoxButton.OK, MessageBoxImage.Information);
+        }
+        // Кнопки/StatusText в любом случае обновит обработчик Exited.
     }
 
     private async void RecreateWorldButton_Click(object sender, RoutedEventArgs e)
@@ -243,7 +320,9 @@ public partial class AdminWindow : Window
         var confirm = MessageBox.Show(
             $"Будет опубликован релиз «{version}» из {_config.ProfileRoot}:\n" +
             "1. Бэкап мира\n2. Остановка сервера (если запущен)\n3. Обновление серверных модов/конфигов\n" +
-            "4. Генерация и загрузка manifest.json + файлов в новый GitHub Release\n5. Запуск сервера обратно.\n\n" +
+            "4. Генерация и загрузка manifest.json + файлов в новый GitHub Release.\n\n" +
+            "Сервер после публикации НЕ запускается обратно автоматически — запусти его сам кнопкой " +
+            "«Запустить сервер», когда будешь готов.\n\n" +
             "Это создаст ПУБЛИЧНЫЙ релиз в репозитории. Продолжить?",
             "Опубликовать обновление",
             MessageBoxButton.YesNo,
@@ -300,17 +379,58 @@ public partial class AdminWindow : Window
         }
     }
 
+    // true только когда мы сами инициируем повторное закрытие после того, как сервер уже
+    // остановлен (см. StopServerThenCloseAsync) — иначе Window_Closing поймал бы и это
+    // закрытие тоже и снова ушёл в диалог подтверждения по кругу.
+    private bool _closingAfterServerStopped;
+
+    /// <summary>
+    /// Раньше закрытие окна просто предупреждало, что сервер продолжит работать в фоне,
+    /// но не мешало закрыться. Теперь — если сервер запущен, закрытие ОТМЕНЯЕТСЯ и вместо
+    /// этого предлагается сначала штатно остановить сервер; лаунчер закрывается только
+    /// после успешной остановки (или сразу, если сервер и так не запущен).
+    /// </summary>
     private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
     {
-        if (_controller?.IsRunning == true)
+        if (_closingAfterServerStopped || _controller?.IsRunning != true)
+            return;
+
+        e.Cancel = true;
+
+        var confirm = MessageBox.Show(
+            "Сервер всё ещё запущен. Остановить его и закрыть лаунчер?",
+            "VanillaLauncher — Admin",
+            MessageBoxButton.YesNo,
+            MessageBoxImage.Warning,
+            MessageBoxResult.No);
+
+        if (confirm == MessageBoxResult.Yes)
+            _ = StopServerThenCloseAsync();
+    }
+
+    private async Task StopServerThenCloseAsync()
+    {
+        StopButton.IsEnabled = false;
+        StatusText.Text = "Останавливаем сервер перед закрытием лаунчера...";
+        Log("Останавливаем сервер перед закрытием лаунчера...");
+
+        var stopped = await _controller!.StopAsync(TimeSpan.FromSeconds(60));
+
+        if (!stopped)
         {
             MessageBox.Show(
-                "Сервер продолжит работать в фоне после закрытия этого окна. " +
-                "Останавливай его кнопкой «Остановить сервер» перед закрытием, если это не нужно.",
-                "VanillaLauncher — Admin",
-                MessageBoxButton.OK,
-                MessageBoxImage.Information);
+                "Сервер не остановился штатно за 60 секунд — закрытие отменено, лаунчер остаётся " +
+                "открытым. Проверь консоль сервера и попробуй ещё раз.",
+                "VanillaLauncher — Admin", MessageBoxButton.OK, MessageBoxImage.Error);
+            StopButton.IsEnabled = true;
+            return;
         }
+
+        MessageBox.Show("Сервер остановлен. Лаунчер закрывается.", "VanillaLauncher — Admin",
+            MessageBoxButton.OK, MessageBoxImage.Information);
+
+        _closingAfterServerStopped = true;
+        Close();
     }
 
     private void Log(string message)

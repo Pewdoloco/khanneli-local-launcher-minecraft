@@ -73,7 +73,7 @@ public class PublishPipelineTests : IDisposable
     }
 
     [Fact]
-    public async Task RunAsync_ServerAlreadyStopped_RunsFullPipelineAndStartsServer()
+    public async Task RunAsync_ServerAlreadyStopped_RunsFullPipelineAndLeavesServerStopped()
     {
         var controller = new ServerProcessController(_serverDir, "start.bat");
         var worldBackup = new WorldBackupService(_serverDir, Path.Combine(_serverDir, "backups"), maxBackupsToKeep: 5);
@@ -85,16 +85,16 @@ public class PublishPipelineTests : IDisposable
             new[] { "mods" }, "v1", publisher, new Progress<string>(log.Enqueue),
             stopTimeout: TimeSpan.FromSeconds(5));
 
-        Assert.True(controller.IsRunning); // пайплайн запустил сервер в конце
+        // Пайплайн больше не запускает сервер сам по себе (см. класс-комментарий
+        // PublishPipeline) — админ должен нажать "Запустить сервер" явно, когда готов.
+        Assert.False(controller.IsRunning);
         Assert.True(File.Exists(Path.Combine(_serverDir, "mods", "a.jar"))); // серверные файлы синхронизированы
         Assert.True(Directory.GetFiles(Path.Combine(_serverDir, "backups"), "world_*.zip").Length == 1); // бэкап сделан
         Assert.True(fake.Requests.Count >= 3); // create release + хотя бы 1 asset + manifest.json
-
-        await controller.StopAsync(TimeSpan.FromSeconds(5));
     }
 
     [Fact]
-    public async Task RunAsync_ServerRunning_StopsFirstThenPublishesThenRestarts()
+    public async Task RunAsync_ServerRunning_StopsFirstThenPublishesAndLeavesServerStopped()
     {
         var controller = new ServerProcessController(_serverDir, "start.bat");
         controller.Start();
@@ -111,9 +111,7 @@ public class PublishPipelineTests : IDisposable
             stopTimeout: TimeSpan.FromSeconds(5));
 
         Assert.Contains(log, l => l.Contains("остановка сервера"));
-        Assert.True(controller.IsRunning); // перезапущен в конце пайплайна
-
-        await controller.StopAsync(TimeSpan.FromSeconds(5));
+        Assert.False(controller.IsRunning); // не перезапускается пайплайном
     }
 
     [Fact]

@@ -41,7 +41,7 @@
 
         <StackPanel Grid.Row="3" Orientation="Horizontal" Margin="0,0,0,8">
             <TextBlock Text="Версия релиза:" VerticalAlignment="Center" Margin="0,0,8,0" />
-            <TextBox x:Name="VersionTextBox" Width="160" VerticalContentAlignment="Center" Margin="0,0,8,0" />
+            <TextBox x:Name="VersionTextBox" Width="220" VerticalContentAlignment="Center" Margin="0,0,8,0" />
             <Button x:Name="PublishButton" Content="Опубликовать обновление" Padding="12,6"
                     Click="PublishButton_Click" />
         </StackPanel>
