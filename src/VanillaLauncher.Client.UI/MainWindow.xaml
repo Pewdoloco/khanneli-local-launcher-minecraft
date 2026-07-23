@@ -23,32 +23,45 @@
         <ProgressBar x:Name="ProgressBar" Grid.Row="1" Height="20" Minimum="0" Maximum="100"
                      Visibility="Collapsed" Margin="0,0,0,8" />
 
-        <StackPanel Grid.Row="2" Orientation="Horizontal" Margin="0,0,0,8">
-            <Button x:Name="CheckButton" Content="Проверить обновления" Padding="12,6" Margin="0,0,8,0"
+        <WrapPanel Grid.Row="2" Orientation="Horizontal" Margin="0,0,0,8">
+            <Button x:Name="CheckButton" Content="Проверить обновления" Padding="12,6" Margin="0,0,8,4"
                     Click="CheckButton_Click" />
-            <Button x:Name="UpdateButton" Content="Обновить" Padding="12,6" IsEnabled="False"
+            <Button x:Name="UpdateButton" Content="Обновить" Padding="12,6" IsEnabled="False" Margin="0,0,8,4"
                     Click="UpdateButton_Click" />
-            <Button x:Name="SetupButton" Content="Настроить лаунчер" Padding="12,6" Margin="0,0,8,0"
+            <Button x:Name="SetupButton" Content="Настроить лаунчер" Padding="12,6" Margin="0,0,8,4"
                     Visibility="Collapsed" Click="SetupButton_Click" />
-            <Button x:Name="GuideButton" Content="Инструкция" Padding="12,6" Margin="24,0,0,0"
+            <Button x:Name="GuideButton" Content="Инструкция" Padding="12,6" Margin="0,0,8,4"
                     Click="GuideButton_Click" />
-            <Button x:Name="AdminButton" Content="Режим администратора" Padding="12,6" Margin="8,0,0,0"
+            <Button x:Name="AdminButton" Content="Режим администратора" Padding="12,6" Margin="0,0,8,4"
                     Click="AdminButton_Click" />
             <Button x:Name="SelectProfileRootButton" Content="Сменить папку сборки" Padding="12,6"
-                    Margin="8,0,0,0" Click="SelectProfileRootButton_Click" />
-        </StackPanel>
+                    Margin="0,0,8,4" Click="SelectProfileRootButton_Click" />
+        </WrapPanel>
 
-        <StackPanel Grid.Row="3" Orientation="Horizontal" Margin="0,0,0,8">
-            <Button x:Name="CheckEngineUpdateButton" Content="Проверить обновление лаунчера" Padding="12,6" Margin="0,0,8,0"
+        <WrapPanel Grid.Row="3" Orientation="Horizontal" Margin="0,0,0,8">
+            <Button x:Name="CheckEngineUpdateButton" Content="Проверить обновление лаунчера" Padding="12,6" Margin="0,0,8,4"
                     Click="CheckEngineUpdateButton_Click" />
-            <Button x:Name="UpdateEngineButton" Content="Обновить лаунчер" Padding="12,6" IsEnabled="False"
+            <Button x:Name="UpdateEngineButton" Content="Обновить лаунчер" Padding="12,6" IsEnabled="False" Margin="0,0,8,4"
                     Click="UpdateEngineButton_Click" />
-            <TextBlock x:Name="EngineStatusText" VerticalAlignment="Center" Margin="12,0,0,0" TextWrapping="Wrap" Foreground="Gray" />
-        </StackPanel>
+            <TextBlock x:Name="EngineStatusText" VerticalAlignment="Center" Margin="4,0,0,4" TextWrapping="Wrap" Foreground="Gray" />
+        </WrapPanel>
 
         <TextBlock Grid.Row="4" Text="Журнал:" FontWeight="Bold" Margin="0,0,0,4" />
 
-        <ListBox x:Name="LogList" Grid.Row="5" ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+        <ListBox x:Name="LogList" Grid.Row="5" ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                 SelectionMode="Extended">
+            <ListBox.InputBindings>
+                <KeyBinding Key="C" Modifiers="Control" Command="ApplicationCommands.Copy" />
+            </ListBox.InputBindings>
+            <ListBox.CommandBindings>
+                <CommandBinding Command="ApplicationCommands.Copy" Executed="CopySelectedLog_Executed" />
+            </ListBox.CommandBindings>
+            <ListBox.ContextMenu>
+                <ContextMenu>
+                    <MenuItem Header="Копировать выделенное" Click="CopySelectedLog_Click" />
+                    <MenuItem Header="Копировать всё" Click="CopyAllLog_Click" />
+                </ContextMenu>
+            </ListBox.ContextMenu>
             <ListBox.ItemContainerStyle>
                 <Style TargetType="ListBoxItem">
                     <Setter Property="HorizontalContentAlignment" Value="Stretch" />

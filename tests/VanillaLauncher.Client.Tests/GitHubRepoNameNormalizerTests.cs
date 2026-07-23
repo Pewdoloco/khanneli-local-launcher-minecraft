@@ -27,4 +27,29 @@ public class GitHubRepoNameNormalizerTests
     {
         Assert.Null(GitHubRepoNameNormalizer.Normalize(input));
     }
+
+    [Theory]
+    [InlineData("Pewdoloco", "Pewdoloco")]
+    [InlineData("  Pewdoloco  ", "Pewdoloco")]
+    [InlineData("https://github.com/Pewdoloco/test-pack", "Pewdoloco")]
+    [InlineData("https://github.com/Pewdoloco/test-pack.git", "Pewdoloco")]
+    [InlineData("https://github.com/Pewdoloco/test-pack/", "Pewdoloco")]
+    [InlineData("github.com/Pewdoloco/test-pack", "Pewdoloco")]
+    [InlineData("Pewdoloco/test-pack", "Pewdoloco")]
+    public void NormalizeOwner_ExtractsOwnerNotRepo(string input, string expected)
+    {
+        // Тот же вставленный URL в поле Owner должен дать ВЛАДЕЛЬЦА (предпоследний сегмент),
+        // а не имя репозитория (последний сегмент, см. Normalize выше) — баг, о котором
+        // сообщил пользователь: полная ссылка в Owner давала неверное значение.
+        Assert.Equal(expected, GitHubRepoNameNormalizer.NormalizeOwner(input));
+    }
+
+    [Theory]
+    [InlineData(null)]
+    [InlineData("")]
+    [InlineData("   ")]
+    public void NormalizeOwner_EmptyOrWhitespace_ReturnsNull(string? input)
+    {
+        Assert.Null(GitHubRepoNameNormalizer.NormalizeOwner(input));
+    }
 }

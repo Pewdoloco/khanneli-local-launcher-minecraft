@@ -21,18 +21,18 @@
         <TextBlock x:Name="StatusText" Grid.Row="0" Text="Сервер остановлен."
                    FontSize="16" Margin="0,0,0,8" TextWrapping="Wrap" />
 
-        <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="0,0,0,8">
-            <Button x:Name="StartButton" Content="Запустить сервер" Padding="12,6" Margin="0,0,8,0"
+        <WrapPanel Grid.Row="1" Orientation="Horizontal" Margin="0,0,0,8">
+            <Button x:Name="StartButton" Content="Запустить сервер" Padding="12,6" Margin="0,0,8,4"
                     Click="StartButton_Click" />
-            <Button x:Name="StopButton" Content="Остановить сервер" Padding="12,6" IsEnabled="False"
+            <Button x:Name="StopButton" Content="Остановить сервер" Padding="12,6" IsEnabled="False" Margin="0,0,8,4"
                     Click="StopButton_Click" />
             <Button x:Name="SelectServerDirectoryButton" Content="Выбрать папку сервера" Padding="12,6"
-                    Margin="8,0,0,0" Visibility="Collapsed" Click="SelectServerDirectoryButton_Click" />
-            <Button x:Name="SettingsButton" Content="Настройки" Padding="12,6" Margin="24,0,0,0"
+                    Margin="0,0,8,4" Visibility="Collapsed" Click="SelectServerDirectoryButton_Click" />
+            <Button x:Name="SettingsButton" Content="Настройки" Padding="12,6" Margin="0,0,8,4"
                     Click="SettingsButton_Click" />
-            <Button x:Name="GuideButton" Content="Инструкция" Padding="12,6" Margin="8,0,0,0"
+            <Button x:Name="GuideButton" Content="Инструкция" Padding="12,6" Margin="0,0,8,4"
                     Click="GuideButton_Click" />
-        </StackPanel>
+        </WrapPanel>
 
         <StackPanel Grid.Row="2" Orientation="Horizontal" Margin="0,0,0,8">
             <Button x:Name="RecreateWorldButton" Content="Пересоздать мир (с бэкапом)" Padding="12,6"
@@ -49,7 +49,20 @@
         <TextBlock Grid.Row="4" Text="Консоль сервера:" FontWeight="Bold" Margin="0,0,0,4" />
 
         <ListBox x:Name="LogList" Grid.Row="5" FontFamily="Consolas"
-                 ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+                 ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                 SelectionMode="Extended">
+            <ListBox.InputBindings>
+                <KeyBinding Key="C" Modifiers="Control" Command="ApplicationCommands.Copy" />
+            </ListBox.InputBindings>
+            <ListBox.CommandBindings>
+                <CommandBinding Command="ApplicationCommands.Copy" Executed="CopySelectedLog_Executed" />
+            </ListBox.CommandBindings>
+            <ListBox.ContextMenu>
+                <ContextMenu>
+                    <MenuItem Header="Копировать выделенное" Click="CopySelectedLog_Click" />
+                    <MenuItem Header="Копировать всё" Click="CopyAllLog_Click" />
+                </ContextMenu>
+            </ListBox.ContextMenu>
             <ListBox.ItemContainerStyle>
                 <Style TargetType="ListBoxItem">
                     <Setter Property="HorizontalContentAlignment" Value="Stretch" />

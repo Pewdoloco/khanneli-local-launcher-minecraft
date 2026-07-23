@@ -343,4 +343,28 @@ public partial class MainWindow : Window
         if (LogList.Items.Count > 0)
             LogList.ScrollIntoView(LogList.Items[^1]);
     }
+
+    // Ошибки от GitHub API (см. GitHubApiErrorTranslator) могут быть длинными и содержать
+    // JSON — проще скопировать и переслать администратору/разработчику, чем перепечатывать
+    // руками. ListBox с ItemTemplate из TextBlock не даёт штатного выделения текста мышью,
+    // поэтому копирование — через контекстное меню/Ctrl+C, а не через выделение по символам.
+    private void CopySelectedLog_Executed(object sender, System.Windows.Input.ExecutedRoutedEventArgs e) =>
+        CopySelectedLogLines();
+
+    private void CopySelectedLog_Click(object sender, RoutedEventArgs e) => CopySelectedLogLines();
+
+    private void CopyAllLog_Click(object sender, RoutedEventArgs e)
+    {
+        var text = string.Join(Environment.NewLine, LogList.Items.Cast<string>());
+        if (!string.IsNullOrEmpty(text))
+            Clipboard.SetText(text);
+    }
+
+    private void CopySelectedLogLines()
+    {
+        var items = LogList.SelectedItems.Count > 0 ? LogList.SelectedItems : LogList.Items;
+        var text = string.Join(Environment.NewLine, items.Cast<string>());
+        if (!string.IsNullOrEmpty(text))
+            Clipboard.SetText(text);
+    }
 }

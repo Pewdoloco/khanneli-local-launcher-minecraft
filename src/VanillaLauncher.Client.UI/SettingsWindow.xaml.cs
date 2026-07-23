@@ -177,9 +177,9 @@ public partial class SettingsWindow : Window
 
         _config.ServerBatFileName = ServerBatFileNameTextBox.Text.Trim();
         _config.ManifestUrl = ManifestUrlTextBox.Text.Trim();
-        _config.GitHubOwner = NullIfEmpty(GitHubOwnerTextBox.Text);
+        _config.GitHubOwner = GitHubRepoNameNormalizer.NormalizeOwner(GitHubOwnerTextBox.Text);
         _config.GitHubRepo = GitHubRepoNameNormalizer.Normalize(GitHubRepoTextBox.Text);
-        _config.EngineGitHubOwner = NullIfEmpty(EngineGitHubOwnerTextBox.Text);
+        _config.EngineGitHubOwner = GitHubRepoNameNormalizer.NormalizeOwner(EngineGitHubOwnerTextBox.Text);
         _config.EngineGitHubRepo = GitHubRepoNameNormalizer.Normalize(EngineGitHubRepoTextBox.Text);
         _config.IncludeFolders = SplitLines(IncludeFoldersTextBox.Text);
         _config.ServerExcludeMods = SplitLines(ServerExcludeModsTextBox.Text);

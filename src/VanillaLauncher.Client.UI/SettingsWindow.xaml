@@ -7,6 +7,45 @@
         mc:Ignorable="d"
         Title="VanillaLauncher — Настройки" Height="720" Width="560"
         WindowStartupLocation="CenterOwner">
+    <Window.Resources>
+        <!--
+          "Водяной знак" для полей с фоллбеком в коде (EngineRepositoryDefaults) — показывает,
+          какое значение реально используется, пока поле пустое. Показывается только когда
+          Text == "" (не FocusVisualStyle) и исчезает сразу при вводе, как обычный placeholder.
+        -->
+        <Style x:Key="EngineOwnerWatermarkStyle" TargetType="TextBox">
+            <Style.Triggers>
+                <Trigger Property="Text" Value="">
+                    <Setter Property="Background">
+                        <Setter.Value>
+                            <VisualBrush AlignmentX="Left" AlignmentY="Center" Stretch="None">
+                                <VisualBrush.Visual>
+                                    <TextBlock Text="Pewdoloco (по умолчанию, если оставить пустым)"
+                                               Foreground="Gray" Margin="4,0,0,0" />
+                                </VisualBrush.Visual>
+                            </VisualBrush>
+                        </Setter.Value>
+                    </Setter>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+        <Style x:Key="EngineRepoWatermarkStyle" TargetType="TextBox">
+            <Style.Triggers>
+                <Trigger Property="Text" Value="">
+                    <Setter Property="Background">
+                        <Setter.Value>
+                            <VisualBrush AlignmentX="Left" AlignmentY="Center" Stretch="None">
+                                <VisualBrush.Visual>
+                                    <TextBlock Text="khanneli-local-launcher-minecraft (по умолчанию, если оставить пустым)"
+                                               Foreground="Gray" Margin="4,0,0,0" />
+                                </VisualBrush.Visual>
+                            </VisualBrush>
+                        </Setter.Value>
+                    </Setter>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+    </Window.Resources>
     <Grid Margin="16">
         <Grid.RowDefinitions>
             <RowDefinition Height="*" />
@@ -76,12 +115,12 @@
 
                 <TextBlock Text="Репозиторий ДВИЖКА — откуда качать новую версию самого exe (EngineGitHubOwner / EngineGitHubRepo)"
                            FontWeight="Bold" Margin="0,0,0,4" TextWrapping="Wrap" />
-                <TextBlock Text="Та же пара полей (Owner/Repo), но про ДРУГОЙ репозиторий: не тот, что публикует контент модпака выше, а репозиторий с исходным кодом самого лаунчера (обычно Pewdoloco / khanneli-local-launcher-minecraft). Используется только кнопкой «Проверить обновление лаунчера» в главном окне. Пусто = эта кнопка отключена, на остальной функционал не влияет."
+                <TextBlock Text="Та же пара полей (Owner/Repo), но про ДРУГОЙ репозиторий: не тот, что публикует контент модпака выше, а репозиторий с исходным кодом самого лаунчера. Используется кнопкой «Проверить обновление лаунчера» в главном окне. Пусто = используется значение по умолчанию (видно водяным знаком в полях ниже) — самообновление работает и без явной настройки этих двух полей, если только это не форк движка со своим репозиторием."
                            Margin="0,0,0,4" TextWrapping="Wrap" Foreground="Gray" />
                 <TextBlock Text="EngineGitHubOwner" Margin="0,0,0,4" />
-                <TextBox x:Name="EngineGitHubOwnerTextBox" Padding="4" Margin="0,0,0,8" />
+                <TextBox x:Name="EngineGitHubOwnerTextBox" Padding="4" Margin="0,0,0,8" Style="{StaticResource EngineOwnerWatermarkStyle}" />
                 <TextBlock Text="EngineGitHubRepo" Margin="0,0,0,4" />
-                <TextBox x:Name="EngineGitHubRepoTextBox" Padding="4" Margin="0,0,0,16" />
+                <TextBox x:Name="EngineGitHubRepoTextBox" Padding="4" Margin="0,0,0,16" Style="{StaticResource EngineRepoWatermarkStyle}" />
 
                 <TextBlock Text="IncludeFolders (по одной папке на строку)" FontWeight="Bold" Margin="0,0,0,4" />
                 <TextBox x:Name="IncludeFoldersTextBox" Padding="4" Margin="0,0,0,16"

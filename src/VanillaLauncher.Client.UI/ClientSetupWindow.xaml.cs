@@ -28,7 +28,7 @@ public partial class ClientSetupWindow : Window
 
     private void SaveButton_Click(object sender, RoutedEventArgs e)
     {
-        var owner = GitHubOwnerTextBox.Text.Trim();
+        var owner = GitHubRepoNameNormalizer.NormalizeOwner(GitHubOwnerTextBox.Text);
         var repo = GitHubRepoNameNormalizer.Normalize(GitHubRepoTextBox.Text);
 
         if (string.IsNullOrWhiteSpace(owner) || string.IsNullOrWhiteSpace(repo))

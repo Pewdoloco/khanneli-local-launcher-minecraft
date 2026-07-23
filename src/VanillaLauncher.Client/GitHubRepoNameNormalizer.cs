@@ -31,4 +31,27 @@ public static class GitHubRepoNameNormalizer
 
         return string.IsNullOrWhiteSpace(trimmed) ? null : trimmed;
     }
+
+    /// <summary>
+    /// То же самое, но для поля GitHubOwner/EngineGitHubOwner — тот же случай вставленной
+    /// ссылки целиком (https://github.com/Owner/Repo) в поле "владелец", только тут нужен
+    /// ПРЕДПОСЛЕДНИЙ сегмент пути (Owner), а не последний (Repo, см. Normalize выше). Один
+    /// и тот же вставленный URL в двух разных полях (Owner и Repo) должен корректно дать
+    /// два разных, правильных значения.
+    /// </summary>
+    public static string? NormalizeOwner(string? value)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+            return null;
+
+        var trimmed = value.Trim().TrimEnd('/');
+
+        if (trimmed.Contains('/'))
+        {
+            var segments = trimmed.Split('/', StringSplitOptions.RemoveEmptyEntries);
+            trimmed = segments.Length >= 2 ? segments[^2] : segments[^1];
+        }
+
+        return string.IsNullOrWhiteSpace(trimmed) ? null : trimmed;
+    }
 }
