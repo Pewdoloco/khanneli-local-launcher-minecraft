@@ -231,6 +231,9 @@ internal static class DefaultGuides
           нет права Contents: Read and write на этот репозиторий. Проверь права токена на
           github.com/settings/tokens (или /settings/personal-access-tokens для fine-grained) —
           для fine-grained токенов также проверь, что репозиторий явно выбран в списке доступа.
+        - 401 Unauthorized — токен VANILLALAUNCHER_GITHUB_TOKEN недействителен или просрочен
+          (не путать с 403 выше — там токен рабочий, но без нужных прав). Выпусти новый
+          Personal Access Token и пропиши его в ту же переменную окружения.
         - 422 "Repository is empty" — в репозитории модпака нет ни одного коммита, а релиз
           GitHub всегда привязан к ветке/тегу — создавать не на чем. Зайди на страницу
           репозитория на github.com и создай любой файл (например README) через встроенную
