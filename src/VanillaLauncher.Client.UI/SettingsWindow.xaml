@@ -28,13 +28,13 @@
                         <ColumnDefinition Width="Auto" />
                     </Grid.ColumnDefinitions>
                     <TextBox x:Name="ProfileRootTextBox" Grid.Column="0" Padding="4" Margin="0,0,8,0"
-                             local:Watermark.Hint="C:\Users\...\curseforge\Instances\VanillaScary" />
+                             local:Watermark.Hint="C:\Users\...\curseforge\Instances\MyModpack" />
                     <Button Grid.Column="1" Content="Обзор..." Padding="10,4" Click="BrowseProfileRoot_Click" />
                 </Grid>
                 <TextBlock Text="Ожидаемое имя папки сборки (для автопоиска)" Margin="0,4,0,4" />
                 <TextBlock TextWrapping="Wrap" Foreground="Gray" Margin="0,0,0,4"
-                           Text="Только ИМЯ папки (не путь), например VanillaScary — так называется папка инстанса в CurseForge/твоём лаунчере у КАЖДОГО игрока, независимо от диска и имени пользователя. Лаунчер ищет прямую подпапку с таким именем (без учёта регистра) в каждом из корней ниже по порядку — не рекурсивно, вложенные глубже подпапки не проверяются. Пусто — автопоиск клиента отключён, каждый игрок будет указывать путь вручную (кнопка «Обзор» в его окне)." />
-                <TextBox x:Name="ClientFolderNameTextBox" Padding="4" Margin="0,0,0,4" local:Watermark.Hint="VanillaScary" />
+                           Text="Только ИМЯ папки (не путь), например MyModpack — так называется папка инстанса в CurseForge/твоём лаунчере у КАЖДОГО игрока, независимо от диска и имени пользователя. Лаунчер ищет прямую подпапку с таким именем (без учёта регистра) в каждом из корней ниже по порядку — не рекурсивно, вложенные глубже подпапки не проверяются. Пусто — автопоиск клиента отключён, каждый игрок будет указывать путь вручную (кнопка «Обзор» в его окне)." />
+                <TextBox x:Name="ClientFolderNameTextBox" Padding="4" Margin="0,0,0,4" local:Watermark.Hint="MyModpack" />
                 <TextBlock Text="Корни поиска клиента (по одному пути на строку; можно использовать переменные окружения, например %USERPROFILE%\curseforge\Instances — у каждого друга свой пользователь/диск)"
                            Margin="0,4,0,4" TextWrapping="Wrap" />
                 <TextBox x:Name="ClientSearchRootsTextBox" Padding="4" Margin="0,0,0,4"
@@ -74,12 +74,12 @@
 
                 <TextBlock Text="Репозиторий МОДПАКА — куда публикуются моды/manifest.json (GitHubOwner / GitHubRepo)"
                            FontWeight="Bold" Margin="0,0,0,4" TextWrapping="Wrap" />
-                <TextBlock Text="GitHubOwner — имя пользователя или организации на GitHub (например, Pewdoloco). GitHubRepo — имя конкретного репозитория внутри этого аккаунта (например, VanillaLauncher-localServer). Вместе они указывают на один репозиторий: github.com/{GitHubOwner}/{GitHubRepo}. Можно вставить ссылку целиком в любое из двух полей — лишнее уберётся само при сохранении."
+                <TextBlock Text="GitHubOwner — имя пользователя или организации на GitHub (например, MyName). GitHubRepo — имя конкретного репозитория внутри этого аккаунта (например, MyModpack-server). Вместе они указывают на один репозиторий: github.com/{GitHubOwner}/{GitHubRepo}. Можно вставить ссылку целиком в любое из двух полей — лишнее уберётся само при сохранении."
                            Margin="0,0,0,4" TextWrapping="Wrap" Foreground="Gray" />
                 <TextBlock Text="GitHubOwner *" Margin="0,0,0,4" />
-                <TextBox x:Name="GitHubOwnerTextBox" Padding="4" Margin="0,0,0,8" local:Watermark.Hint="Pewdoloco" />
+                <TextBox x:Name="GitHubOwnerTextBox" Padding="4" Margin="0,0,0,8" local:Watermark.Hint="MyName" />
                 <TextBlock Text="GitHubRepo *" Margin="0,0,0,4" />
-                <TextBox x:Name="GitHubRepoTextBox" Padding="4" Margin="0,0,0,16" local:Watermark.Hint="VanillaLauncher-localServer" />
+                <TextBox x:Name="GitHubRepoTextBox" Padding="4" Margin="0,0,0,16" local:Watermark.Hint="MyModpack-server" />
 
                 <TextBlock Text="Репозиторий ДВИЖКА — откуда качать новую версию самого exe (EngineGitHubOwner / EngineGitHubRepo)"
                            FontWeight="Bold" Margin="0,0,0,4" TextWrapping="Wrap" />

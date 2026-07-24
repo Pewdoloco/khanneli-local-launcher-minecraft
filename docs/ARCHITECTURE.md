@@ -32,7 +32,7 @@ VanillaLauncher.Client/
       "path": "mods/sodium.jar",
       "sha256": "…",
       "size": 123456,
-      "url": "https://github.com/Pewdoloco/VanillaLauncher-localServer/releases/download/26.1.2-b3/sodium.jar"
+      "url": "https://github.com/YourOwner/YourModpackRepo/releases/download/1.0.0/sodium.jar"
     }
   ]
 }
@@ -336,14 +336,13 @@ VanillaLauncher.Client.UI/
 
 Позже репозиторий фактически разделили: этот репозиторий (`khanneli-local-launcher-minecraft`)
 теперь и есть "движок" — только код, `appsettings.json` здесь тоже по-настоящему пустой (не
-только embedded-дефолт). Контент/релизы конкретных модпаков живут в отдельных репозиториях —
-пример: [`Pewdoloco/VanillaLauncher-localServer`](https://github.com/Pewdoloco/VanillaLauncher-localServer)
-(модпак VanillaScary), из которого в этот репозиторий переехал весь код (`src/`, `tests/`,
-`tools/`, этот workflow) и доки о коде/архитектуре; специфика самого модпака VanillaScary
-(`docs/SPEC.md`, `docs/ADMIN_GUIDE.md`, `docs/CLIENT_GUIDE.md`, `docs/OVERVIEW.md`) осталась
-там. `CHANGELOG.md`/история ниже в этом файле — общая с тем репозиторием до момента
-разделения; упоминания VanillaScary/Pewdoloco в исторических разделах — не конфигурация,
-а то, на каком реальном деплое движок разрабатывался и проверялся.
+только embedded-дефолт). Контент/релизы конкретных модпаков живут в отдельных репозиториях,
+не связанных с этим напрямую — из одного такого репозитория-примера в этот репозиторий
+переехал весь код (`src/`, `tests/`, `tools/`, этот workflow) и доки о коде/архитектуре;
+специфика самого модпака (`docs/SPEC.md`, `docs/ADMIN_GUIDE.md`, `docs/CLIENT_GUIDE.md`,
+`docs/OVERVIEW.md`) осталась там. `CHANGELOG.md`/история ниже в этом файле — общая с тем
+репозиторием до момента разделения; упоминания конкретного модпака в исторических разделах —
+не конфигурация, а то, на каком реальном деплое движок разрабатывался и проверялся.
 
 **`AppConfig.Load()` больше не бросает исключение на пустых `ManifestUrl`/`ProfileRoot`.**
 Раньше отсутствие `ManifestUrl` в конфиге считалось ошибкой чтения файла
@@ -439,6 +438,8 @@ VanillaLauncher.Client.UI/
 на немедленную подмену текста в одном read-only `TextBox`; без прогонки текста markdown/HTML
 разметки во что-то богаче, обычный текст (в кратком/полном формате) для этой задачи
 достаточен.
+
+*(Позже, `engine-v1.8.0`, добавился третий вариант длины — см. одноимённый раздел ниже.)*
 
 ## Модули (этап — самообновление exe движка)
 
@@ -567,7 +568,7 @@ self-contained single-file публикации чтение версии сбо
 
 ## Модули (этап — `engine-v1.3.0`, живой прогон публикации на реальном модпаке)
 
-Первая настоящая живая публикация на VanillaScary/test-pack после разделения движок/модпак
+Первая настоящая живая публикация на реальном модпаке после разделения движок/модпак
 (предыдущий живой прогон, "Живой прогон публикации и ServerExcludeMods" выше, был ещё в
 едином репозитории). Полная сводка — CHANGELOG.md, тот же заголовок. Здесь — детали по
 новым классам.
@@ -684,6 +685,44 @@ CheckEngineUpdateButton_Click`, когда `EngineGitHubOwner`/`EngineGitHubRepo
 code-behind (не статический XAML-триггер, как для `EngineGitHubOwner`/`Repo` — значение
 динамическое, известно только после сетевого запроса). Переключается туда-обратно по
 `TextChanged`: набранный текст скрывает вотермарку, очистка поля возвращает её обратно.
+
+## Модули (этап — `engine-v1.7.0`, вотермарки полей, обязательные поля, явный итог публикации)
+
+Точечные доработки UX без изменения логики (полная сводка — `CHANGELOG.md`, тот же
+заголовок):
+- **`Watermark`** — присоединённое свойство (`VanillaLauncher.Client.UI`) для серой
+  подсказки-примера внутри пустого `TextBox`, работает и статически из XAML
+  (`local:Watermark.Hint="..."`), и динамически из code-behind (`Watermark.SetHint(...)`) —
+  заменило bespoke-код `VersionTextBox` в `AdminWindow`.
+- Обязательные поля отмечены `*` в `SettingsWindow`/`ClientSetupWindow` (`ProfileRoot`,
+  `ServerDirectory`, `ManifestUrl`, `GitHubOwner`, `GitHubRepo`) — `EngineGitHubOwner`/
+  `EngineGitHubRepo` намеренно без звёздочки (есть дефолтный фоллбек с `engine-v1.4.0`).
+- `PublishButton_Click` показывает явный `MessageBox` и при успехе, и при ошибке публикации —
+  раньше только `StatusText`/лог.
+
+## Модули (этап — `engine-v1.8.0`/`engine-v1.8.1`, полировка встроенной "Инструкции")
+
+По прямому запросу пользователя после прочтения текущих `ClientGuideFull`/`AdminGuideFull` —
+полная сводка в `CHANGELOG.md` (те же заголовки версий). Ключевое для архитектуры:
+
+- **Markdown убран из `DefaultGuides`** — `GuideTextBox` обычный `TextBox`, не рендерит
+  `#`/`**`, поэтому весь текст констант `ClientShort/Full`/`AdminShort/Full` переписан
+  plain-text (заголовки разделов — КАПСОМ отдельной строкой).
+- **Третий вариант длины гайда — "Пошаговое руководство".** `GuideLength` — enum
+  (`Short`/`Full`/`Manual`, `VanillaLauncher.Client.UI`) вместо пары `bool` в `UpdateText()`;
+  `GuideWindow.xaml` — третий `RadioButton` в группе `GuideLength`; `AppConfig` — два новых
+  поля (`ClientGuideManual`, `AdminGuideManual`), итого шесть строковых полей гайдов вместо
+  четырёх, описанных выше; `SettingsWindow` — два новых редактируемых поля по образцу
+  существующих (`GetGuideField` расширен кейсами `"ClientManual"`/`"AdminManual"`).
+- `DefaultGuides.ClientManual`/`AdminManual` — не переиспользуют текст Short/Full, это
+  отдельные пошаговые тексты (нумерованные шаги вида `1.`/`1.1.`).
+- `engine-v1.8.1` — фикс: `AdminFull` не упоминал случай `401 Unauthorized` (просроченный/
+  недействительный токен, отдельный от `403 Forbidden` — нехватка прав) в списке ошибок
+  публикации, хотя `GitHubApiErrorTranslator.TryGetHint` его обрабатывает и он реально
+  достижим и при публикации, и при самообновлении. Добавлен как отдельный пункт.
+
+119 тестов (81 Client + 38 Admin) без изменений в обеих версиях — правки только в
+тексте/разметке `GuideWindow`/`SettingsWindow`/`DefaultGuides`, логики не касаются.
 
 ## Что сознательно отложено
 - Переиспользование ассетов между релизами (см. выше, почему не делали)

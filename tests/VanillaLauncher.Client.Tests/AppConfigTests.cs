@@ -219,13 +219,13 @@ public class AppConfigTests : IDisposable
         WriteAppSettings("""{ "ManifestUrl": "https://example.invalid/manifest.json", "ProfileRoot": "C:\\old" }""");
         var config = AppConfig.Load(_dir);
 
-        config.ClientFolderName = "VanillaScary";
+        config.ClientFolderName = "TestModpack";
         config.ClientSearchRoots = new List<string> { "D:\\Games\\curseforge\\Instances" };
         config.ServerFolderName = "Server VS";
         config.Save();
 
         var reloaded = AppConfig.Load(_dir);
-        Assert.Equal("VanillaScary", reloaded.ClientFolderName);
+        Assert.Equal("TestModpack", reloaded.ClientFolderName);
         Assert.Equal(new List<string> { "D:\\Games\\curseforge\\Instances" }, reloaded.ClientSearchRoots);
         Assert.Equal("Server VS", reloaded.ServerFolderName);
     }

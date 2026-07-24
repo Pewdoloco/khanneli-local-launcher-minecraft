@@ -15,7 +15,8 @@
     <!--
       appsettings.default.json (по-настоящему пустой шаблон) встраивается в сборку как
       fallback (см. AppConfig.Load) — на случай, если внешний appsettings.json не попал в
-      релиз (было ровно так с 26.1.2-b1 в VanillaLauncher-localServer, см. CHANGELOG.md).
+      релиз (было ровно так с первым реальным релизом одного из модпак-деплоев, см.
+      CHANGELOG.md).
       Это репозиторий "движка" (docs/TASK_PATH_AUTODETECT.md, "Модель распространения") —
       здесь appsettings.json тоже пустой, без значений конкретного модпака: адаптация под
       модпак (пути, ManifestUrl, GitHubOwner/Repo и т.д.) делается локально через экран
