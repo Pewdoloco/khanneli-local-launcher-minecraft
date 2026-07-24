@@ -38,12 +38,19 @@ public partial class SettingsWindow : Window
         ServerExcludeModsTextBox.Text = JoinLines(_config.ServerExcludeMods);
         MaxBackupsToKeepTextBox.Text = _config.MaxBackupsToKeep.ToString();
 
-        ClientGuideShortTextBox.Text = _config.ClientGuideShort;
-        ClientGuideFullTextBox.Text = _config.ClientGuideFull;
-        AdminGuideShortTextBox.Text = _config.AdminGuideShort;
-        AdminGuideFullTextBox.Text = _config.AdminGuideFull;
-        ClientGuideManualTextBox.Text = _config.ClientGuideManual;
-        AdminGuideManualTextBox.Text = _config.AdminGuideManual;
+        // Resolve — та же логика, что и в GuideWindow: пока поле не тронуто админом, показываем
+        // дефолт движка на ТЕКУЩЕМ языке интерфейса (иначе EN-администратору показывался бы
+        // русский дефолт без всякой возможности прочитать/отредактировать английскую версию).
+        // Модальность SettingsWindow (ShowDialog) исключает переключение языка, пока это окно
+        // открыто — родительское окно с тумблером заблокировано, поэтому достаточно разрешить
+        // один раз при открытии, live-обновление не нужно (в отличие от GuideWindow).
+        var language = Loc.Instance.Language;
+        ClientGuideShortTextBox.Text = DefaultGuides.Resolve(_config.ClientGuideShort, DefaultGuides.ClientShort, DefaultGuides.ClientShortEn, language);
+        ClientGuideFullTextBox.Text = DefaultGuides.Resolve(_config.ClientGuideFull, DefaultGuides.ClientFull, DefaultGuides.ClientFullEn, language);
+        AdminGuideShortTextBox.Text = DefaultGuides.Resolve(_config.AdminGuideShort, DefaultGuides.AdminShort, DefaultGuides.AdminShortEn, language);
+        AdminGuideFullTextBox.Text = DefaultGuides.Resolve(_config.AdminGuideFull, DefaultGuides.AdminFull, DefaultGuides.AdminFullEn, language);
+        ClientGuideManualTextBox.Text = DefaultGuides.Resolve(_config.ClientGuideManual, DefaultGuides.ClientManual, DefaultGuides.ClientManualEn, language);
+        AdminGuideManualTextBox.Text = DefaultGuides.Resolve(_config.AdminGuideManual, DefaultGuides.AdminManual, DefaultGuides.AdminManualEn, language);
     }
 
     private static string JoinLines(IEnumerable<string> values) => string.Join(Environment.NewLine, values);

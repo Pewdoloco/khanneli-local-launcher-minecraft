@@ -6,8 +6,8 @@
         xmlns:local="clr-namespace:VanillaLauncher.Client.UI"
         xmlns:loc="clr-namespace:VanillaLauncher.Client.UI.Localization"
         mc:Ignorable="d"
-        Title="{Binding Source={x:Static loc:Loc.Instance}, Path=[AdminLogin.Title]}" Height="200" Width="380"
-        WindowStartupLocation="CenterOwner" ResizeMode="NoResize">
+        Title="{Binding Source={x:Static loc:Loc.Instance}, Path=[AdminLogin.Title]}" Width="380"
+        SizeToContent="Height" WindowStartupLocation="CenterOwner" ResizeMode="NoResize">
     <StackPanel Margin="16">
         <TextBlock Margin="0,0,0,4" Text="{Binding Source={x:Static loc:Loc.Instance}, Path=[AdminLogin.PasswordLabel]}" />
         <PasswordBox x:Name="PasswordBox" Margin="0,0,0,8" Padding="4" />

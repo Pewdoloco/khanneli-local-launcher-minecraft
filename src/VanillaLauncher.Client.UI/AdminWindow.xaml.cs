@@ -18,11 +18,24 @@ public partial class AdminWindow : Window
     private string? _statusKey;
     private object[] _statusArgs = Array.Empty<object>();
 
+    // Тот же класс проблемы, что и со StatusText: Watermark.Hint выставляется императивно
+    // (нужно из-за асинхронного запроса к GitHub, см. LoadLastPublishedVersionAsync), поэтому
+    // тумблер языка сам его не обновляет — запоминаем последний известный тег и перерисовываем
+    // при переключении.
+    private string? _lastPublishedTag;
+
     private void SetStatus(string key, params object[] args)
     {
         _statusKey = key;
         _statusArgs = args;
         StatusText.Text = args.Length == 0 ? Loc.Instance[key] : string.Format(Loc.Instance[key], args);
+    }
+
+    private void RefreshVersionWatermark()
+    {
+        Watermark.SetHint(VersionTextBox, _lastPublishedTag is null
+            ? Loc.Instance["Admin.VersionWatermark"]
+            : string.Format(Loc.Instance["Admin.VersionWatermarkPrevious"], _lastPublishedTag));
     }
 
     public AdminWindow(AppConfig config)
@@ -33,7 +46,7 @@ public partial class AdminWindow : Window
         RefreshLanguageButtons();
         RefreshServerDirectoryState();
 
-        Watermark.SetHint(VersionTextBox, Loc.Instance["Admin.VersionWatermark"]);
+        RefreshVersionWatermark();
         _ = LoadLastPublishedVersionAsync();
     }
 
@@ -54,6 +67,7 @@ public partial class AdminWindow : Window
 
         if (_statusKey is not null)
             SetStatus(_statusKey, _statusArgs);
+        RefreshVersionWatermark();
 
         _config.Language = language;
         try { _config.Save(); } catch (IOException) { } catch (UnauthorizedAccessException) { }
@@ -88,7 +102,10 @@ public partial class AdminWindow : Window
             var tag = doc.RootElement.GetProperty("tag_name").GetString();
 
             if (!string.IsNullOrWhiteSpace(tag))
-                Watermark.SetHint(VersionTextBox, string.Format(Loc.Instance["Admin.VersionWatermarkPrevious"], tag));
+            {
+                _lastPublishedTag = tag;
+                RefreshVersionWatermark();
+            }
         }
         catch
         {
