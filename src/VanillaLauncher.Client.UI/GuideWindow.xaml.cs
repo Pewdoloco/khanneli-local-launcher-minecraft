@@ -45,7 +45,16 @@ public partial class GuideWindow : Window
         }
 
         UpdateText();
+
+        // Пока значение AppConfig.*Guide* — нетронутый дефолт движка (см. DefaultGuides.Resolve),
+        // тело инструкции должно следовать за тумблером языка в MainWindow/AdminWindow, даже
+        // если это окно уже открыто в момент переключения — иначе один и тот же нетронутый
+        // дефолт показывал бы то английский chrome, то русское тело инструкции одновременно.
+        Loc.Instance.PropertyChanged += Loc_PropertyChanged;
+        Closed += (_, _) => Loc.Instance.PropertyChanged -= Loc_PropertyChanged;
     }
+
+    private void Loc_PropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e) => UpdateText();
 
     private void RoleOrLength_Changed(object sender, RoutedEventArgs e)
     {
@@ -61,17 +70,18 @@ public partial class GuideWindow : Window
         var length = ManualRadio.IsChecked == true ? GuideLength.Manual
             : FullRadio.IsChecked == true ? GuideLength.Full
             : GuideLength.Short;
+        var language = Loc.Instance.Language;
 
         Title = isAdmin ? Loc.Instance["Guide.TitleAdmin"] : Loc.Instance["Guide.TitleUser"];
 
         GuideTextBox.Text = (isAdmin, length) switch
         {
-            (true, GuideLength.Full) => _config.AdminGuideFull,
-            (true, GuideLength.Manual) => _config.AdminGuideManual,
-            (true, GuideLength.Short) => _config.AdminGuideShort,
-            (false, GuideLength.Full) => _config.ClientGuideFull,
-            (false, GuideLength.Manual) => _config.ClientGuideManual,
-            (false, GuideLength.Short) => _config.ClientGuideShort,
+            (true, GuideLength.Full) => DefaultGuides.Resolve(_config.AdminGuideFull, DefaultGuides.AdminFull, DefaultGuides.AdminFullEn, language),
+            (true, GuideLength.Manual) => DefaultGuides.Resolve(_config.AdminGuideManual, DefaultGuides.AdminManual, DefaultGuides.AdminManualEn, language),
+            (true, GuideLength.Short) => DefaultGuides.Resolve(_config.AdminGuideShort, DefaultGuides.AdminShort, DefaultGuides.AdminShortEn, language),
+            (false, GuideLength.Full) => DefaultGuides.Resolve(_config.ClientGuideFull, DefaultGuides.ClientFull, DefaultGuides.ClientFullEn, language),
+            (false, GuideLength.Manual) => DefaultGuides.Resolve(_config.ClientGuideManual, DefaultGuides.ClientManual, DefaultGuides.ClientManualEn, language),
+            (false, GuideLength.Short) => DefaultGuides.Resolve(_config.ClientGuideShort, DefaultGuides.ClientShort, DefaultGuides.ClientShortEn, language),
             _ => _config.ClientGuideShort,
         };
     }
