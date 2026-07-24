@@ -2,6 +2,7 @@ using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Interop;
 using VanillaLauncher.Client;
+using VanillaLauncher.Client.UI.Localization;
 
 namespace VanillaLauncher.Client.UI;
 
@@ -61,7 +62,7 @@ public partial class GuideWindow : Window
             : FullRadio.IsChecked == true ? GuideLength.Full
             : GuideLength.Short;
 
-        Title = isAdmin ? "Инструкция — Администратор" : "Инструкция — Пользователь";
+        Title = isAdmin ? Loc.Instance["Guide.TitleAdmin"] : Loc.Instance["Guide.TitleUser"];
 
         GuideTextBox.Text = (isAdmin, length) switch
         {

@@ -1,5 +1,6 @@
 using System.Windows;
 using VanillaLauncher.Admin;
+using VanillaLauncher.Client.UI.Localization;
 
 namespace VanillaLauncher.Client.UI;
 
@@ -21,13 +22,13 @@ public partial class SetAdminPasswordWindow : Window
 
         if (string.IsNullOrEmpty(password))
         {
-            ShowError("Пароль не может быть пустым.");
+            ShowError(Loc.Instance["SetPassword.EmptyError"]);
             return;
         }
 
         if (password != confirm)
         {
-            ShowError("Пароли не совпадают.");
+            ShowError(Loc.Instance["SetPassword.MismatchError"]);
             return;
         }
 

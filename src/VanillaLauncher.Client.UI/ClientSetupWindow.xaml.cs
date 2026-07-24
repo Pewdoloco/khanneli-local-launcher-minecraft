@@ -1,5 +1,6 @@
 using System.Windows;
 using VanillaLauncher.Client;
+using VanillaLauncher.Client.UI.Localization;
 
 namespace VanillaLauncher.Client.UI;
 
@@ -33,7 +34,7 @@ public partial class ClientSetupWindow : Window
 
         if (string.IsNullOrWhiteSpace(owner) || string.IsNullOrWhiteSpace(repo))
         {
-            ShowError("GitHubOwner и GitHubRepo обязательны — уточни у администратора сервера, если не знаешь их.");
+            ShowError(Loc.Instance["ClientSetup.MissingFieldsError"]);
             return;
         }
 

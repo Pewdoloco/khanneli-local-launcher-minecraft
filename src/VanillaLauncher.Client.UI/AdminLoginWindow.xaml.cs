@@ -1,5 +1,6 @@
 using System.Windows;
 using VanillaLauncher.Admin;
+using VanillaLauncher.Client.UI.Localization;
 
 namespace VanillaLauncher.Client.UI;
 
@@ -22,7 +23,7 @@ public partial class AdminLoginWindow : Window
             return;
         }
 
-        ErrorText.Text = "Неверный пароль.";
+        ErrorText.Text = Loc.Instance["AdminLogin.WrongPassword"];
         ErrorText.Visibility = Visibility.Visible;
         PasswordBox.Clear();
         PasswordBox.Focus();

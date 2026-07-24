@@ -1,7 +1,9 @@
+using System.IO;
 using System.Windows;
 using System.Windows.Media;
 using VanillaLauncher.Admin;
 using VanillaLauncher.Client;
+using VanillaLauncher.Client.UI.Localization;
 
 namespace VanillaLauncher.Client.UI;
 
@@ -10,14 +12,51 @@ public partial class AdminWindow : Window
     private readonly AppConfig _config;
     private ServerProcessController? _controller;
 
+    // См. аналогичный комментарий в MainWindow.xaml.cs — прямое присваивание StatusText.Text
+    // снимает XAML-биндинг, поэтому переключение языка тумблером само не обновляет уже
+    // показанный статус без явного перерисовывания последнего ключа.
+    private string? _statusKey;
+    private object[] _statusArgs = Array.Empty<object>();
+
+    private void SetStatus(string key, params object[] args)
+    {
+        _statusKey = key;
+        _statusArgs = args;
+        StatusText.Text = args.Length == 0 ? Loc.Instance[key] : string.Format(Loc.Instance[key], args);
+    }
+
     public AdminWindow(AppConfig config)
     {
         InitializeComponent();
         _config = config;
+        Loc.Instance.Language = _config.Language;
+        RefreshLanguageButtons();
         RefreshServerDirectoryState();
 
-        Watermark.SetHint(VersionTextBox, "например: 1.2.3");
+        Watermark.SetHint(VersionTextBox, Loc.Instance["Admin.VersionWatermark"]);
         _ = LoadLastPublishedVersionAsync();
+    }
+
+    private void RefreshLanguageButtons()
+    {
+        LangRuButton.Tag = Loc.Instance.Language == "ru" ? "Active" : null;
+        LangEnButton.Tag = Loc.Instance.Language == "en" ? "Active" : null;
+    }
+
+    private void LangRuButton_Click(object sender, RoutedEventArgs e) => SetLanguage("ru");
+
+    private void LangEnButton_Click(object sender, RoutedEventArgs e) => SetLanguage("en");
+
+    private void SetLanguage(string language)
+    {
+        Loc.Instance.Language = language;
+        RefreshLanguageButtons();
+
+        if (_statusKey is not null)
+            SetStatus(_statusKey, _statusArgs);
+
+        _config.Language = language;
+        try { _config.Save(); } catch (IOException) { } catch (UnauthorizedAccessException) { }
     }
 
     /// <summary>
@@ -49,7 +88,7 @@ public partial class AdminWindow : Window
             var tag = doc.RootElement.GetProperty("tag_name").GetString();
 
             if (!string.IsNullOrWhiteSpace(tag))
-                Watermark.SetHint(VersionTextBox, $"было: {tag}");
+                Watermark.SetHint(VersionTextBox, string.Format(Loc.Instance["Admin.VersionWatermarkPrevious"], tag));
         }
         catch
         {
@@ -80,14 +119,14 @@ public partial class AdminWindow : Window
         {
             _config.ServerDirectory = detected;
             _config.Save();
-            StatusText.Text = $"Серверная папка определена автоматически: {detected}";
-            Log($"ServerDirectory автоопределён: {detected}");
+            SetStatus("Admin.ServerDirAutoDetected.Status", detected);
+            Log(string.Format(Loc.Instance["Admin.ServerDirAutoDetected.Log"], detected));
             SelectServerDirectoryButton.Visibility = Visibility.Collapsed;
             StartButton.IsEnabled = true;
             return;
         }
 
-        StatusText.Text = "ServerDirectory не задан — укажи папку сервера вручную.";
+        SetStatus("Admin.ServerDirMissing.Status");
         StartButton.IsEnabled = false;
         SelectServerDirectoryButton.Visibility = Visibility.Visible;
     }
@@ -96,7 +135,7 @@ public partial class AdminWindow : Window
     {
         var dialog = new Microsoft.Win32.OpenFolderDialog
         {
-            Title = "Выбери (или создай) папку сервера"
+            Title = Loc.Instance["Admin.SelectServerDirDialog.Title"]
         };
 
         if (dialog.ShowDialog(this) != true)
@@ -104,7 +143,7 @@ public partial class AdminWindow : Window
 
         _config.ServerDirectory = dialog.FolderName;
         _config.Save();
-        Log($"Папка сервера установлена: {dialog.FolderName}");
+        Log(string.Format(Loc.Instance["Admin.ServerDirSet.Log"], dialog.FolderName));
         RefreshServerDirectoryState();
     }
 
@@ -118,6 +157,7 @@ public partial class AdminWindow : Window
             if (_controller?.IsRunning != true)
                 _controller = null;
 
+            RefreshLanguageButtons();
             RefreshServerDirectoryState();
         }
     }
@@ -140,7 +180,7 @@ public partial class AdminWindow : Window
             _controller.OutputReceived += line => Dispatcher.Invoke(() => Log(line));
             _controller.Exited += () => Dispatcher.Invoke(() =>
             {
-                StatusText.Text = "Сервер остановлен.";
+                SetStatus("Admin.StatusStopped");
                 StartButton.IsEnabled = true;
                 StopButton.IsEnabled = false;
             });
@@ -159,14 +199,14 @@ public partial class AdminWindow : Window
         try
         {
             controller.Start();
-            StatusText.Text = "Сервер запускается...";
+            SetStatus("Admin.ServerStarting.Status");
             StartButton.IsEnabled = false;
             StopButton.IsEnabled = true;
         }
         catch (Exception ex)
         {
-            StatusText.Text = "Ошибка запуска.";
-            Log($"Ошибка: {ex.Message}");
+            SetStatus("Admin.ServerStartError.Status");
+            Log(string.Format(Loc.Instance["Common.Error"], ex.Message));
         }
     }
 
@@ -176,14 +216,14 @@ public partial class AdminWindow : Window
             return;
 
         StopButton.IsEnabled = false;
-        StatusText.Text = "Останавливаем сервер (ждём штатного завершения)...";
+        SetStatus("Admin.ServerStopping.Status");
 
         var stoppedGracefully = await _controller.StopAsync(TimeSpan.FromSeconds(60));
 
         if (!stoppedGracefully)
         {
-            StatusText.Text = "Сервер не завершился штатно за 60 секунд.";
-            Log("Сервер не ответил на stop за отведённое время — возможно, завис.");
+            SetStatus("Admin.ServerStopTimeout.Status");
+            Log(Loc.Instance["Admin.ServerStopTimeout.Log"]);
             StopButton.IsEnabled = true;
         }
         else
@@ -191,7 +231,7 @@ public partial class AdminWindow : Window
             // Пассивного обновления StatusText/кнопок обработчиком Exited недостаточно —
             // легко пропустить, если не смотреть на окно в этот момент. Явное окно, чтобы
             // администратор точно знал, что сервер уже остановлен, а не завис где-то.
-            MessageBox.Show("Сервер остановлен.", "VanillaLauncher — Admin",
+            MessageBox.Show(Loc.Instance["Admin.ServerStopped.MessageBox"], Loc.Instance["Common.AdminWindowTitle"],
                 MessageBoxButton.OK, MessageBoxImage.Information);
         }
         // Кнопки/StatusText в любом случае обновит обработчик Exited.
@@ -205,8 +245,8 @@ public partial class AdminWindow : Window
         if (_controller?.IsRunning == true)
         {
             MessageBox.Show(
-                "Сначала останови сервер — пересоздавать мир на работающем сервере нельзя.",
-                "VanillaLauncher — Admin",
+                Loc.Instance["Admin.RecreateWorldRunning.MessageBox"],
+                Loc.Instance["Common.AdminWindowTitle"],
                 MessageBoxButton.OK,
                 MessageBoxImage.Warning);
             return;
@@ -214,9 +254,8 @@ public partial class AdminWindow : Window
 
         var levelName = ServerPropertiesReader.GetLevelName(_config.ServerDirectory);
         var confirm = MessageBox.Show(
-            $"Мир «{levelName}» будет забэкаплен в backups/, затем удалён. " +
-            "Новый мир сгенерируется при следующем запуске сервера. Продолжить?",
-            "Пересоздать мир",
+            string.Format(Loc.Instance["Admin.RecreateWorldConfirm.Text"], levelName),
+            Loc.Instance["Admin.RecreateWorldConfirm.Title"],
             MessageBoxButton.YesNo,
             MessageBoxImage.Warning,
             MessageBoxResult.No);
@@ -225,8 +264,8 @@ public partial class AdminWindow : Window
             return;
 
         RecreateWorldButton.IsEnabled = false;
-        StatusText.Text = $"Бэкап мира «{levelName}»...";
-        Log($"Пересоздание мира «{levelName}»: бэкап...");
+        SetStatus("Admin.RecreateWorldBackingUp.Status", levelName);
+        Log(string.Format(Loc.Instance["Admin.RecreateWorldBackingUp.Log"], levelName));
 
         try
         {
@@ -237,20 +276,20 @@ public partial class AdminWindow : Window
 
             if (backupPath is null)
             {
-                StatusText.Text = $"Мир «{levelName}» не найден — нечего было пересоздавать.";
-                Log("Папка мира отсутствовала, бэкап не создавался.");
+                SetStatus("Admin.RecreateWorldMissing.Status", levelName);
+                Log(Loc.Instance["Admin.RecreateWorldMissing.Log"]);
             }
             else
             {
-                StatusText.Text = $"Мир «{levelName}» пересоздан.";
-                Log($"Бэкап сохранён: {backupPath}");
-                Log("Папка мира удалена. Новый мир сгенерируется при следующем запуске сервера.");
+                SetStatus("Admin.RecreateWorldDone.Status", levelName);
+                Log(string.Format(Loc.Instance["Admin.RecreateWorldDone.Log"], backupPath));
+                Log(Loc.Instance["Admin.RecreateWorldDone.Log2"]);
             }
         }
         catch (Exception ex)
         {
-            StatusText.Text = "Ошибка пересоздания мира.";
-            Log($"Ошибка: {ex.Message}");
+            SetStatus("Admin.RecreateWorldError.Status");
+            Log(string.Format(Loc.Instance["Common.Error"], ex.Message));
         }
         finally
         {
@@ -266,15 +305,15 @@ public partial class AdminWindow : Window
         var version = VersionTextBox.Text.Trim();
         if (string.IsNullOrEmpty(version))
         {
-            MessageBox.Show("Укажи версию релиза (например, 26.1.2-b2).",
-                "VanillaLauncher — Admin", MessageBoxButton.OK, MessageBoxImage.Warning);
+            MessageBox.Show(Loc.Instance["Admin.PublishNoVersion.MessageBox"],
+                Loc.Instance["Common.AdminWindowTitle"], MessageBoxButton.OK, MessageBoxImage.Warning);
             return;
         }
 
         if (string.IsNullOrWhiteSpace(_config.GitHubOwner) || string.IsNullOrWhiteSpace(_config.GitHubRepo))
         {
-            MessageBox.Show("GitHubOwner/GitHubRepo не заданы в appsettings.json.",
-                "VanillaLauncher — Admin", MessageBoxButton.OK, MessageBoxImage.Warning);
+            MessageBox.Show(Loc.Instance["Admin.PublishNoRepo.MessageBox"],
+                Loc.Instance["Common.AdminWindowTitle"], MessageBoxButton.OK, MessageBoxImage.Warning);
             return;
         }
 
@@ -285,18 +324,13 @@ public partial class AdminWindow : Window
         }
         catch (Exception ex)
         {
-            MessageBox.Show(ex.Message, "VanillaLauncher — Admin", MessageBoxButton.OK, MessageBoxImage.Error);
+            MessageBox.Show(ex.Message, Loc.Instance["Common.AdminWindowTitle"], MessageBoxButton.OK, MessageBoxImage.Error);
             return;
         }
 
         var confirm = MessageBox.Show(
-            $"Будет опубликован релиз «{version}» из {_config.ProfileRoot}:\n" +
-            "1. Бэкап мира\n2. Остановка сервера (если запущен)\n3. Обновление серверных модов/конфигов\n" +
-            "4. Генерация и загрузка manifest.json + файлов в новый GitHub Release.\n\n" +
-            "Сервер после публикации НЕ запускается обратно автоматически — запусти его сам кнопкой " +
-            "«Запустить сервер», когда будешь готов.\n\n" +
-            "Это создаст ПУБЛИЧНЫЙ релиз в репозитории. Продолжить?",
-            "Опубликовать обновление",
+            string.Format(Loc.Instance["Admin.PublishConfirm.Text"], version, _config.ProfileRoot),
+            Loc.Instance["Admin.PublishConfirm.Title"],
             MessageBoxButton.YesNo,
             MessageBoxImage.Warning,
             MessageBoxResult.No);
@@ -310,7 +344,7 @@ public partial class AdminWindow : Window
         StartButton.IsEnabled = false;
         StopButton.IsEnabled = false;
         RecreateWorldButton.IsEnabled = false;
-        StatusText.Text = $"Публикация «{version}»...";
+        SetStatus("Admin.Publishing.Status", version);
 
         try
         {
@@ -335,20 +369,20 @@ public partial class AdminWindow : Window
                 progress,
                 serverExcludeFileNames: _config.ServerExcludeMods);
 
-            StatusText.Text = $"Опубликовано: {version}.";
+            SetStatus("Admin.PublishDone.Status", version);
 
             // Пассивного обновления StatusText/лога недостаточно — та же причина, что и у
             // явного окна после "Остановить сервер" (см. StopButton_Click): легко пропустить,
             // если не смотреть на окно именно в момент завершения долгой публикации.
             MessageBox.Show(
-                $"Релиз «{version}» опубликован. Сервер остановлен — запусти его сам, когда будешь готов.",
-                "VanillaLauncher — Admin", MessageBoxButton.OK, MessageBoxImage.Information);
+                string.Format(Loc.Instance["Admin.PublishDone.MessageBox"], version),
+                Loc.Instance["Common.AdminWindowTitle"], MessageBoxButton.OK, MessageBoxImage.Information);
         }
         catch (Exception ex)
         {
-            StatusText.Text = "Ошибка публикации.";
-            Log($"Ошибка: {ex.Message}");
-            MessageBox.Show($"Публикация не удалась: {ex.Message}", "VanillaLauncher — Admin",
+            SetStatus("Admin.PublishError.Status");
+            Log(string.Format(Loc.Instance["Admin.PublishError.Log"], ex.Message));
+            MessageBox.Show(string.Format(Loc.Instance["Admin.PublishError.MessageBox"], ex.Message), Loc.Instance["Common.AdminWindowTitle"],
                 MessageBoxButton.OK, MessageBoxImage.Error);
         }
         finally
@@ -379,8 +413,8 @@ public partial class AdminWindow : Window
         e.Cancel = true;
 
         var confirm = MessageBox.Show(
-            "Сервер всё ещё запущен. Остановить его и закрыть лаунчер?",
-            "VanillaLauncher — Admin",
+            Loc.Instance["Admin.CloseConfirm.Text"],
+            Loc.Instance["Common.AdminWindowTitle"],
             MessageBoxButton.YesNo,
             MessageBoxImage.Warning,
             MessageBoxResult.No);
@@ -392,39 +426,30 @@ public partial class AdminWindow : Window
     private async Task StopServerThenCloseAsync()
     {
         StopButton.IsEnabled = false;
-        StatusText.Text = "Останавливаем сервер перед закрытием лаунчера...";
-        Log("Останавливаем сервер перед закрытием лаунчера...");
+        SetStatus("Admin.ClosingStoppingServer.Status");
+        Log(Loc.Instance["Admin.ClosingStoppingServer.Log"]);
 
         var stopped = await _controller!.StopAsync(TimeSpan.FromSeconds(60));
 
         if (!stopped)
         {
             MessageBox.Show(
-                "Сервер не остановился штатно за 60 секунд — закрытие отменено, лаунчер остаётся " +
-                "открытым. Проверь консоль сервера и попробуй ещё раз.",
-                "VanillaLauncher — Admin", MessageBoxButton.OK, MessageBoxImage.Error);
+                Loc.Instance["Admin.ClosingStopTimeout.MessageBox"],
+                Loc.Instance["Common.AdminWindowTitle"], MessageBoxButton.OK, MessageBoxImage.Error);
             StopButton.IsEnabled = true;
             return;
         }
 
-        MessageBox.Show("Сервер остановлен. Лаунчер закрывается.", "VanillaLauncher — Admin",
+        MessageBox.Show(Loc.Instance["Admin.ClosingStopped.MessageBox"], Loc.Instance["Common.AdminWindowTitle"],
             MessageBoxButton.OK, MessageBoxImage.Information);
 
         _closingAfterServerStopped = true;
         Close();
     }
 
-    private void Log(string message)
-    {
-        LogList.Items.Add(message);
-        if (LogList.Items.Count > 0)
-            LogList.ScrollIntoView(LogList.Items[^1]);
-    }
-
     // Ошибки от GitHub API (см. GitHubApiErrorTranslator) могут быть длинными и содержать
     // JSON — проще скопировать и переслать администратору/разработчику, чем перепечатывать
-    // руками. ListBox с ItemTemplate из TextBlock не даёт штатного выделения текста мышью,
-    // поэтому копирование — через контекстное меню/Ctrl+C, а не через выделение по символам.
+    // руками.
     private void CopySelectedLog_Executed(object sender, System.Windows.Input.ExecutedRoutedEventArgs e) =>
         CopySelectedLogLines();
 
@@ -443,5 +468,12 @@ public partial class AdminWindow : Window
         var text = string.Join(Environment.NewLine, items.Cast<string>());
         if (!string.IsNullOrEmpty(text))
             Clipboard.SetText(text);
+    }
+
+    private void Log(string message)
+    {
+        LogList.Items.Add($"{DateTime.Now:HH:mm:ss}  {message}");
+        if (LogList.Items.Count > 0)
+            LogList.ScrollIntoView(LogList.Items[^1]);
     }
 }

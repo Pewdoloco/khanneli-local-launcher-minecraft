@@ -7,6 +7,12 @@ public sealed class AppConfig
     public string ManifestUrl { get; set; } = string.Empty;
     public string ProfileRoot { get; set; } = string.Empty;
 
+    // Язык интерфейса ("ru"/"en", engine-v1.9.0) — переключается тумблером в MainWindow/
+    // AdminWindow, применяется мгновенно ко всем открытым окнам (см. Client.UI.Localization.Loc),
+    // сохраняется в appsettings.json как обычное поле. Любое значение, кроме "en", трактуется
+    // как "ru" — см. Loc.Language.
+    public string Language { get; set; } = "ru";
+
     // Только для Admin-режима (Этап 3+). В чисто клиентской сборке можно не задавать.
     public string? ServerDirectory { get; set; }
     public string ServerBatFileName { get; set; } = "start.bat";

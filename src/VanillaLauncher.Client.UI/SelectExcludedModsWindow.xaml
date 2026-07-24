@@ -4,8 +4,9 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:VanillaLauncher.Client.UI"
+        xmlns:loc="clr-namespace:VanillaLauncher.Client.UI.Localization"
         mc:Ignorable="d"
-        Title="Выбрать моды для ServerExcludeMods" Height="560" Width="480"
+        Title="{Binding Source={x:Static loc:Loc.Instance}, Path=[SelectMods.Title]}" Height="560" Width="480"
         WindowStartupLocation="CenterOwner">
     <Grid Margin="16">
         <Grid.RowDefinitions>
@@ -19,15 +20,16 @@
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
-        <TextBlock Grid.Row="0" Text="Папка с модами (обычно ProfileRoot\mods):"
-                    Margin="0,0,0,4" TextWrapping="Wrap" />
+        <TextBlock Grid.Row="0" Margin="0,0,0,4" TextWrapping="Wrap"
+                    Text="{Binding Source={x:Static loc:Loc.Instance}, Path=[SelectMods.FolderLabel]}" />
         <Grid Grid.Row="1" Margin="0,0,0,8">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*" />
                 <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
             <TextBox x:Name="FolderTextBox" Grid.Column="0" Padding="4" Margin="0,0,8,0" />
-            <Button Grid.Column="1" Content="Обзор..." Padding="10,4" Click="BrowseFolder_Click" />
+            <Button Grid.Column="1" Padding="10,4" Click="BrowseFolder_Click"
+                    Content="{Binding Source={x:Static loc:Loc.Instance}, Path=[Common.Browse]}" />
         </Grid>
 
         <Grid Grid.Row="2" Margin="0,0,0,8">
@@ -37,13 +39,14 @@
             </Grid.ColumnDefinitions>
             <TextBox x:Name="SearchTextBox" Grid.Column="0" Padding="4" Margin="0,0,8,0"
                      KeyDown="SearchTextBox_KeyDown" />
-            <Button Grid.Column="1" Content="Найти" Padding="10,4" Click="SearchButton_Click" />
+            <Button Grid.Column="1" Padding="10,4" Click="SearchButton_Click"
+                    Content="{Binding Source={x:Static loc:Loc.Instance}, Path=[SelectMods.SearchButton]}" />
         </Grid>
 
-        <TextBlock Grid.Row="3" Text="Отметь моды, которые НЕ должны попадать на сервер:"
-                    Margin="0,0,0,4" TextWrapping="Wrap" />
+        <TextBlock Grid.Row="3" Margin="0,0,0,4" TextWrapping="Wrap"
+                    Text="{Binding Source={x:Static loc:Loc.Instance}, Path=[SelectMods.Instruction]}" />
         <TextBlock x:Name="AutoDetectSummaryText" Grid.Row="4" Margin="0,0,0,4" TextWrapping="Wrap"
-                   Foreground="Gray" FontStyle="Italic" />
+                   Foreground="{StaticResource MutedTextBrush}" FontStyle="Italic" />
         <ListBox x:Name="ModsListBox" Grid.Row="5" Margin="0,0,0,8" />
 
         <Grid Grid.Row="6" Margin="0,0,0,8">
@@ -52,19 +55,21 @@
                 <ColumnDefinition Width="*" />
                 <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
-            <Button x:Name="PrevPageButton" Grid.Column="0" Content="◀ Пред." Padding="10,4"
-                    Click="PrevPageButton_Click" />
+            <Button x:Name="PrevPageButton" Grid.Column="0" Padding="10,4" Click="PrevPageButton_Click"
+                    Content="{Binding Source={x:Static loc:Loc.Instance}, Path=[SelectMods.PrevPage]}" />
             <TextBlock x:Name="PageInfoText" Grid.Column="1" HorizontalAlignment="Center"
                        VerticalAlignment="Center" />
-            <Button x:Name="NextPageButton" Grid.Column="2" Content="След. ▶" Padding="10,4"
-                    Click="NextPageButton_Click" />
+            <Button x:Name="NextPageButton" Grid.Column="2" Padding="10,4" Click="NextPageButton_Click"
+                    Content="{Binding Source={x:Static loc:Loc.Instance}, Path=[SelectMods.NextPage]}" />
         </Grid>
 
         <StackPanel Grid.Row="7" Orientation="Horizontal" HorizontalAlignment="Right">
             <TextBlock x:Name="ErrorText" Foreground="Red" TextWrapping="Wrap" Margin="0,0,8,0"
                        VerticalAlignment="Center" Visibility="Collapsed" />
-            <Button Content="Отмена" Padding="12,6" Margin="0,0,8,0" IsCancel="True" Click="CancelButton_Click" />
-            <Button Content="Применить" Padding="12,6" IsDefault="True" Click="ApplyButton_Click" />
+            <Button Padding="12,6" Margin="0,0,8,0" IsCancel="True" Click="CancelButton_Click"
+                    Content="{Binding Source={x:Static loc:Loc.Instance}, Path=[Common.Cancel]}" />
+            <Button Padding="12,6" IsDefault="True" Click="ApplyButton_Click" Style="{StaticResource AccentButton}"
+                    Content="{Binding Source={x:Static loc:Loc.Instance}, Path=[SelectMods.ApplyButton]}" />
         </StackPanel>
     </Grid>
 </Window>

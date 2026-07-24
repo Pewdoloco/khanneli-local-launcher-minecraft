@@ -1,7 +1,9 @@
+using System.IO;
 using System.Net.Http;
 using System.Windows;
 using VanillaLauncher.Admin;
 using VanillaLauncher.Client;
+using VanillaLauncher.Client.UI.Localization;
 
 namespace VanillaLauncher.Client.UI;
 
@@ -12,11 +14,63 @@ public partial class MainWindow : Window
     private List<FilePlanItem>? _plan;
     private EngineUpdateInfo? _engineUpdateInfo;
 
+    // Прямое присваивание StatusText.Text (не биндинг) молча снимает XAML-биндинг с этого
+    // DependencyProperty — так что переключение языка тумблером само по себе не обновляет уже
+    // показанный статус. Запоминаем последний ключ/аргументы и перерисовываем текст явно из
+    // SetLanguage(), иначе после переключения на лету статус так и останется на старом языке
+    // до следующего события, которое его перезапишет.
+    private string? _statusKey;
+    private object[] _statusArgs = Array.Empty<object>();
+    private string? _engineStatusKey;
+    private object[] _engineStatusArgs = Array.Empty<object>();
+
+    private void SetStatus(string key, params object[] args)
+    {
+        _statusKey = key;
+        _statusArgs = args;
+        StatusText.Text = args.Length == 0 ? Loc.Instance[key] : string.Format(Loc.Instance[key], args);
+    }
+
+    private void SetEngineStatus(string key, params object[] args)
+    {
+        _engineStatusKey = key;
+        _engineStatusArgs = args;
+        EngineStatusText.Text = args.Length == 0 ? Loc.Instance[key] : string.Format(Loc.Instance[key], args);
+    }
+
     public MainWindow()
     {
         InitializeComponent();
         Title = $"VanillaLauncher {EngineVersion.Current}";
+        RefreshLanguageButtons();
         Loaded += async (_, _) => await InitializeAsync();
+    }
+
+    private void RefreshLanguageButtons()
+    {
+        LangRuButton.Tag = Loc.Instance.Language == "ru" ? "Active" : null;
+        LangEnButton.Tag = Loc.Instance.Language == "en" ? "Active" : null;
+    }
+
+    private void LangRuButton_Click(object sender, RoutedEventArgs e) => SetLanguage("ru");
+
+    private void LangEnButton_Click(object sender, RoutedEventArgs e) => SetLanguage("en");
+
+    private void SetLanguage(string language)
+    {
+        Loc.Instance.Language = language;
+        RefreshLanguageButtons();
+
+        if (_statusKey is not null)
+            SetStatus(_statusKey, _statusArgs);
+        if (_engineStatusKey is not null)
+            SetEngineStatus(_engineStatusKey, _engineStatusArgs);
+
+        if (_config is null)
+            return;
+
+        _config.Language = language;
+        try { _config.Save(); } catch (IOException) { } catch (UnauthorizedAccessException) { }
     }
 
     /// <summary>
@@ -30,11 +84,13 @@ public partial class MainWindow : Window
         try
         {
             _config = AppConfig.Load();
+            Loc.Instance.Language = _config.Language;
+            RefreshLanguageButtons();
         }
         catch (Exception ex)
         {
-            StatusText.Text = "Ошибка конфигурации лаунчера.";
-            Log($"Не удалось загрузить appsettings.json: {ex.Message}");
+            SetStatus("Main.ConfigError.Status");
+            Log(string.Format(Loc.Instance["Main.ConfigError.Log"], ex.Message));
             CheckButton.IsEnabled = false;
             return;
         }
@@ -47,8 +103,8 @@ public partial class MainWindow : Window
             // "Настроить лаунчер" даёт игроку самому вписать GitHubOwner/GitHubRepo (не
             // секретные, просто координаты репозитория) — не через Admin-режим, админу не
             // нужно пересобирать и рассылать exe+appsettings.json каждому другу заново.
-            StatusText.Text = "Лаунчер не настроен под модпак. Нажми «Настроить лаунчер» и впиши данные от администратора, либо обратись к нему за готовым appsettings.json.";
-            Log("ManifestUrl/GitHubOwner/GitHubRepo не заданы — это неадаптированная сборка движка.");
+            SetStatus("Main.NotConfigured.Status");
+            Log(Loc.Instance["Main.NotConfigured.Log"]);
             CheckButton.IsEnabled = false;
             SetupButton.Visibility = Visibility.Visible;
             return;
@@ -71,12 +127,12 @@ public partial class MainWindow : Window
             {
                 _config.ProfileRoot = detected;
                 _config.Save();
-                Log($"Папка сборки определена автоматически: {detected}");
+                Log(string.Format(Loc.Instance["Main.ProfileRootAutoDetected.Log"], detected));
             }
             else
             {
-                StatusText.Text = "Не найдена папка сборки Minecraft — укажи её вручную.";
-                Log($"Папка «{_config.ProfileRoot}» не существует на этой машине, автоопределение не нашло совпадений.");
+                SetStatus("Main.ProfileRootNotFound.Status");
+                Log(string.Format(Loc.Instance["Main.ProfileRootNotFound.Log"], _config.ProfileRoot));
                 CheckButton.IsEnabled = false;
                 return;
             }
@@ -95,7 +151,7 @@ public partial class MainWindow : Window
             return;
 
         SetupButton.Visibility = Visibility.Collapsed;
-        Log($"Настроено вручную: GitHubOwner={_config.GitHubOwner}, GitHubRepo={_config.GitHubRepo}.");
+        Log(string.Format(Loc.Instance["Main.SetupDone.Log"], _config.GitHubOwner, _config.GitHubRepo));
         await ProceedWithConfiguredClientAsync();
     }
 
@@ -123,7 +179,7 @@ public partial class MainWindow : Window
     {
         var dialog = new Microsoft.Win32.OpenFolderDialog
         {
-            Title = "Выбери папку сборки Minecraft (профиль CurseForge/лаунчера с модами)"
+            Title = Loc.Instance["Main.SelectProfileRootDialog.Title"]
         };
 
         if (dialog.ShowDialog(this) != true)
@@ -131,7 +187,7 @@ public partial class MainWindow : Window
 
         _config!.ProfileRoot = dialog.FolderName;
         _config.Save();
-        Log($"Папка сборки установлена: {dialog.FolderName}");
+        Log(string.Format(Loc.Instance["Main.SelectProfileRoot.Log"], dialog.FolderName));
         return true;
     }
 
@@ -141,8 +197,8 @@ public partial class MainWindow : Window
     {
         CheckButton.IsEnabled = false;
         UpdateButton.IsEnabled = false;
-        StatusText.Text = "Проверка манифеста...";
-        Log("Проверка манифеста...");
+        SetStatus("Main.CheckingManifest.Log");
+        Log(Loc.Instance["Main.CheckingManifest.Log"]);
 
         try
         {
@@ -150,7 +206,7 @@ public partial class MainWindow : Window
 
             var manifestService = new ManifestService(_http);
             var manifest = await manifestService.FetchAsync(_config.ManifestUrl);
-            Log($"Версия сборки: {manifest.Version}, файлов в манифесте: {manifest.Files.Count}");
+            Log(string.Format(Loc.Instance["Main.ManifestInfo.Log"], manifest.Version, manifest.Files.Count));
 
             var updateService = new UpdateService(_config.ProfileRoot);
             _plan = await updateService.BuildPlanAsync(manifest);
@@ -159,20 +215,20 @@ public partial class MainWindow : Window
 
             if (toDownload == 0)
             {
-                StatusText.Text = $"Сборка актуальна (версия {manifest.Version}).";
-                Log("Расхождений не найдено.");
+                SetStatus("Main.UpToDate.Status", manifest.Version);
+                Log(Loc.Instance["Main.UpToDate.Log"]);
             }
             else
             {
-                StatusText.Text = $"Требуется обновление: {toDownload} из {_plan.Count} файлов.";
-                Log($"Требуют обновления: {toDownload} из {_plan.Count}");
+                SetStatus("Main.UpdateNeeded.Status", toDownload, _plan.Count);
+                Log(string.Format(Loc.Instance["Main.UpdateNeeded.Log"], toDownload, _plan.Count));
                 UpdateButton.IsEnabled = true;
             }
         }
         catch (Exception ex)
         {
-            StatusText.Text = "Ошибка проверки обновлений.";
-            Log($"Ошибка: {ex.Message}");
+            SetStatus("Main.CheckUpdatesError.Status");
+            Log(string.Format(Loc.Instance["Common.Error"], ex.Message));
         }
         finally
         {
@@ -195,7 +251,7 @@ public partial class MainWindow : Window
             var downloader = new Downloader(_http, _config.ProfileRoot);
             var progress = new Progress<DownloadProgress>(p =>
             {
-                var label = p.Stage == DownloadStage.Started ? "Скачивание" : "Готово";
+                var label = p.Stage == DownloadStage.Started ? Loc.Instance["Main.Downloading.Log"] : Loc.Instance["Main.DownloadDone.Log"];
                 Log($"{label}: {p.FilePath} ({p.CompletedCount}/{p.TotalCount})");
                 if (p.TotalCount > 0)
                     ProgressBar.Value = 100.0 * p.CompletedCount / p.TotalCount;
@@ -203,13 +259,13 @@ public partial class MainWindow : Window
 
             await downloader.ApplyAsync(_plan, progress);
 
-            Log("Докачка завершена.");
+            Log(Loc.Instance["Main.UpdateComplete.Log"]);
             ProgressBar.Value = 100;
         }
         catch (Exception ex)
         {
-            StatusText.Text = "Ошибка обновления.";
-            Log($"Ошибка: {ex.Message}");
+            SetStatus("Main.UpdateError.Status");
+            Log(string.Format(Loc.Instance["Common.Error"], ex.Message));
         }
         finally
         {
@@ -248,8 +304,8 @@ public partial class MainWindow : Window
 
         CheckEngineUpdateButton.IsEnabled = false;
         UpdateEngineButton.IsEnabled = false;
-        EngineStatusText.Text = "Проверка обновлений лаунчера...";
-        Log("Проверка обновлений лаунчера...");
+        SetEngineStatus("Main.EngineCheck.Status");
+        Log(Loc.Instance["Main.EngineCheck.Status"]);
 
         try
         {
@@ -258,20 +314,20 @@ public partial class MainWindow : Window
 
             if (_engineUpdateInfo.IsUpdateAvailable)
             {
-                EngineStatusText.Text = $"Доступно обновление лаунчера: {_engineUpdateInfo.LatestVersion} (у вас {EngineVersion.Current}).";
-                Log($"Найдено обновление лаунчера: {_engineUpdateInfo.LatestVersion} (сейчас {EngineVersion.Current}).");
+                SetEngineStatus("Main.EngineUpdateAvailable.Status", _engineUpdateInfo.LatestVersion, EngineVersion.Current);
+                Log(string.Format(Loc.Instance["Main.EngineUpdateAvailable.Log"], _engineUpdateInfo.LatestVersion, EngineVersion.Current));
                 UpdateEngineButton.IsEnabled = true;
             }
             else
             {
-                EngineStatusText.Text = $"У вас последняя версия лаунчера ({EngineVersion.Current}).";
-                Log($"Обновлений лаунчера не найдено (у вас {EngineVersion.Current}).");
+                SetEngineStatus("Main.EngineUpToDate.Status", EngineVersion.Current);
+                Log(string.Format(Loc.Instance["Main.EngineUpToDate.Log"], EngineVersion.Current));
             }
         }
         catch (Exception ex)
         {
-            EngineStatusText.Text = "Ошибка проверки обновлений лаунчера.";
-            Log($"Ошибка проверки обновлений лаунчера: {ex.Message}");
+            SetEngineStatus("Main.EngineCheckError.Status");
+            Log(string.Format(Loc.Instance["Main.EngineCheckError.Log"], ex.Message));
         }
         finally
         {
@@ -285,9 +341,8 @@ public partial class MainWindow : Window
             return;
 
         var confirm = MessageBox.Show(
-            $"Доступна новая версия лаунчера: {_engineUpdateInfo.LatestVersion} (у вас {EngineVersion.Current}).\n" +
-            "Лаунчер скачает обновление, закроется и перезапустится с новой версией. Продолжить?",
-            "Обновление лаунчера",
+            string.Format(Loc.Instance["Main.EngineUpdateConfirm.Text"], _engineUpdateInfo.LatestVersion, EngineVersion.Current),
+            Loc.Instance["Main.EngineUpdateConfirm.Title"],
             MessageBoxButton.YesNo,
             MessageBoxImage.Question,
             MessageBoxResult.No);
@@ -297,19 +352,19 @@ public partial class MainWindow : Window
 
         CheckEngineUpdateButton.IsEnabled = false;
         UpdateEngineButton.IsEnabled = false;
-        EngineStatusText.Text = "Скачивание обновления лаунчера...";
-        Log("Скачивание обновления лаунчера...");
+        SetEngineStatus("Main.EngineDownloading.Status");
+        Log(Loc.Instance["Main.EngineDownloading.Status"]);
 
         try
         {
             await EngineSelfUpdater.PrepareAndLaunchUpdateAsync(_http, _engineUpdateInfo.DownloadUrl);
-            Log("Обновление скачано — лаунчер перезапускается.");
+            Log(Loc.Instance["Main.EngineUpdateDone.Log"]);
             Application.Current.Shutdown();
         }
         catch (Exception ex)
         {
-            EngineStatusText.Text = "Ошибка обновления лаунчера.";
-            Log($"Ошибка обновления лаунчера: {ex.Message}");
+            SetEngineStatus("Main.EngineUpdateError.Status");
+            Log(string.Format(Loc.Instance["Main.EngineUpdateError.Log"], ex.Message));
             CheckEngineUpdateButton.IsEnabled = true;
             UpdateEngineButton.IsEnabled = true;
         }

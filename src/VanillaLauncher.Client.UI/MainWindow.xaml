@@ -4,8 +4,9 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:VanillaLauncher.Client.UI"
+        xmlns:loc="clr-namespace:VanillaLauncher.Client.UI.Localization"
         mc:Ignorable="d"
-        Title="VanillaLauncher" Height="480" Width="640"
+        Title="VanillaLauncher" Height="500" Width="640"
         WindowStartupLocation="CenterScreen">
     <Grid Margin="16">
         <Grid.RowDefinitions>
@@ -17,36 +18,63 @@
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
 
-        <TextBlock x:Name="StatusText" Grid.Row="0" Text="Проверка манифеста..."
-                   FontSize="16" Margin="0,0,0,8" TextWrapping="Wrap" />
+        <Grid Grid.Row="0" Margin="0,0,0,8">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            <TextBlock x:Name="StatusText" Grid.Column="0"
+                       Text="{Binding Source={x:Static loc:Loc.Instance}, Path=[Main.StatusInitial]}"
+                       FontSize="16" TextWrapping="Wrap" VerticalAlignment="Center" />
+            <Border Grid.Column="1" Style="{StaticResource LanguageToggleContainer}" VerticalAlignment="Top">
+                <StackPanel Orientation="Horizontal">
+                    <Button x:Name="LangRuButton" Style="{StaticResource LanguageToggleButton}"
+                            Content="{Binding Source={x:Static loc:Loc.Instance}, Path=[Common.LangRu]}"
+                            Click="LangRuButton_Click" />
+                    <Button x:Name="LangEnButton" Style="{StaticResource LanguageToggleButton}"
+                            Content="{Binding Source={x:Static loc:Loc.Instance}, Path=[Common.LangEn]}"
+                            Click="LangEnButton_Click" />
+                </StackPanel>
+            </Border>
+        </Grid>
 
         <ProgressBar x:Name="ProgressBar" Grid.Row="1" Height="20" Minimum="0" Maximum="100"
                      Visibility="Collapsed" Margin="0,0,0,8" />
 
         <WrapPanel Grid.Row="2" Orientation="Horizontal" Margin="0,0,0,8">
-            <Button x:Name="CheckButton" Content="Проверить обновления" Padding="12,6" Margin="0,0,8,4"
+            <Button x:Name="CheckButton" Padding="12,6" Margin="0,0,8,4"
+                    Content="{Binding Source={x:Static loc:Loc.Instance}, Path=[Main.CheckButton]}"
                     Click="CheckButton_Click" />
-            <Button x:Name="UpdateButton" Content="Обновить" Padding="12,6" IsEnabled="False" Margin="0,0,8,4"
+            <Button x:Name="UpdateButton" Padding="12,6" IsEnabled="False" Margin="0,0,8,4"
+                    Content="{Binding Source={x:Static loc:Loc.Instance}, Path=[Main.UpdateButton]}"
                     Click="UpdateButton_Click" />
-            <Button x:Name="SetupButton" Content="Настроить лаунчер" Padding="12,6" Margin="0,0,8,4"
+            <Button x:Name="SetupButton" Padding="12,6" Margin="0,0,8,4"
+                    Content="{Binding Source={x:Static loc:Loc.Instance}, Path=[Main.SetupButton]}"
                     Visibility="Collapsed" Click="SetupButton_Click" />
-            <Button x:Name="GuideButton" Content="Инструкция" Padding="12,6" Margin="0,0,8,4"
+            <Button x:Name="GuideButton" Padding="12,6" Margin="0,0,8,4"
+                    Content="{Binding Source={x:Static loc:Loc.Instance}, Path=[Main.GuideButton]}"
                     Click="GuideButton_Click" />
-            <Button x:Name="AdminButton" Content="Режим администратора" Padding="12,6" Margin="0,0,8,4"
+            <Button x:Name="AdminButton" Padding="12,6" Margin="0,0,8,4"
+                    Content="{Binding Source={x:Static loc:Loc.Instance}, Path=[Main.AdminButton]}"
                     Click="AdminButton_Click" />
-            <Button x:Name="SelectProfileRootButton" Content="Сменить папку сборки" Padding="12,6"
-                    Margin="0,0,8,4" Click="SelectProfileRootButton_Click" />
+            <Button x:Name="SelectProfileRootButton" Padding="12,6" Margin="0,0,8,4"
+                    Content="{Binding Source={x:Static loc:Loc.Instance}, Path=[Main.SelectProfileRootButton]}"
+                    Click="SelectProfileRootButton_Click" />
         </WrapPanel>
 
         <WrapPanel Grid.Row="3" Orientation="Horizontal" Margin="0,0,0,8">
-            <Button x:Name="CheckEngineUpdateButton" Content="Проверить обновление лаунчера" Padding="12,6" Margin="0,0,8,4"
+            <Button x:Name="CheckEngineUpdateButton" Padding="12,6" Margin="0,0,8,4"
+                    Content="{Binding Source={x:Static loc:Loc.Instance}, Path=[Main.CheckEngineUpdateButton]}"
                     Click="CheckEngineUpdateButton_Click" />
-            <Button x:Name="UpdateEngineButton" Content="Обновить лаунчер" Padding="12,6" IsEnabled="False" Margin="0,0,8,4"
+            <Button x:Name="UpdateEngineButton" Padding="12,6" IsEnabled="False" Margin="0,0,8,4"
+                    Content="{Binding Source={x:Static loc:Loc.Instance}, Path=[Main.UpdateEngineButton]}"
                     Click="UpdateEngineButton_Click" />
-            <TextBlock x:Name="EngineStatusText" VerticalAlignment="Center" Margin="4,0,0,4" TextWrapping="Wrap" Foreground="Gray" />
+            <TextBlock x:Name="EngineStatusText" VerticalAlignment="Center" Margin="4,0,0,4" TextWrapping="Wrap"
+                       Foreground="{StaticResource MutedTextBrush}" />
         </WrapPanel>
 
-        <TextBlock Grid.Row="4" Text="Журнал:" FontWeight="Bold" Margin="0,0,0,4" />
+        <TextBlock Grid.Row="4" Margin="0,0,0,4" FontWeight="Bold"
+                   Text="{Binding Source={x:Static loc:Loc.Instance}, Path=[Main.LogHeader]}" />
 
         <ListBox x:Name="LogList" Grid.Row="5" ScrollViewer.HorizontalScrollBarVisibility="Disabled"
                  SelectionMode="Extended">
@@ -58,8 +86,10 @@
             </ListBox.CommandBindings>
             <ListBox.ContextMenu>
                 <ContextMenu>
-                    <MenuItem Header="Копировать выделенное" Click="CopySelectedLog_Click" />
-                    <MenuItem Header="Копировать всё" Click="CopyAllLog_Click" />
+                    <MenuItem Click="CopySelectedLog_Click"
+                              Header="{Binding Source={x:Static loc:Loc.Instance}, Path=[Main.CopySelected]}" />
+                    <MenuItem Click="CopyAllLog_Click"
+                              Header="{Binding Source={x:Static loc:Loc.Instance}, Path=[Main.CopyAll]}" />
                 </ContextMenu>
             </ListBox.ContextMenu>
             <ListBox.ItemContainerStyle>

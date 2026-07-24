@@ -1,6 +1,7 @@
 using System.Windows;
 using System.Windows.Controls;
 using VanillaLauncher.Client;
+using VanillaLauncher.Client.UI.Localization;
 
 namespace VanillaLauncher.Client.UI;
 
@@ -53,14 +54,14 @@ public partial class SettingsWindow : Window
 
     private void BrowseProfileRoot_Click(object sender, RoutedEventArgs e)
     {
-        var dialog = new Microsoft.Win32.OpenFolderDialog { Title = "Выбери папку клиентской сборки" };
+        var dialog = new Microsoft.Win32.OpenFolderDialog { Title = Loc.Instance["Settings.BrowseProfileRootDialog.Title"] };
         if (dialog.ShowDialog(this) == true)
             ProfileRootTextBox.Text = dialog.FolderName;
     }
 
     private void BrowseServerDirectory_Click(object sender, RoutedEventArgs e)
     {
-        var dialog = new Microsoft.Win32.OpenFolderDialog { Title = "Выбери (или создай) папку сервера" };
+        var dialog = new Microsoft.Win32.OpenFolderDialog { Title = Loc.Instance["Settings.BrowseServerDirDialog.Title"] };
         if (dialog.ShowDialog(this) == true)
             ServerDirectoryTextBox.Text = dialog.FolderName;
     }
@@ -77,7 +78,7 @@ public partial class SettingsWindow : Window
         }
         else
         {
-            ErrorText.Text = "Автопоиск клиентской папки не нашёл совпадений — укажи путь вручную (Обзор...).";
+            ErrorText.Text = Loc.Instance["Settings.AutoDetectClientError"];
             ErrorText.Visibility = Visibility.Visible;
         }
     }
@@ -95,7 +96,7 @@ public partial class SettingsWindow : Window
         }
         else
         {
-            ErrorText.Text = "Автопоиск серверной папки не нашёл совпадений — укажи путь вручную (Обзор...).";
+            ErrorText.Text = Loc.Instance["Settings.AutoDetectServerError"];
             ErrorText.Visibility = Visibility.Visible;
         }
     }
@@ -166,7 +167,7 @@ public partial class SettingsWindow : Window
             // WorldBackupService.ctor бросает ArgumentOutOfRangeException при < 1 — сверяем
             // здесь ту же границу, чтобы не пропустить в конфиг значение, которое сломает
             // "Пересоздать мир" при первом же клике в AdminWindow.
-            ErrorText.Text = "MaxBackupsToKeep должен быть целым числом ≥ 1 (нужно хранить хотя бы один бэкап).";
+            ErrorText.Text = Loc.Instance["Settings.MaxBackupsError"];
             ErrorText.Visibility = Visibility.Visible;
             return;
         }

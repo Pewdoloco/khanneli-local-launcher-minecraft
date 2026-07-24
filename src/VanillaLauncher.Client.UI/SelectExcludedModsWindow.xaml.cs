@@ -2,6 +2,7 @@ using System.IO;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using VanillaLauncher.Client.UI.Localization;
 
 namespace VanillaLauncher.Client.UI;
 
@@ -56,7 +57,7 @@ public partial class SelectExcludedModsWindow : Window
 
     private void BrowseFolder_Click(object sender, RoutedEventArgs e)
     {
-        var dialog = new Microsoft.Win32.OpenFolderDialog { Title = "Выбери папку с модами" };
+        var dialog = new Microsoft.Win32.OpenFolderDialog { Title = Loc.Instance["SelectMods.BrowseDialog.Title"] };
         if (dialog.ShowDialog(this) != true)
             return;
 
@@ -72,7 +73,7 @@ public partial class SelectExcludedModsWindow : Window
 
         if (!Directory.Exists(folder))
         {
-            ErrorText.Text = "Папка не найдена.";
+            ErrorText.Text = Loc.Instance["SelectMods.FolderNotFound"];
             ErrorText.Visibility = Visibility.Visible;
             ApplyFilterAndRender();
             return;
@@ -93,14 +94,13 @@ public partial class SelectExcludedModsWindow : Window
 
         if (_allJarNames.Count == 0)
         {
-            ErrorText.Text = "В папке нет .jar файлов.";
+            ErrorText.Text = Loc.Instance["SelectMods.NoJars"];
             ErrorText.Visibility = Visibility.Visible;
         }
 
         AutoDetectSummaryText.Text = _autoDetectedClientOnly.Count == 0
-            ? "Моды с честным \"environment\": \"client\" в метаданных не найдены — не значит, что клиентских модов нет, часть из них не декларирует это поле вообще."
-            : $"Автоматически отмечено как client-only по метаданным (\"environment\": \"client\"): {_autoDetectedClientOnly.Count}. " +
-              "Часть модов заявляет универсальность (\"*\"), но на деле клиентская и падает на сервере — это НЕ определяется автоматически, проверяй запуском сервера.";
+            ? Loc.Instance["SelectMods.AutoDetectNone"]
+            : string.Format(Loc.Instance["SelectMods.AutoDetectSome"], _autoDetectedClientOnly.Count);
 
         ApplyFilterAndRender();
     }
@@ -140,7 +140,7 @@ public partial class SelectExcludedModsWindow : Window
             // имя файла для ServerExcludeMods берётся из замыкания, а не из Content.
             var displayName = name.Replace("_", "__");
             if (_autoDetectedClientOnly.Contains(name))
-                displayName += "  [авто: environment=client]";
+                displayName += Loc.Instance["SelectMods.AutoDetectSuffix"];
 
             var checkBox = new CheckBox
             {
@@ -154,8 +154,8 @@ public partial class SelectExcludedModsWindow : Window
         }
 
         PageInfoText.Text = _filteredJarNames.Count == 0
-            ? "Ничего не найдено"
-            : $"Страница {_currentPage + 1} из {pageCount} ({_filteredJarNames.Count} файлов)";
+            ? Loc.Instance["SelectMods.NoResults"]
+            : string.Format(Loc.Instance["SelectMods.PageInfo"], _currentPage + 1, pageCount, _filteredJarNames.Count);
 
         PrevPageButton.IsEnabled = _currentPage > 0;
         NextPageButton.IsEnabled = _currentPage < pageCount - 1;

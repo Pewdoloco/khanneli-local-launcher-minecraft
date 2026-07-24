@@ -4,8 +4,10 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:VanillaLauncher.Client.UI"
+        xmlns:loc="clr-namespace:VanillaLauncher.Client.UI.Localization"
         mc:Ignorable="d"
-        Title="VanillaLauncher — Admin" Height="580" Width="720"
+        Title="{Binding Source={x:Static loc:Loc.Instance}, Path=[Common.AdminWindowTitle]}"
+        Height="600" Width="720"
         WindowStartupLocation="CenterScreen"
         Closing="Window_Closing">
     <Grid Margin="16">
@@ -18,35 +20,63 @@
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
 
-        <TextBlock x:Name="StatusText" Grid.Row="0" Text="Сервер остановлен."
-                   FontSize="16" Margin="0,0,0,8" TextWrapping="Wrap" />
+        <Grid Grid.Row="0" Margin="0,0,0,8">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            <TextBlock x:Name="StatusText" Grid.Column="0"
+                       Text="{Binding Source={x:Static loc:Loc.Instance}, Path=[Admin.StatusStopped]}"
+                       FontSize="16" TextWrapping="Wrap" VerticalAlignment="Center" />
+            <Border Grid.Column="1" Style="{StaticResource LanguageToggleContainer}" VerticalAlignment="Top">
+                <StackPanel Orientation="Horizontal">
+                    <Button x:Name="LangRuButton" Style="{StaticResource LanguageToggleButton}"
+                            Content="{Binding Source={x:Static loc:Loc.Instance}, Path=[Common.LangRu]}"
+                            Click="LangRuButton_Click" />
+                    <Button x:Name="LangEnButton" Style="{StaticResource LanguageToggleButton}"
+                            Content="{Binding Source={x:Static loc:Loc.Instance}, Path=[Common.LangEn]}"
+                            Click="LangEnButton_Click" />
+                </StackPanel>
+            </Border>
+        </Grid>
 
         <WrapPanel Grid.Row="1" Orientation="Horizontal" Margin="0,0,0,8">
-            <Button x:Name="StartButton" Content="Запустить сервер" Padding="12,6" Margin="0,0,8,4"
+            <Button x:Name="StartButton" Padding="12,6" Margin="0,0,8,4"
+                    Content="{Binding Source={x:Static loc:Loc.Instance}, Path=[Admin.StartButton]}"
                     Click="StartButton_Click" />
-            <Button x:Name="StopButton" Content="Остановить сервер" Padding="12,6" IsEnabled="False" Margin="0,0,8,4"
+            <Button x:Name="StopButton" Padding="12,6" IsEnabled="False" Margin="0,0,8,4"
+                    Content="{Binding Source={x:Static loc:Loc.Instance}, Path=[Admin.StopButton]}"
                     Click="StopButton_Click" />
-            <Button x:Name="SelectServerDirectoryButton" Content="Выбрать папку сервера" Padding="12,6"
-                    Margin="0,0,8,4" Visibility="Collapsed" Click="SelectServerDirectoryButton_Click" />
-            <Button x:Name="SettingsButton" Content="Настройки" Padding="12,6" Margin="0,0,8,4"
+            <Button x:Name="SelectServerDirectoryButton" Padding="12,6"
+                    Margin="0,0,8,4" Visibility="Collapsed"
+                    Content="{Binding Source={x:Static loc:Loc.Instance}, Path=[Admin.SelectServerDirectoryButton]}"
+                    Click="SelectServerDirectoryButton_Click" />
+            <Button x:Name="SettingsButton" Padding="12,6" Margin="0,0,8,4"
+                    Content="{Binding Source={x:Static loc:Loc.Instance}, Path=[Admin.SettingsButton]}"
                     Click="SettingsButton_Click" />
-            <Button x:Name="GuideButton" Content="Инструкция" Padding="12,6" Margin="0,0,8,4"
+            <Button x:Name="GuideButton" Padding="12,6" Margin="0,0,8,4"
+                    Content="{Binding Source={x:Static loc:Loc.Instance}, Path=[Admin.GuideButton]}"
                     Click="GuideButton_Click" />
         </WrapPanel>
 
         <StackPanel Grid.Row="2" Orientation="Horizontal" Margin="0,0,0,8">
-            <Button x:Name="RecreateWorldButton" Content="Пересоздать мир (с бэкапом)" Padding="12,6"
+            <Button x:Name="RecreateWorldButton" Padding="12,6"
+                    Content="{Binding Source={x:Static loc:Loc.Instance}, Path=[Admin.RecreateWorldButton]}"
                     Click="RecreateWorldButton_Click" />
         </StackPanel>
 
         <StackPanel Grid.Row="3" Orientation="Horizontal" Margin="0,0,0,8">
-            <TextBlock Text="Версия релиза:" VerticalAlignment="Center" Margin="0,0,8,0" />
+            <TextBlock VerticalAlignment="Center" Margin="0,0,8,0"
+                       Text="{Binding Source={x:Static loc:Loc.Instance}, Path=[Admin.VersionLabel]}" />
             <TextBox x:Name="VersionTextBox" Width="220" VerticalContentAlignment="Center" Margin="0,0,8,0" />
-            <Button x:Name="PublishButton" Content="Опубликовать обновление" Padding="12,6"
+            <Button x:Name="PublishButton" Padding="12,6"
+                    Content="{Binding Source={x:Static loc:Loc.Instance}, Path=[Admin.PublishButton]}"
+                    Style="{StaticResource AccentButton}"
                     Click="PublishButton_Click" />
         </StackPanel>
 
-        <TextBlock Grid.Row="4" Text="Консоль сервера:" FontWeight="Bold" Margin="0,0,0,4" />
+        <TextBlock Grid.Row="4" FontWeight="Bold" Margin="0,0,0,4"
+                   Text="{Binding Source={x:Static loc:Loc.Instance}, Path=[Admin.ConsoleHeader]}" />
 
         <ListBox x:Name="LogList" Grid.Row="5" FontFamily="Consolas"
                  ScrollViewer.HorizontalScrollBarVisibility="Disabled"
@@ -59,8 +89,10 @@
             </ListBox.CommandBindings>
             <ListBox.ContextMenu>
                 <ContextMenu>
-                    <MenuItem Header="Копировать выделенное" Click="CopySelectedLog_Click" />
-                    <MenuItem Header="Копировать всё" Click="CopyAllLog_Click" />
+                    <MenuItem Click="CopySelectedLog_Click"
+                              Header="{Binding Source={x:Static loc:Loc.Instance}, Path=[Main.CopySelected]}" />
+                    <MenuItem Click="CopyAllLog_Click"
+                              Header="{Binding Source={x:Static loc:Loc.Instance}, Path=[Main.CopyAll]}" />
                 </ContextMenu>
             </ListBox.ContextMenu>
             <ListBox.ItemContainerStyle>

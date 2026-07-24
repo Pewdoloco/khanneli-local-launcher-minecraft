@@ -4,19 +4,22 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:VanillaLauncher.Client.UI"
+        xmlns:loc="clr-namespace:VanillaLauncher.Client.UI.Localization"
         mc:Ignorable="d"
-        Title="Вход в режим администратора" Height="200" Width="380"
+        Title="{Binding Source={x:Static loc:Loc.Instance}, Path=[AdminLogin.Title]}" Height="200" Width="380"
         WindowStartupLocation="CenterOwner" ResizeMode="NoResize">
     <StackPanel Margin="16">
-        <TextBlock Text="Пароль:" Margin="0,0,0,4" />
+        <TextBlock Margin="0,0,0,4" Text="{Binding Source={x:Static loc:Loc.Instance}, Path=[AdminLogin.PasswordLabel]}" />
         <PasswordBox x:Name="PasswordBox" Margin="0,0,0,8" Padding="4" />
 
         <TextBlock x:Name="ErrorText" Foreground="Red" TextWrapping="Wrap"
                    Margin="0,0,0,8" Visibility="Collapsed" />
 
         <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-            <Button Content="Отмена" Padding="12,6" Margin="0,0,8,0" IsCancel="True" Click="CancelButton_Click" />
-            <Button Content="Войти" Padding="12,6" IsDefault="True" Click="LoginButton_Click" />
+            <Button Padding="12,6" Margin="0,0,8,0" IsCancel="True" Click="CancelButton_Click"
+                    Content="{Binding Source={x:Static loc:Loc.Instance}, Path=[Common.Cancel]}" />
+            <Button Padding="12,6" IsDefault="True" Click="LoginButton_Click" Style="{StaticResource AccentButton}"
+                    Content="{Binding Source={x:Static loc:Loc.Instance}, Path=[AdminLogin.LoginButton]}" />
         </StackPanel>
     </StackPanel>
 </Window>

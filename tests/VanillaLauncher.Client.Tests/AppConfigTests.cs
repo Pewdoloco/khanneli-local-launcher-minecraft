@@ -229,4 +229,24 @@ public class AppConfigTests : IDisposable
         Assert.Equal(new List<string> { "D:\\Games\\curseforge\\Instances" }, reloaded.ClientSearchRoots);
         Assert.Equal("Server VS", reloaded.ServerFolderName);
     }
+
+    [Fact]
+    public void Load_MissingExternalFile_DefaultsLanguageToRu()
+    {
+        var config = AppConfig.Load(_dir);
+        Assert.Equal("ru", config.Language);
+    }
+
+    [Fact]
+    public void Save_PreservesLanguage()
+    {
+        WriteAppSettings("""{ "ManifestUrl": "https://example.invalid/manifest.json", "ProfileRoot": "C:\\old" }""");
+        var config = AppConfig.Load(_dir);
+
+        config.Language = "en";
+        config.Save();
+
+        var reloaded = AppConfig.Load(_dir);
+        Assert.Equal("en", reloaded.Language);
+    }
 }

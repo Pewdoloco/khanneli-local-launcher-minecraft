@@ -4,6 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:VanillaLauncher.Client.UI"
+        xmlns:loc="clr-namespace:VanillaLauncher.Client.UI.Localization"
         mc:Ignorable="d"
         Title="Инструкция" Height="600" Width="620"
         WindowStartupLocation="CenterOwner">
@@ -23,20 +24,23 @@
         <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,12" HorizontalAlignment="Center">
             <RadioButton x:Name="ClientRoleRadio" GroupName="GuideRole" Margin="0,0,24,0"
                          Checked="RoleOrLength_Changed">
-                <TextBlock Text="Пользователь" FontSize="20" FontWeight="Bold" />
+                <TextBlock Text="{Binding Source={x:Static loc:Loc.Instance}, Path=[Guide.RoleUser]}" FontSize="20" FontWeight="Bold" />
             </RadioButton>
             <RadioButton x:Name="AdminRoleRadio" GroupName="GuideRole"
                          Checked="RoleOrLength_Changed">
-                <TextBlock Text="Администратор" FontSize="20" FontWeight="Bold" />
+                <TextBlock Text="{Binding Source={x:Static loc:Loc.Instance}, Path=[Guide.RoleAdmin]}" FontSize="20" FontWeight="Bold" />
             </RadioButton>
         </StackPanel>
 
         <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="0,0,0,12" HorizontalAlignment="Center">
-            <RadioButton x:Name="ShortRadio" Content="Краткое" GroupName="GuideLength" Margin="0,0,16,0"
+            <RadioButton x:Name="ShortRadio" GroupName="GuideLength" Margin="0,0,16,0"
+                         Content="{Binding Source={x:Static loc:Loc.Instance}, Path=[Guide.LengthShort]}"
                          IsChecked="True" Checked="RoleOrLength_Changed" />
-            <RadioButton x:Name="FullRadio" Content="Полное" GroupName="GuideLength" Margin="0,0,16,0"
+            <RadioButton x:Name="FullRadio" GroupName="GuideLength" Margin="0,0,16,0"
+                         Content="{Binding Source={x:Static loc:Loc.Instance}, Path=[Guide.LengthFull]}"
                          Checked="RoleOrLength_Changed" />
-            <RadioButton x:Name="ManualRadio" Content="Пошаговое руководство" GroupName="GuideLength"
+            <RadioButton x:Name="ManualRadio" GroupName="GuideLength"
+                         Content="{Binding Source={x:Static loc:Loc.Instance}, Path=[Guide.LengthManual]}"
                          Checked="RoleOrLength_Changed" />
         </StackPanel>
 
