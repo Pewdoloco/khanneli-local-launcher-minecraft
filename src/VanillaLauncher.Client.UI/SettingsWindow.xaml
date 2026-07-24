@@ -161,7 +161,31 @@
                     <Button x:Name="AdminGuideFullEditButton" Grid.Column="1" Content="Редактировать" Padding="10,4"
                             Click="ToggleGuideEdit_Click" Tag="AdminFull" />
                 </Grid>
-                <TextBox x:Name="AdminGuideFullTextBox" Padding="4" Margin="0,0,0,16" IsReadOnly="True"
+                <TextBox x:Name="AdminGuideFullTextBox" Padding="4" Margin="0,0,0,12" IsReadOnly="True"
+                         AcceptsReturn="True" TextWrapping="Wrap" Height="140" VerticalScrollBarVisibility="Auto" />
+
+                <Grid Margin="0,0,0,4">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Grid.Column="0" Text="Клиент — пошаговое руководство" FontWeight="Bold" VerticalAlignment="Center" />
+                    <Button x:Name="ClientGuideManualEditButton" Grid.Column="1" Content="Редактировать" Padding="10,4"
+                            Click="ToggleGuideEdit_Click" Tag="ClientManual" />
+                </Grid>
+                <TextBox x:Name="ClientGuideManualTextBox" Padding="4" Margin="0,0,0,12" IsReadOnly="True"
+                         AcceptsReturn="True" TextWrapping="Wrap" Height="140" VerticalScrollBarVisibility="Auto" />
+
+                <Grid Margin="0,0,0,4">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Grid.Column="0" Text="Админ — пошаговое руководство" FontWeight="Bold" VerticalAlignment="Center" />
+                    <Button x:Name="AdminGuideManualEditButton" Grid.Column="1" Content="Редактировать" Padding="10,4"
+                            Click="ToggleGuideEdit_Click" Tag="AdminManual" />
+                </Grid>
+                <TextBox x:Name="AdminGuideManualTextBox" Padding="4" Margin="0,0,0,16" IsReadOnly="True"
                          AcceptsReturn="True" TextWrapping="Wrap" Height="140" VerticalScrollBarVisibility="Auto" />
 
                 <TextBlock x:Name="ErrorText" Foreground="Red" TextWrapping="Wrap"

@@ -47,6 +47,13 @@ public sealed class AppConfig
     public string AdminGuideShort { get; set; } = DefaultGuides.AdminShort;
     public string AdminGuideFull { get; set; } = DefaultGuides.AdminFull;
 
+    // Третий вариант длины в GuideWindow ("Пошаговое руководство") — по конкретным шагам,
+    // в отличие от Short (обзор кнопок) и Full (справочник по разделам). Тот же принцип
+    // generic-дефолта, что и у полей выше — админ переписывает под свой модпак через
+    // "Настройки".
+    public string ClientGuideManual { get; set; } = DefaultGuides.ClientManual;
+    public string AdminGuideManual { get; set; } = DefaultGuides.AdminManual;
+
     // Репозиторий ДВИЖКА (не модпака) для самообновления exe (см. EngineSelfUpdater) —
     // сознательно отдельные поля от GitHubOwner/GitHubRepo выше: те указывают, куда
     // публикуются релизы модпака (контент), эти — откуда качать новую версию самого

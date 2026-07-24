@@ -11,6 +11,13 @@ public enum GuideRole
     Admin
 }
 
+internal enum GuideLength
+{
+    Short,
+    Full,
+    Manual
+}
+
 /// <summary>
 /// Встроенная инструкция — один и тот же переключаемый экран для клиента и админа
 /// (роль + краткое/полное), открывается кнопкой "Инструкция" и из MainWindow, и из
@@ -50,16 +57,21 @@ public partial class GuideWindow : Window
     private void UpdateText()
     {
         var isAdmin = AdminRoleRadio.IsChecked == true;
-        var isFull = FullRadio.IsChecked == true;
+        var length = ManualRadio.IsChecked == true ? GuideLength.Manual
+            : FullRadio.IsChecked == true ? GuideLength.Full
+            : GuideLength.Short;
 
         Title = isAdmin ? "Инструкция — Администратор" : "Инструкция — Пользователь";
 
-        GuideTextBox.Text = (isAdmin, isFull) switch
+        GuideTextBox.Text = (isAdmin, length) switch
         {
-            (true, true) => _config.AdminGuideFull,
-            (true, false) => _config.AdminGuideShort,
-            (false, true) => _config.ClientGuideFull,
-            (false, false) => _config.ClientGuideShort,
+            (true, GuideLength.Full) => _config.AdminGuideFull,
+            (true, GuideLength.Manual) => _config.AdminGuideManual,
+            (true, GuideLength.Short) => _config.AdminGuideShort,
+            (false, GuideLength.Full) => _config.ClientGuideFull,
+            (false, GuideLength.Manual) => _config.ClientGuideManual,
+            (false, GuideLength.Short) => _config.ClientGuideShort,
+            _ => _config.ClientGuideShort,
         };
     }
 

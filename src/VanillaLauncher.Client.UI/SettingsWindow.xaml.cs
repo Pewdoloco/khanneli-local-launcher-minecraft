@@ -41,6 +41,8 @@ public partial class SettingsWindow : Window
         ClientGuideFullTextBox.Text = _config.ClientGuideFull;
         AdminGuideShortTextBox.Text = _config.AdminGuideShort;
         AdminGuideFullTextBox.Text = _config.AdminGuideFull;
+        ClientGuideManualTextBox.Text = _config.ClientGuideManual;
+        AdminGuideManualTextBox.Text = _config.AdminGuideManual;
     }
 
     private static string JoinLines(IEnumerable<string> values) => string.Join(Environment.NewLine, values);
@@ -130,6 +132,8 @@ public partial class SettingsWindow : Window
         "ClientFull" => (ClientGuideFullTextBox, 140, 380),
         "AdminShort" => (AdminGuideShortTextBox, 80, 320),
         "AdminFull" => (AdminGuideFullTextBox, 140, 380),
+        "ClientManual" => (ClientGuideManualTextBox, 140, 380),
+        "AdminManual" => (AdminGuideManualTextBox, 140, 380),
         _ => throw new InvalidOperationException($"Неизвестное поле руководства: {key}")
     };
 
@@ -189,6 +193,8 @@ public partial class SettingsWindow : Window
         _config.ClientGuideFull = ClientGuideFullTextBox.Text;
         _config.AdminGuideShort = AdminGuideShortTextBox.Text;
         _config.AdminGuideFull = AdminGuideFullTextBox.Text;
+        _config.ClientGuideManual = ClientGuideManualTextBox.Text;
+        _config.AdminGuideManual = AdminGuideManualTextBox.Text;
 
         _config.Save();
         DialogResult = true;
