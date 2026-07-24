@@ -33,12 +33,6 @@
 4. Дальше публикация обновлений, старт/стоп сервера, бэкапы мира — обычный Admin-режим,
    уже настроенный под твой модпак.
 
-## Пример реального деплоя на этом движке
-
-[`Pewdoloco/VanillaLauncher-localServer`](https://github.com/Pewdoloco/VanillaLauncher-localServer) —
-модпак VanillaScary: только `manifest.json`/моды через Releases и доки под конкретный
-сервер (`docs/ADMIN_GUIDE.md`, `docs/CLIENT_GUIDE.md`), без единой строчки кода.
-
 ## Релизы движка
 
 Тег `engine-vX.Y.Z` (`.github/workflows/engine-release.yml`) собирает self-contained
