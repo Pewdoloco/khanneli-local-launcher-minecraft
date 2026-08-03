@@ -79,6 +79,31 @@ public class ServerProcessControllerTests : IDisposable
     }
 
     [Fact]
+    public async Task SendCommandAsync_WritesToStdin_WithoutStoppingServer()
+    {
+        using var controller = new ServerProcessController(_serverDir, "fake_server.bat");
+        var lines = new List<string>();
+        controller.OutputReceived += line => { lock (lines) lines.Add(line); };
+
+        controller.Start();
+        await WaitUntilAsync(() => lines.Any(l => l.Contains("Server starting")), TimeSpan.FromSeconds(10));
+
+        await controller.SendCommandAsync("hello");
+
+        Assert.True(await WaitUntilAsync(() => lines.Any(l => l.Contains("unknown command: hello")), TimeSpan.FromSeconds(10)));
+        Assert.True(controller.IsRunning);
+
+        await controller.StopAsync(TimeSpan.FromSeconds(10));
+    }
+
+    [Fact]
+    public async Task SendCommandAsync_ServerNotRunning_Throws()
+    {
+        using var controller = new ServerProcessController(_serverDir, "fake_server.bat");
+        await Assert.ThrowsAsync<InvalidOperationException>(() => controller.SendCommandAsync("hello"));
+    }
+
+    [Fact]
     public void Start_MissingBatFile_Throws()
     {
         using var controller = new ServerProcessController(_serverDir, "does_not_exist.bat");

@@ -38,6 +38,17 @@ public partial class AdminWindow : Window
             : string.Format(Loc.Instance["Admin.VersionWatermarkPrevious"], _lastPublishedTag));
     }
 
+    // Ввод команд имеет смысл ровно тогда же, когда доступна "Остановить сервер" — сервер
+    // запущен и стабилен (не в процессе старта/остановки/публикации). Выставляется везде,
+    // где меняется StopButton.IsEnabled, а не биндится напрямую на него — самих мест мало
+    // и логика включения нетривиальная (например, во время публикации сервер может быть
+    // временно недоступен, даже если StopButton на вид активна).
+    private void SetCommandInputEnabled(bool enabled)
+    {
+        CommandInputTextBox.IsEnabled = enabled;
+        SendCommandButton.IsEnabled = enabled;
+    }
+
     public AdminWindow(AppConfig config)
     {
         InitializeComponent();
@@ -200,6 +211,7 @@ public partial class AdminWindow : Window
                 SetStatus("Admin.StatusStopped");
                 StartButton.IsEnabled = true;
                 StopButton.IsEnabled = false;
+                SetCommandInputEnabled(false);
             });
         }
 
@@ -219,6 +231,7 @@ public partial class AdminWindow : Window
             SetStatus("Admin.ServerStarting.Status");
             StartButton.IsEnabled = false;
             StopButton.IsEnabled = true;
+            SetCommandInputEnabled(true);
         }
         catch (Exception ex)
         {
@@ -233,6 +246,7 @@ public partial class AdminWindow : Window
             return;
 
         StopButton.IsEnabled = false;
+        SetCommandInputEnabled(false);
         SetStatus("Admin.ServerStopping.Status");
 
         var stoppedGracefully = await _controller.StopAsync(TimeSpan.FromSeconds(60));
@@ -361,6 +375,7 @@ public partial class AdminWindow : Window
         StartButton.IsEnabled = false;
         StopButton.IsEnabled = false;
         RecreateWorldButton.IsEnabled = false;
+        SetCommandInputEnabled(false);
         SetStatus("Admin.Publishing.Status", version);
 
         try
@@ -407,7 +422,41 @@ public partial class AdminWindow : Window
             PublishButton.IsEnabled = true;
             StartButton.IsEnabled = !controller.IsRunning;
             StopButton.IsEnabled = controller.IsRunning;
+            SetCommandInputEnabled(controller.IsRunning);
             RecreateWorldButton.IsEnabled = true;
+        }
+    }
+
+    private void SendCommandButton_Click(object sender, RoutedEventArgs e) => _ = SendCommandAsync();
+
+    private void CommandInputTextBox_KeyDown(object sender, System.Windows.Input.KeyEventArgs e)
+    {
+        if (e.Key == System.Windows.Input.Key.Enter)
+            _ = SendCommandAsync();
+    }
+
+    /// <summary>
+    /// Отправляет введённую команду в stdin сервера (say, list, whitelist add, op и т.д.) —
+    /// не путать со "Стоп" (см. StopButton_Click, у неё отдельная фиксированная команда и
+    /// логика ожидания завершения процесса). Эхо команды в лог — сервер сам её не печатает
+    /// (в консоли виден только вывод сервера, не то, что было введено на его stdin).
+    /// </summary>
+    private async Task SendCommandAsync()
+    {
+        var command = CommandInputTextBox.Text.Trim();
+        if (string.IsNullOrEmpty(command) || _controller is not { IsRunning: true } controller)
+            return;
+
+        Log($"> {command}");
+        CommandInputTextBox.Clear();
+
+        try
+        {
+            await controller.SendCommandAsync(command);
+        }
+        catch (Exception ex)
+        {
+            Log(string.Format(Loc.Instance["Admin.CommandSendError"], ex.Message));
         }
     }
 
@@ -443,6 +492,7 @@ public partial class AdminWindow : Window
     private async Task StopServerThenCloseAsync()
     {
         StopButton.IsEnabled = false;
+        SetCommandInputEnabled(false);
         SetStatus("Admin.ClosingStoppingServer.Status");
         Log(Loc.Instance["Admin.ClosingStoppingServer.Log"]);
 

@@ -102,6 +102,9 @@ internal static class Strings
         ["Admin.VersionWatermarkPrevious"] = ("было: {0}", "previous: {0}"),
         ["Admin.PublishButton"] = ("Опубликовать обновление", "Publish Update"),
         ["Admin.ConsoleHeader"] = ("Консоль сервера:", "Server console:"),
+        ["Admin.CommandInputWatermark"] = ("Команда серверу (например: say привет, list)", "Server command (e.g. say hello, list)"),
+        ["Admin.SendCommandButton"] = ("Отправить", "Send"),
+        ["Admin.CommandSendError"] = ("Не удалось отправить команду: {0}", "Failed to send command: {0}"),
 
         ["Admin.SelectServerDirDialog.Title"] = ("Выбери (или создай) папку сервера", "Select (or create) the server folder"),
         ["Admin.ServerDirAutoDetected.Status"] = ("Серверная папка определена автоматически: {0}", "Server folder auto-detected: {0}"),

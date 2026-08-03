@@ -252,7 +252,8 @@ public static class DefaultGuides
         1. Первый клик по «Режим администратора» — задать пароль.
         2. «Настройки» — все параметры (пути, ManifestUrl, GitHubOwner/Repo,
            ServerExcludeMods и т.д.), включая автопоиск папок.
-        3. «Запустить/Остановить сервер» — обёртка над .bat-файлом сервера.
+        3. «Запустить/Остановить сервер» — обёртка над .bat-файлом сервера; пока сервер
+           работает, команды можно отправлять прямо из консоли (поле ввода под логом).
         4. «Пересоздать мир» — с обязательным бэкапом.
         5. «Опубликовать обновление» — бэкап → стоп → синхронизация модов → генерация
            manifest.json → публикация в GitHub Release. Сервер после этого НЕ запускается
@@ -268,7 +269,8 @@ public static class DefaultGuides
         1. First click on "Admin Mode" — set a password.
         2. "Settings" — all parameters (paths, ManifestUrl, GitHubOwner/Repo,
            ServerExcludeMods, etc.), including path auto-detection.
-        3. "Start/Stop Server" — a wrapper over the server's .bat file.
+        3. "Start/Stop Server" — a wrapper over the server's .bat file; while it's running,
+           you can send commands right from the console (input field below the log).
         4. "Recreate World" — with a mandatory backup.
         5. "Publish Update" — backup → stop → sync mods → generate manifest.json → publish
            to a GitHub Release. The server does NOT start back up automatically afterward —
@@ -324,6 +326,11 @@ public static class DefaultGuides
         КНОПКИ ADMIN-РЕЖИМА
         - «Запустить сервер» / «Остановить сервер» — обёртка над .bat-файлом сервера;
           остановка — штатная команда, дожидается корректного завершения.
+        - Поле ввода команды под консолью сервера — активно, только пока сервер запущен и
+          стабилен (не во время старта/остановки/публикации). Любая команда сервера (say,
+          list, whitelist add, op и т.д.) отправляется по Enter или кнопкой «Отправить»;
+          введённая команда добавляется в лог отдельной строкой с "> " — сама консоль сервера
+          её не печатает, только свой ответ на неё.
         - «Пересоздать мир (с бэкапом)» — отказывает, если сервер запущен. Бэкапит текущий
           мир в zip, затем удаляет — новый мир сгенерируется на следующем запуске сервера.
           Хранится последние N бэкапов (MaxBackupsToKeep), старые ротируются автоматически.
@@ -443,6 +450,11 @@ public static class DefaultGuides
         ADMIN MODE BUTTONS
         - "Start Server" / "Stop Server" — a wrapper over the server's .bat file; stopping
           sends the proper command and waits for a clean shutdown.
+        - The command input field under the server console — active only while the server is
+          running and stable (not during startup/shutdown/publishing). Any server command
+          (say, list, whitelist add, op, etc.) is sent by pressing Enter or the "Send"
+          button; the command you typed is added to the log as its own line prefixed with
+          "> " — the server console itself doesn't echo it, only its response to it.
         - "Recreate World (with Backup)" — refuses if the server is running. Backs up the
           current world to a zip, then deletes it — a new world will be generated on the
           next server start. The last N backups are kept (MaxBackupsToKeep), older ones are

@@ -4,6 +4,13 @@
     <ProjectReference Include="..\VanillaLauncher.Client\VanillaLauncher.Client.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <!-- Нужен для Encoding.GetEncoding(OEM-кодпейдж, например 866 для ru-RU) — вывод cmd.exe
+         (в отличие от вывода самого Java-процесса сервера) кодируется в OEM, не в ANSI/UTF-8,
+         .NET по умолчанию его не регистрирует. См. ServerProcessController. -->
+    <PackageReference Include="System.Text.Encoding.CodePages" Version="8.0.0" />
+  </ItemGroup>
+
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>

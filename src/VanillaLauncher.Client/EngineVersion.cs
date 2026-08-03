@@ -11,5 +11,5 @@ namespace VanillaLauncher.Client;
 /// </summary>
 public static class EngineVersion
 {
-    public const string Current = "1.9.2";
+    public const string Current = "1.10.0";
 }

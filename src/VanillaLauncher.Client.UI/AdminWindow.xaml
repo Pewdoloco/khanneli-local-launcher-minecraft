@@ -18,6 +18,7 @@
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
         <Grid Grid.Row="0" Margin="0,0,0,8">
@@ -106,5 +107,18 @@
                 </DataTemplate>
             </ListBox.ItemTemplate>
         </ListBox>
+
+        <Grid Grid.Row="6" Margin="0,8,0,0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            <TextBox x:Name="CommandInputTextBox" Grid.Column="0" Padding="4" Margin="0,0,8,0"
+                     FontFamily="Consolas" IsEnabled="False" KeyDown="CommandInputTextBox_KeyDown"
+                     local:Watermark.Hint="{Binding Source={x:Static loc:Loc.Instance}, Path=[Admin.CommandInputWatermark]}" />
+            <Button x:Name="SendCommandButton" Grid.Column="1" Padding="12,6" IsEnabled="False"
+                    Content="{Binding Source={x:Static loc:Loc.Instance}, Path=[Admin.SendCommandButton]}"
+                    Click="SendCommandButton_Click" />
+        </Grid>
     </Grid>
 </Window>

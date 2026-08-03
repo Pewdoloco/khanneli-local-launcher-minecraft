@@ -1,10 +1,13 @@
 using System.Diagnostics;
+using System.Runtime.InteropServices;
+using System.Text;
 
 namespace VanillaLauncher.Admin;
 
 /// <summary>
 /// Обёртка над серверным .bat: старт через cmd.exe, построчный захват вывода,
-/// штатная остановка через команду "stop" на stdin сервера.
+/// штатная остановка через команду "stop" на stdin сервера, произвольные команды через
+/// <see cref="SendCommandAsync"/> пока сервер работает.
 /// </summary>
 public sealed class ServerProcessController : IDisposable
 {
@@ -24,6 +27,34 @@ public sealed class ServerProcessController : IDisposable
         _batFileName = batFileName;
     }
 
+    /// <summary>
+    /// cmd.exe пишет свои собственные сообщения (в т.ч. приглашение "pause" при закрытии
+    /// stdin) в OEM-кодпейдже консоли (866 для ru-RU), а не в ANSI/UTF-8 — если не задать
+    /// кодировку явно, .NET декодирует их как попало и получается нечитаемая абракадабра
+    /// вместо "Для продолжения нажмите любую клавишу . . .". Сам Java-процесс сервера обычно
+    /// пишет в UTF-8 и не подчиняется этой кодировке — смешанность неизбежна при захвате
+    /// вывода через cmd.exe, но подавляющее большинство строк (лог сервера) от этого не
+    /// страдает, а служебные сообщения самого cmd.exe читаются корректно.
+    /// CodePagesEncodingProvider нужен once — .NET Core/5+ не регистрирует OEM/ANSI кодпейджи
+    /// по умолчанию, только Unicode-семейство.
+    ///
+    /// НЕ бери кодпейдж из CultureInfo.CurrentCulture.TextInfo.OEMCodePage — на практике он
+    /// может не совпадать с реальной консольной OEM-кодировкой Windows (найдено вживую: на
+    /// машине с системной локалью ru-RU/866, .NET-поток отдавал CurrentCulture = en-AI/850,
+    /// декодирование под этим кодпейджем давало другую, но всё равно нечитаемую абракадабру).
+    /// GetOEMCP() — тот же самый WinAPI-вызов, что использует сам cmd.exe/chcp, поэтому
+    /// единственный надёжный источник здесь.
+    /// </summary>
+    static ServerProcessController()
+    {
+        Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
+    }
+
+    [DllImport("kernel32.dll")]
+    private static extern uint GetOEMCP();
+
+    private static Encoding ConsoleOemEncoding => Encoding.GetEncoding((int)GetOEMCP());
+
     public void Start()
     {
         if (IsRunning)
@@ -40,6 +71,9 @@ public sealed class ServerProcessController : IDisposable
             RedirectStandardInput = true,
             RedirectStandardOutput = true,
             RedirectStandardError = true,
+            StandardOutputEncoding = ConsoleOemEncoding,
+            StandardErrorEncoding = ConsoleOemEncoding,
+            StandardInputEncoding = ConsoleOemEncoding,
             UseShellExecute = false,
             CreateNoWindow = true,
         };
@@ -60,6 +94,20 @@ public sealed class ServerProcessController : IDisposable
         process.BeginErrorReadLine();
 
         _process = process;
+    }
+
+    /// <summary>
+    /// Отправляет произвольную команду в stdin сервера (say, list, whitelist add, op и т.д.) —
+    /// для интерактивной консоли Admin-режима. В отличие от <see cref="StopAsync"/>, stdin
+    /// НЕ закрывается — сервер продолжает работать и принимать дальнейшие команды.
+    /// </summary>
+    public async Task SendCommandAsync(string command, CancellationToken ct = default)
+    {
+        if (!IsRunning)
+            throw new InvalidOperationException("Сервер не запущен.");
+
+        await _process!.StandardInput.WriteLineAsync(command);
+        await _process.StandardInput.FlushAsync(ct);
     }
 
     /// <summary>
