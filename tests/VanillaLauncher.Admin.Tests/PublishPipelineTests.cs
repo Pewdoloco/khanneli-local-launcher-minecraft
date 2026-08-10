@@ -193,6 +193,39 @@ public class PublishPipelineTests : IDisposable
     }
 
     [Fact]
+    public async Task RunAsync_SmokeTestCrashes_NamesSuspiciousJarInErrorMessage()
+    {
+        // Реальный сценарий инцидента: синхронизированный мод содержит ZIP-запись STORED с
+        // флагом data descriptor — Forge/NeoForge падает на этом при сканировании mods, но не
+        // логирует имя виновного файла. Пайплайн должен назвать его сам.
+        File.WriteAllBytes(
+            Path.Combine(_buildSourceRoot, "mods", "oculus-mc1.20.1-1.8.0.jar"),
+            ZipTestHelper.BuildSingleEntryZip("assets/", generalPurposeFlag: 0x0008, compressionMethod: 0));
+
+        var crashingBat = string.Join("\r\n", new[]
+        {
+            "@echo off",
+            "echo Server starting...",
+            "echo Exception in thread \"main\" java.util.zip.ZipException",
+            "exit /b 1"
+        });
+        File.WriteAllText(Path.Combine(_serverDir, "crashing2.bat"), crashingBat);
+
+        var controller = new ServerProcessController(_serverDir, "crashing2.bat");
+        var worldBackup = new WorldBackupService(_serverDir, Path.Combine(_serverDir, "backups"), maxBackupsToKeep: 5);
+        var publisher = CreateFakePublisher(out var fake);
+        var log = new System.Collections.Concurrent.ConcurrentQueue<string>();
+
+        var ex = await Assert.ThrowsAsync<InvalidOperationException>(() => new PublishPipeline().RunAsync(
+            controller, worldBackup, "world", _serverDir, _buildSourceRoot,
+            new[] { "mods" }, "v1", publisher, new Progress<string>(log.Enqueue),
+            stopTimeout: TimeSpan.FromSeconds(5), smokeTestTimeout: TimeSpan.FromSeconds(10)));
+
+        Assert.Contains("oculus-mc1.20.1-1.8.0.jar", ex.Message);
+        Assert.Empty(fake.Requests);
+    }
+
+    [Fact]
     public async Task RunAsync_SmokeTestTimesOut_KillsHungProcessAndAbortsBeforePublish()
     {
         var hangingBat = string.Join("\r\n", new[]

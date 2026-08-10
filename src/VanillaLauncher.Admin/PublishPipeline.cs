@@ -67,6 +67,18 @@ public sealed class PublishPipeline
             var reason = smokeTest.Outcome == ServerSmokeTestOutcome.TimedOut
                 ? "сервер не дошёл до готовности за отведённое время"
                 : "процесс сервера завершился раньше готовности (краш)";
+
+            // Известный, надёжно детектируемый (не эвристика) класс краша Forge/NeoForge при
+            // сканировании mods — ZIP-запись STORED с флагом data descriptor. Java-класс, на
+            // котором это падает (securejarhandler), не логирует имя виновного файла — сканер
+            // называет кандидатов сам, вместо голого стектрейса без имён.
+            var suspiciousJars = JarDataDescriptorScanner.FindSuspiciousJars(Path.Combine(serverDirectory, "mods"));
+            var suspiciousNote = suspiciousJars.Count > 0
+                ? "Вероятный виновник — ZIP-дефект в файле(ах), из-за которого Forge/NeoForge падает " +
+                  "при сканировании mods (сам файл не обязательно повреждён, так его просто собрал " +
+                  $"автор мода): {string.Join(", ", suspiciousJars)}. "
+                : "";
+
             var details = smokeTest.ErrorLines.Count > 0
                 ? "Похожие на ошибку строки из вывода:\n" + string.Join("\n", smokeTest.ErrorLines)
                 : "Строк, похожих на ошибку, не найдено — смотри полный лог в консоли.";
@@ -74,7 +86,8 @@ public sealed class PublishPipeline
             throw new InvalidOperationException(
                 $"Тестовый запуск сервера не удался ({reason}). Публикация прервана, на GitHub " +
                 $"ничего не загружено — вероятно, дело в моде, который просочился на сервер. " +
-                $"Синхронизированные файлы сервера остались как есть, проверь их вручную. {details}");
+                $"{suspiciousNote}Синхронизированные файлы сервера остались как есть, проверь их " +
+                $"вручную. {details}");
         }
 
         progress.Report("Шаг 5/5: генерация и публикация манифеста...");

@@ -23,6 +23,7 @@
 - [x] **`engine-v1.10.1`** — индикатор успеха/провала запуска сервера (зелёный/красный текст), отдельная панель "Ошибки" (дублирует ERROR/Exception-строки из консоли), убрано модальное окно после остановки сервера. Детали в CHANGELOG.md, docs/ARCHITECTURE.md.
 - [x] **`engine-v1.11.0`** — остаток Этапа 7: индикатор игроков онлайн в `AdminWindow` (парсинг консоли, `PlayerActivityParser`), TCP-проверка доступности сервера перед игрой в `MainWindow` (`ServerReachabilityChecker`, поля `ServerHost`/`ServerPort` в "Настройках"). Детали в CHANGELOG.md, docs/ARCHITECTURE.md. Этап 7 закрыт целиком.
 - [x] **`engine-v1.12.0`** — смоук-тест сервера перед публикацией (`ServerSmokeTestRunner`, новый шаг 4/5 в `PublishPipeline`): реакция на реальный инцидент, когда клиентский мод просочился на сервер и уронил старт уже после публикации. Если тестовый старт не проходит — публикация прерывается до загрузки на GitHub. Детали в CHANGELOG.md, docs/ARCHITECTURE.md.
+- [x] **`engine-v1.13.0`** — `JarDataDescriptorScanner` называет виновный jar при конкретном классе краша Forge/NeoForge (ZIP-запись STORED с data descriptor), вместо голого стектрейса без имени файла; `FileLogger` — файловое логирование (`logs/launcher-{timestamp}.log`, общее на MainWindow+AdminWindow+необработанные исключения, до этого лог был только в памяти окна). Детали в CHANGELOG.md, docs/ARCHITECTURE.md.
 
 ## Как передавать этапы в Claude Code
 Открой `docs/SPEC.md` и `docs/ARCHITECTURE.md` в контексте, затем:

@@ -636,6 +636,7 @@ public partial class AdminWindow : Window
         LogList.Items.Add($"{DateTime.Now:HH:mm:ss}  {message}");
         if (LogList.Items.Count > 0)
             LogList.ScrollIntoView(LogList.Items[^1]);
+        App.Logger.Log($"[Admin] {message}");
     }
 
     private void LogError(string message)

@@ -450,6 +450,7 @@ public partial class MainWindow : Window
         LogList.Items.Add($"{DateTime.Now:HH:mm:ss}  {message}");
         if (LogList.Items.Count > 0)
             LogList.ScrollIntoView(LogList.Items[^1]);
+        App.Logger.Log($"[Client] {message}");
     }
 
     // Ошибки от GitHub API (см. GitHubApiErrorTranslator) могут быть длинными и содержать
