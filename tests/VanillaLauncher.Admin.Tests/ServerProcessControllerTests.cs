@@ -104,6 +104,19 @@ public class ServerProcessControllerTests : IDisposable
     }
 
     [Fact]
+    public async Task Start_RaisesStartedEvent_SynchronouslyBeforeReturning()
+    {
+        using var controller = new ServerProcessController(_serverDir, "fake_server.bat");
+        var started = false;
+        controller.Started += () => started = true;
+
+        controller.Start();
+
+        Assert.True(started);
+        await controller.StopAsync(TimeSpan.FromSeconds(10));
+    }
+
+    [Fact]
     public void Start_MissingBatFile_Throws()
     {
         using var controller = new ServerProcessController(_serverDir, "does_not_exist.bat");

@@ -18,6 +18,16 @@ public sealed class ServerProcessController : IDisposable
     public event Action<string>? OutputReceived;
     public event Action? Exited;
 
+    /// <summary>
+    /// Срабатывает сразу после успешного <see cref="Start"/> — не после готовности сервера
+    /// (см. <see cref="OutputReceived"/>/строка "Done (...)!"), а именно после самого факта
+    /// запуска процесса. Общий сигнал для индикатора "идёт запуск..." в UI — работает
+    /// одинаково что для ручного нажатия "Запустить сервер" в AdminWindow, что для
+    /// автоматического старта внутри <see cref="ServerSmokeTestRunner"/> при публикации:
+    /// оба пути идут через один и тот же <see cref="Start"/>.
+    /// </summary>
+    public event Action? Started;
+
     public bool IsRunning => _process is { HasExited: false };
     public int? ProcessId => _process?.Id;
 
@@ -94,6 +104,7 @@ public sealed class ServerProcessController : IDisposable
         process.BeginErrorReadLine();
 
         _process = process;
+        Started?.Invoke();
     }
 
     /// <summary>

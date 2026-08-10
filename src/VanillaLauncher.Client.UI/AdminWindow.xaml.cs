@@ -253,6 +253,13 @@ public partial class AdminWindow : Window
         if (_controller is null)
         {
             _controller = new ServerProcessController(_config.ServerDirectory!, _config.ServerBatFileName);
+            // Индикатор "идёт запуск..." — одинаково работает и для ручного нажатия "Запустить
+            // сервер", и для автоматического старта внутри смоук-теста при публикации
+            // (ServerSmokeTestRunner), так как оба пути идут через один и тот же Start().
+            _controller.Started += () => Dispatcher.Invoke(() =>
+            {
+                StartupProgressBar.Visibility = Visibility.Visible;
+            });
             _controller.OutputReceived += line => Dispatcher.Invoke(() =>
             {
                 Log(line);
@@ -274,6 +281,8 @@ public partial class AdminWindow : Window
                         UpdatePlayersOnlineText();
                     }
                 }
+                if (ServerLogLineClassifier.IsSuccessLine(line))
+                    StartupProgressBar.Visibility = Visibility.Collapsed;
                 if (_awaitingStartupOutcome && ServerLogLineClassifier.IsSuccessLine(line))
                 {
                     _awaitingStartupOutcome = false;
@@ -282,6 +291,7 @@ public partial class AdminWindow : Window
             });
             _controller.Exited += () => Dispatcher.Invoke(() =>
             {
+                StartupProgressBar.Visibility = Visibility.Collapsed;
                 if (_awaitingStartupOutcome)
                     SetStartOutcome(success: false);
                 _awaitingStartupOutcome = false;

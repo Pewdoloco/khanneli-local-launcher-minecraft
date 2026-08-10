@@ -49,8 +49,12 @@
             </Border>
         </Grid>
 
-        <TextBlock x:Name="PlayersOnlineText" Grid.Row="1" Margin="0,0,0,8"
-                   Foreground="{StaticResource MutedTextBrush}" TextWrapping="Wrap" />
+        <StackPanel Grid.Row="1" Margin="0,0,0,8">
+            <TextBlock x:Name="PlayersOnlineText"
+                       Foreground="{StaticResource MutedTextBrush}" TextWrapping="Wrap" />
+            <ProgressBar x:Name="StartupProgressBar" Height="4" Margin="0,4,0,0"
+                         IsIndeterminate="True" Visibility="Collapsed" />
+        </StackPanel>
 
         <WrapPanel Grid.Row="2" Orientation="Horizontal" Margin="0,0,0,8">
             <Button x:Name="StartButton" Padding="12,6" Margin="0,0,8,4"
