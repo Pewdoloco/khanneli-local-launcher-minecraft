@@ -24,6 +24,38 @@ public partial class AdminWindow : Window
     // при переключении.
     private string? _lastPublishedTag;
 
+    // true между Start() и первым из двух исходов: строка "Done (...)!" в выводе (успех) или
+    // Exited раньше, чем она появилась (провал старта — например, NoClassDefFoundError от
+    // клиентского мода в серверной сборке). После явной остановки (StopButton) сбрасывается
+    // в неизвестное состояние — это не провал, а штатное действие администратора.
+    private bool _awaitingStartupOutcome;
+    private bool? _startOutcomeSuccess;
+
+    private void SetStartOutcome(bool success)
+    {
+        _startOutcomeSuccess = success;
+        StartOutcomeText.Visibility = Visibility.Visible;
+        StartOutcomeText.Text = Loc.Instance[success ? "Admin.StartOutcomeSuccess" : "Admin.StartOutcomeFailure"];
+        StartOutcomeText.Foreground = (System.Windows.Media.Brush)FindResource(success ? "SuccessBrush" : "DangerBrush");
+    }
+
+    private void ClearStartOutcome()
+    {
+        _startOutcomeSuccess = null;
+        _awaitingStartupOutcome = false;
+        StartOutcomeText.Visibility = Visibility.Collapsed;
+    }
+
+    // Java-стектрейсы ("Exception ...", "\tat ...", "Caused by: ...") и строки уровня
+    // ERROR/FATAL от Log4j — дублируются в отдельную панель "Ошибки" для быстрого
+    // сканирования, не только в общую консоль (где их легко потерять среди обычного лога).
+    private static bool IsErrorLine(string line)
+    {
+        var trimmed = line.TrimStart();
+        return line.Contains("ERROR") || line.Contains("FATAL") || line.Contains("Exception")
+            || trimmed.StartsWith("at ") || trimmed.StartsWith("Caused by:");
+    }
+
     private void SetStatus(string key, params object[] args)
     {
         _statusKey = key;
@@ -78,6 +110,8 @@ public partial class AdminWindow : Window
 
         if (_statusKey is not null)
             SetStatus(_statusKey, _statusArgs);
+        if (_startOutcomeSuccess is { } success)
+            SetStartOutcome(success);
         RefreshVersionWatermark();
 
         _config.Language = language;
@@ -205,9 +239,25 @@ public partial class AdminWindow : Window
         if (_controller is null)
         {
             _controller = new ServerProcessController(_config.ServerDirectory!, _config.ServerBatFileName);
-            _controller.OutputReceived += line => Dispatcher.Invoke(() => Log(line));
+            _controller.OutputReceived += line => Dispatcher.Invoke(() =>
+            {
+                Log(line);
+                if (IsErrorLine(line))
+                    LogError(line);
+                // "Done (12.345s)! For help, type "help"" — стандартная строка готовности
+                // сервера, неизменна много лет во всех форках (vanilla/Forge/Fabric/Paper).
+                if (_awaitingStartupOutcome && line.Contains("Done (") && line.Contains(")!"))
+                {
+                    _awaitingStartupOutcome = false;
+                    SetStartOutcome(success: true);
+                }
+            });
             _controller.Exited += () => Dispatcher.Invoke(() =>
             {
+                if (_awaitingStartupOutcome)
+                    SetStartOutcome(success: false);
+                _awaitingStartupOutcome = false;
+
                 SetStatus("Admin.StatusStopped");
                 StartButton.IsEnabled = true;
                 StopButton.IsEnabled = false;
@@ -227,7 +277,9 @@ public partial class AdminWindow : Window
 
         try
         {
+            ClearStartOutcome();
             controller.Start();
+            _awaitingStartupOutcome = true;
             SetStatus("Admin.ServerStarting.Status");
             StartButton.IsEnabled = false;
             StopButton.IsEnabled = true;
@@ -247,6 +299,7 @@ public partial class AdminWindow : Window
 
         StopButton.IsEnabled = false;
         SetCommandInputEnabled(false);
+        ClearStartOutcome();
         SetStatus("Admin.ServerStopping.Status");
 
         var stoppedGracefully = await _controller.StopAsync(TimeSpan.FromSeconds(60));
@@ -257,15 +310,9 @@ public partial class AdminWindow : Window
             Log(Loc.Instance["Admin.ServerStopTimeout.Log"]);
             StopButton.IsEnabled = true;
         }
-        else
-        {
-            // Пассивного обновления StatusText/кнопок обработчиком Exited недостаточно —
-            // легко пропустить, если не смотреть на окно в этот момент. Явное окно, чтобы
-            // администратор точно знал, что сервер уже остановлен, а не завис где-то.
-            MessageBox.Show(Loc.Instance["Admin.ServerStopped.MessageBox"], Loc.Instance["Common.AdminWindowTitle"],
-                MessageBoxButton.OK, MessageBoxImage.Information);
-        }
-        // Кнопки/StatusText в любом случае обновит обработчик Exited.
+        // Явного окна с подтверждением больше нет — цветной StatusText/StartOutcomeText уже
+        // достаточно заметен, а лишний модальный клик мешал, когда админ переключается между
+        // окнами. Кнопки/StatusText в любом случае обновит обработчик Exited.
     }
 
     private async void RecreateWorldButton_Click(object sender, RoutedEventArgs e)
@@ -516,23 +563,32 @@ public partial class AdminWindow : Window
 
     // Ошибки от GitHub API (см. GitHubApiErrorTranslator) могут быть длинными и содержать
     // JSON — проще скопировать и переслать администратору/разработчику, чем перепечатывать
-    // руками.
+    // руками. Общие для LogList и ErrorLogList — оба ListBox устроены одинаково.
     private void CopySelectedLog_Executed(object sender, System.Windows.Input.ExecutedRoutedEventArgs e) =>
-        CopySelectedLogLines();
+        CopySelectedLines(LogList);
 
-    private void CopySelectedLog_Click(object sender, RoutedEventArgs e) => CopySelectedLogLines();
+    private void CopySelectedLog_Click(object sender, RoutedEventArgs e) => CopySelectedLines(LogList);
 
-    private void CopyAllLog_Click(object sender, RoutedEventArgs e)
+    private void CopyAllLog_Click(object sender, RoutedEventArgs e) => CopyAllLines(LogList);
+
+    private void CopySelectedErrorLog_Executed(object sender, System.Windows.Input.ExecutedRoutedEventArgs e) =>
+        CopySelectedLines(ErrorLogList);
+
+    private void CopySelectedErrorLog_Click(object sender, RoutedEventArgs e) => CopySelectedLines(ErrorLogList);
+
+    private void CopyAllErrorLog_Click(object sender, RoutedEventArgs e) => CopyAllLines(ErrorLogList);
+
+    private static void CopySelectedLines(System.Windows.Controls.ListBox listBox)
     {
-        var text = string.Join(Environment.NewLine, LogList.Items.Cast<string>());
+        var items = listBox.SelectedItems.Count > 0 ? listBox.SelectedItems : listBox.Items;
+        var text = string.Join(Environment.NewLine, items.Cast<string>());
         if (!string.IsNullOrEmpty(text))
             Clipboard.SetText(text);
     }
 
-    private void CopySelectedLogLines()
+    private static void CopyAllLines(System.Windows.Controls.ListBox listBox)
     {
-        var items = LogList.SelectedItems.Count > 0 ? LogList.SelectedItems : LogList.Items;
-        var text = string.Join(Environment.NewLine, items.Cast<string>());
+        var text = string.Join(Environment.NewLine, listBox.Items.Cast<string>());
         if (!string.IsNullOrEmpty(text))
             Clipboard.SetText(text);
     }
@@ -542,5 +598,12 @@ public partial class AdminWindow : Window
         LogList.Items.Add($"{DateTime.Now:HH:mm:ss}  {message}");
         if (LogList.Items.Count > 0)
             LogList.ScrollIntoView(LogList.Items[^1]);
+    }
+
+    private void LogError(string message)
+    {
+        ErrorLogList.Items.Add($"{DateTime.Now:HH:mm:ss}  {message}");
+        if (ErrorLogList.Items.Count > 0)
+            ErrorLogList.ScrollIntoView(ErrorLogList.Items[^1]);
     }
 }

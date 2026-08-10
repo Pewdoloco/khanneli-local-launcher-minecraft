@@ -7,7 +7,7 @@
         xmlns:loc="clr-namespace:VanillaLauncher.Client.UI.Localization"
         mc:Ignorable="d"
         Title="{Binding Source={x:Static loc:Loc.Instance}, Path=[Common.AdminWindowTitle]}"
-        Height="600" Width="720"
+        Height="760" Width="760"
         WindowStartupLocation="CenterScreen"
         Closing="Window_Closing">
     <Grid Margin="16">
@@ -17,8 +17,11 @@
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
-            <RowDefinition Height="*" />
+            <RowDefinition Height="2*" />
             <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="1*" />
         </Grid.RowDefinitions>
 
         <Grid Grid.Row="0" Margin="0,0,0,8">
@@ -26,9 +29,13 @@
                 <ColumnDefinition Width="*" />
                 <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
-            <TextBlock x:Name="StatusText" Grid.Column="0"
-                       Text="{Binding Source={x:Static loc:Loc.Instance}, Path=[Admin.StatusStopped]}"
-                       FontSize="16" TextWrapping="Wrap" VerticalAlignment="Center" />
+            <StackPanel Grid.Column="0" Orientation="Horizontal">
+                <TextBlock x:Name="StatusText"
+                           Text="{Binding Source={x:Static loc:Loc.Instance}, Path=[Admin.StatusStopped]}"
+                           FontSize="16" TextWrapping="Wrap" VerticalAlignment="Center" />
+                <TextBlock x:Name="StartOutcomeText" FontSize="16" FontWeight="SemiBold"
+                           Margin="12,0,0,0" VerticalAlignment="Center" Visibility="Collapsed" />
+            </StackPanel>
             <Border Grid.Column="1" Style="{StaticResource LanguageToggleContainer}" VerticalAlignment="Top">
                 <StackPanel Orientation="Horizontal">
                     <Button x:Name="LangRuButton" Style="{StaticResource LanguageToggleButton}"
@@ -120,5 +127,41 @@
                     Content="{Binding Source={x:Static loc:Loc.Instance}, Path=[Admin.SendCommandButton]}"
                     Click="SendCommandButton_Click" />
         </Grid>
+
+        <Border Grid.Row="7" BorderThickness="0,1,0,0" BorderBrush="{StaticResource BorderBrush2}"
+                Margin="0,12,0,8" />
+
+        <TextBlock Grid.Row="8" FontWeight="Bold" Margin="0,0,0,4"
+                   Text="{Binding Source={x:Static loc:Loc.Instance}, Path=[Admin.ErrorsHeader]}" />
+
+        <ListBox x:Name="ErrorLogList" Grid.Row="9" FontFamily="Consolas"
+                 Foreground="{StaticResource DangerBrush}"
+                 ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                 SelectionMode="Extended">
+            <ListBox.InputBindings>
+                <KeyBinding Key="C" Modifiers="Control" Command="ApplicationCommands.Copy" />
+            </ListBox.InputBindings>
+            <ListBox.CommandBindings>
+                <CommandBinding Command="ApplicationCommands.Copy" Executed="CopySelectedErrorLog_Executed" />
+            </ListBox.CommandBindings>
+            <ListBox.ContextMenu>
+                <ContextMenu>
+                    <MenuItem Click="CopySelectedErrorLog_Click"
+                              Header="{Binding Source={x:Static loc:Loc.Instance}, Path=[Main.CopySelected]}" />
+                    <MenuItem Click="CopyAllErrorLog_Click"
+                              Header="{Binding Source={x:Static loc:Loc.Instance}, Path=[Main.CopyAll]}" />
+                </ContextMenu>
+            </ListBox.ContextMenu>
+            <ListBox.ItemContainerStyle>
+                <Style TargetType="ListBoxItem">
+                    <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                </Style>
+            </ListBox.ItemContainerStyle>
+            <ListBox.ItemTemplate>
+                <DataTemplate>
+                    <TextBlock Text="{Binding}" TextWrapping="Wrap" />
+                </DataTemplate>
+            </ListBox.ItemTemplate>
+        </ListBox>
     </Grid>
 </Window>

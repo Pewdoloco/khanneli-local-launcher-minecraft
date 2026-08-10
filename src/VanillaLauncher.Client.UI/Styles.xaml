@@ -38,6 +38,8 @@
     <SolidColorBrush x:Key="ButtonFaceHoverBrush" Color="{StaticResource ButtonFaceHoverColor}" />
     <SolidColorBrush x:Key="ButtonFacePressedBrush" Color="{StaticResource ButtonFacePressedColor}" />
     <SolidColorBrush x:Key="AccentForegroundBrush" Color="White" />
+    <SolidColorBrush x:Key="SuccessBrush" Color="#1E8E3E" />
+    <SolidColorBrush x:Key="DangerBrush" Color="#D93025" />
 
     <FontFamily x:Key="AppFontFamily">Segoe UI Variable Text, Segoe UI</FontFamily>
 

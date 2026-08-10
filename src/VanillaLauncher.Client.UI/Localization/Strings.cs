@@ -105,6 +105,9 @@ internal static class Strings
         ["Admin.CommandInputWatermark"] = ("Команда серверу (например: say привет, list)", "Server command (e.g. say hello, list)"),
         ["Admin.SendCommandButton"] = ("Отправить", "Send"),
         ["Admin.CommandSendError"] = ("Не удалось отправить команду: {0}", "Failed to send command: {0}"),
+        ["Admin.StartOutcomeSuccess"] = ("Успешный запуск", "Started successfully"),
+        ["Admin.StartOutcomeFailure"] = ("Не успешный запуск", "Failed to start"),
+        ["Admin.ErrorsHeader"] = ("Ошибки:", "Errors:"),
 
         ["Admin.SelectServerDirDialog.Title"] = ("Выбери (или создай) папку сервера", "Select (or create) the server folder"),
         ["Admin.ServerDirAutoDetected.Status"] = ("Серверная папка определена автоматически: {0}", "Server folder auto-detected: {0}"),
