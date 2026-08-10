@@ -32,6 +32,7 @@ public class PublishPipelineTests : IDisposable
         {
             "@echo off",
             "echo Server starting...",
+            "echo Done (0.001s)! For help, type \"help\"",
             ":loop",
             "set /p CMD=",
             "if /I \"%CMD%\"==\"stop\" goto :stopping",
@@ -158,5 +159,66 @@ public class PublishPipelineTests : IDisposable
                 // процесс уже завершился сам — ничего убивать не нужно
             }
         }
+    }
+
+    [Fact]
+    public async Task RunAsync_SmokeTestCrashes_AbortsBeforePublish_ButServerFilesAlreadySynced()
+    {
+        // Именно тот класс бага, ради которого добавлен смоук-тест: клиентский мод (либо
+        // соврал в метаданных, либо забыт в ServerExcludeMods) роняет старт сервера сразу
+        // после синхронизации новых файлов — до этого шага пайплайн об этом не узнавал.
+        var crashingBat = string.Join("\r\n", new[]
+        {
+            "@echo off",
+            "echo Server starting...",
+            "echo [ERROR]: NoClassDefFoundError: some.client.OnlyMod",
+            "exit /b 1"
+        });
+        File.WriteAllText(Path.Combine(_serverDir, "crashing.bat"), crashingBat);
+
+        var controller = new ServerProcessController(_serverDir, "crashing.bat");
+        var worldBackup = new WorldBackupService(_serverDir, Path.Combine(_serverDir, "backups"), maxBackupsToKeep: 5);
+        var publisher = CreateFakePublisher(out var fake);
+        var log = new System.Collections.Concurrent.ConcurrentQueue<string>();
+
+        var ex = await Assert.ThrowsAsync<InvalidOperationException>(() => new PublishPipeline().RunAsync(
+            controller, worldBackup, "world", _serverDir, _buildSourceRoot,
+            new[] { "mods" }, "v1", publisher, new Progress<string>(log.Enqueue),
+            stopTimeout: TimeSpan.FromSeconds(5), smokeTestTimeout: TimeSpan.FromSeconds(10)));
+
+        Assert.Contains("NoClassDefFoundError", ex.Message);
+        Assert.True(File.Exists(Path.Combine(_serverDir, "mods", "a.jar"))); // синхронизация уже прошла
+        Assert.Empty(fake.Requests); // на GitHub ничего не загружено
+        Assert.False(controller.IsRunning);
+    }
+
+    [Fact]
+    public async Task RunAsync_SmokeTestTimesOut_KillsHungProcessAndAbortsBeforePublish()
+    {
+        var hangingBat = string.Join("\r\n", new[]
+        {
+            "@echo off",
+            "echo Server starting...",
+            ":loop",
+            "set /p CMD=",
+            "goto :loop"
+        });
+        File.WriteAllText(Path.Combine(_serverDir, "hanging.bat"), hangingBat);
+
+        var controller = new ServerProcessController(_serverDir, "hanging.bat");
+        var worldBackup = new WorldBackupService(_serverDir, Path.Combine(_serverDir, "backups"), maxBackupsToKeep: 5);
+        var publisher = CreateFakePublisher(out var fake);
+        var log = new System.Collections.Concurrent.ConcurrentQueue<string>();
+
+        await Assert.ThrowsAsync<InvalidOperationException>(() => new PublishPipeline().RunAsync(
+            controller, worldBackup, "world", _serverDir, _buildSourceRoot,
+            new[] { "mods" }, "v1", publisher, new Progress<string>(log.Enqueue),
+            stopTimeout: TimeSpan.FromSeconds(2), smokeTestTimeout: TimeSpan.FromMilliseconds(500)));
+
+        Assert.Empty(fake.Requests);
+
+        for (var i = 0; i < 20 && controller.IsRunning; i++)
+            await Task.Delay(100);
+        Assert.False(controller.IsRunning); // принудительно убит после таймаута
     }
 }

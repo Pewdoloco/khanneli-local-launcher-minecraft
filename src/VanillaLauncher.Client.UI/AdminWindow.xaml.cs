@@ -68,16 +68,6 @@ public partial class AdminWindow : Window
         StartOutcomeText.Visibility = Visibility.Collapsed;
     }
 
-    // Java-стектрейсы ("Exception ...", "\tat ...", "Caused by: ...") и строки уровня
-    // ERROR/FATAL от Log4j — дублируются в отдельную панель "Ошибки" для быстрого
-    // сканирования, не только в общую консоль (где их легко потерять среди обычного лога).
-    private static bool IsErrorLine(string line)
-    {
-        var trimmed = line.TrimStart();
-        return line.Contains("ERROR") || line.Contains("FATAL") || line.Contains("Exception")
-            || trimmed.StartsWith("at ") || trimmed.StartsWith("Caused by:");
-    }
-
     private void SetStatus(string key, params object[] args)
     {
         _statusKey = key;
@@ -266,7 +256,7 @@ public partial class AdminWindow : Window
             _controller.OutputReceived += line => Dispatcher.Invoke(() =>
             {
                 Log(line);
-                if (IsErrorLine(line))
+                if (ServerLogLineClassifier.IsErrorLine(line))
                     LogError(line);
 
                 var joined = PlayerActivityParser.TryParseJoin(line);
@@ -284,9 +274,7 @@ public partial class AdminWindow : Window
                         UpdatePlayersOnlineText();
                     }
                 }
-                // "Done (12.345s)! For help, type "help"" — стандартная строка готовности
-                // сервера, неизменна много лет во всех форках (vanilla/Forge/Fabric/Paper).
-                if (_awaitingStartupOutcome && line.Contains("Done (") && line.Contains(")!"))
+                if (_awaitingStartupOutcome && ServerLogLineClassifier.IsSuccessLine(line))
                 {
                     _awaitingStartupOutcome = false;
                     SetStartOutcome(success: true);
@@ -298,6 +286,14 @@ public partial class AdminWindow : Window
                     SetStartOutcome(success: false);
                 _awaitingStartupOutcome = false;
                 ClearOnlinePlayers();
+
+                // Во время публикации сервер может сам стартовать и останавливаться (смоук-тест
+                // в PublishPipeline, см. ServerSmokeTestRunner) — не перетираем статус публикации
+                // и не включаем кнопки раньше времени. PublishButton.IsEnabled — надёжный признак
+                // "публикация ещё идёт": это единственное место, которое его выключает/включает
+                // (см. PublishButton_Click).
+                if (!PublishButton.IsEnabled)
+                    return;
 
                 SetStatus("Admin.StatusStopped");
                 StartButton.IsEnabled = true;

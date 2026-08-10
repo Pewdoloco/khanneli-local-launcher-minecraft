@@ -142,6 +142,19 @@ public sealed class ServerProcessController : IDisposable
         }
     }
 
+    /// <summary>
+    /// Принудительно завершает процесс сервера (весь дочерний cmd.exe/java, не только cmd.exe) —
+    /// используется, когда штатная остановка невозможна или не нужна (например,
+    /// <see cref="ServerSmokeTestRunner"/> после неудачного тестового старта при публикации:
+    /// сервер уже в краше или завис, слать "stop" и ждать штатного завершения бессмысленно).
+    /// Не путать со <see cref="StopAsync"/> — там штатный "stop" в stdin и ожидание exit.
+    /// </summary>
+    public void Kill()
+    {
+        if (_process is { HasExited: false } process)
+            process.Kill(entireProcessTree: true);
+    }
+
     public void Dispose()
     {
         _process?.Dispose();
