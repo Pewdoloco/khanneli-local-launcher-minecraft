@@ -31,6 +31,28 @@ public partial class AdminWindow : Window
     private bool _awaitingStartupOutcome;
     private bool? _startOutcomeSuccess;
 
+    // Игроки, вошедшие в игру с последнего Start() — сбрасывается при каждом старте/остановке
+    // (сервер не помнит своих игроков между процессами, и мы этого не эмулируем через "list").
+    // Имена берутся построчным парсингом консоли (PlayerActivityParser) — тот же принцип, что
+    // у IsErrorLine/StartOutcome ниже, отдельного сетевого запроса к серверу для этого нет.
+    private readonly HashSet<string> _onlinePlayers = new(StringComparer.OrdinalIgnoreCase);
+
+    private void UpdatePlayersOnlineText()
+    {
+        PlayersOnlineText.Text = _onlinePlayers.Count == 0
+            ? Loc.Instance["Admin.PlayersOnlineEmpty"]
+            : string.Format(
+                Loc.Instance["Admin.PlayersOnlineCount"],
+                _onlinePlayers.Count,
+                string.Join(", ", _onlinePlayers.OrderBy(name => name, StringComparer.OrdinalIgnoreCase)));
+    }
+
+    private void ClearOnlinePlayers()
+    {
+        _onlinePlayers.Clear();
+        UpdatePlayersOnlineText();
+    }
+
     private void SetStartOutcome(bool success)
     {
         _startOutcomeSuccess = success;
@@ -90,6 +112,7 @@ public partial class AdminWindow : Window
         RefreshServerDirectoryState();
 
         RefreshVersionWatermark();
+        UpdatePlayersOnlineText();
         _ = LoadLastPublishedVersionAsync();
     }
 
@@ -113,6 +136,7 @@ public partial class AdminWindow : Window
         if (_startOutcomeSuccess is { } success)
             SetStartOutcome(success);
         RefreshVersionWatermark();
+        UpdatePlayersOnlineText();
 
         _config.Language = language;
         try { _config.Save(); } catch (IOException) { } catch (UnauthorizedAccessException) { }
@@ -244,6 +268,22 @@ public partial class AdminWindow : Window
                 Log(line);
                 if (IsErrorLine(line))
                     LogError(line);
+
+                var joined = PlayerActivityParser.TryParseJoin(line);
+                if (joined is not null)
+                {
+                    _onlinePlayers.Add(joined);
+                    UpdatePlayersOnlineText();
+                }
+                else
+                {
+                    var left = PlayerActivityParser.TryParseLeave(line);
+                    if (left is not null)
+                    {
+                        _onlinePlayers.Remove(left);
+                        UpdatePlayersOnlineText();
+                    }
+                }
                 // "Done (12.345s)! For help, type "help"" — стандартная строка готовности
                 // сервера, неизменна много лет во всех форках (vanilla/Forge/Fabric/Paper).
                 if (_awaitingStartupOutcome && line.Contains("Done (") && line.Contains(")!"))
@@ -257,6 +297,7 @@ public partial class AdminWindow : Window
                 if (_awaitingStartupOutcome)
                     SetStartOutcome(success: false);
                 _awaitingStartupOutcome = false;
+                ClearOnlinePlayers();
 
                 SetStatus("Admin.StatusStopped");
                 StartButton.IsEnabled = true;
@@ -278,6 +319,7 @@ public partial class AdminWindow : Window
         try
         {
             ClearStartOutcome();
+            ClearOnlinePlayers();
             controller.Start();
             _awaitingStartupOutcome = true;
             SetStatus("Admin.ServerStarting.Status");

@@ -206,6 +206,32 @@ public class AppConfigTests : IDisposable
     }
 
     [Fact]
+    public void Load_MissingServerHost_DefaultsToNullWithStandardPort()
+    {
+        WriteAppSettings("""{ "ManifestUrl": "https://example.invalid/manifest.json", "ProfileRoot": "C:\\somewhere" }""");
+
+        var config = AppConfig.Load(_dir);
+
+        Assert.Null(config.ServerHost);
+        Assert.Equal(25565, config.ServerPort);
+    }
+
+    [Fact]
+    public void Save_PreservesServerHostAndPort()
+    {
+        WriteAppSettings("""{ "ManifestUrl": "https://example.invalid/manifest.json", "ProfileRoot": "C:\\old" }""");
+        var config = AppConfig.Load(_dir);
+
+        config.ServerHost = "100.64.0.1";
+        config.ServerPort = 25566;
+        config.Save();
+
+        var reloaded = AppConfig.Load(_dir);
+        Assert.Equal("100.64.0.1", reloaded.ServerHost);
+        Assert.Equal(25566, reloaded.ServerPort);
+    }
+
+    [Fact]
     public void Save_WithoutLoad_Throws()
     {
         var config = new AppConfig { ManifestUrl = "https://x", ProfileRoot = "C:\\x" };

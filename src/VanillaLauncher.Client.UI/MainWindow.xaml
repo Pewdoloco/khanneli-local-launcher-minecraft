@@ -15,6 +15,7 @@
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
 
@@ -73,10 +74,18 @@
                        Foreground="{StaticResource MutedTextBrush}" />
         </WrapPanel>
 
-        <TextBlock Grid.Row="4" Margin="0,0,0,4" FontWeight="Bold"
+        <WrapPanel x:Name="ServerReachabilityRow" Grid.Row="4" Orientation="Horizontal"
+                   Margin="0,0,0,8" Visibility="Collapsed">
+            <Button x:Name="CheckServerButton" Padding="12,6" Margin="0,0,8,4"
+                    Content="{Binding Source={x:Static loc:Loc.Instance}, Path=[Main.ServerCheckButton]}"
+                    Click="CheckServerButton_Click" />
+            <TextBlock x:Name="ServerReachabilityText" VerticalAlignment="Center" Margin="4,0,0,4" TextWrapping="Wrap" />
+        </WrapPanel>
+
+        <TextBlock Grid.Row="5" Margin="0,0,0,4" FontWeight="Bold"
                    Text="{Binding Source={x:Static loc:Loc.Instance}, Path=[Main.LogHeader]}" />
 
-        <ListBox x:Name="LogList" Grid.Row="5" ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+        <ListBox x:Name="LogList" Grid.Row="6" ScrollViewer.HorizontalScrollBarVisibility="Disabled"
                  SelectionMode="Extended">
             <ListBox.InputBindings>
                 <KeyBinding Key="C" Modifiers="Control" Command="ApplicationCommands.Copy" />

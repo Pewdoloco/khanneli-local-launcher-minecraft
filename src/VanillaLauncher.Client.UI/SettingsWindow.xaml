@@ -74,6 +74,15 @@
                 <TextBox x:Name="ServerBatFileNameTextBox" Padding="4" Margin="0,0,0,16" local:Watermark.Hint="start.bat" />
 
                 <TextBlock FontWeight="Bold" Margin="0,0,0,4"
+                           Text="{Binding Source={x:Static loc:Loc.Instance}, Path=[Settings.ServerHostLabel]}" />
+                <TextBlock Margin="0,0,0,4" TextWrapping="Wrap" Foreground="{StaticResource MutedTextBrush}"
+                           Text="{Binding Source={x:Static loc:Loc.Instance}, Path=[Settings.ServerHostHint]}" />
+                <TextBox x:Name="ServerHostTextBox" Padding="4" Margin="0,0,0,8" local:Watermark.Hint="100.x.y.z" />
+                <TextBlock Margin="0,0,0,4" Text="{Binding Source={x:Static loc:Loc.Instance}, Path=[Settings.ServerPortLabel]}" />
+                <TextBox x:Name="ServerPortTextBox" Padding="4" Margin="0,0,0,16" Width="100" HorizontalAlignment="Left"
+                         local:Watermark.Hint="25565" />
+
+                <TextBlock FontWeight="Bold" Margin="0,0,0,4"
                            Text="{Binding Source={x:Static loc:Loc.Instance}, Path=[Settings.ManifestUrlLabel]}" />
                 <TextBlock Margin="0,0,0,4" TextWrapping="Wrap" Foreground="{StaticResource MutedTextBrush}"
                            Text="{Binding Source={x:Static loc:Loc.Instance}, Path=[Settings.ManifestUrlHint]}" />

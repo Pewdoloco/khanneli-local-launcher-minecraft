@@ -29,6 +29,8 @@ public partial class SettingsWindow : Window
         ServerSearchRootsTextBox.Text = JoinLines(_config.ServerSearchRoots);
 
         ServerBatFileNameTextBox.Text = _config.ServerBatFileName;
+        ServerHostTextBox.Text = _config.ServerHost ?? string.Empty;
+        ServerPortTextBox.Text = _config.ServerPort.ToString();
         ManifestUrlTextBox.Text = _config.ManifestUrl;
         GitHubOwnerTextBox.Text = _config.GitHubOwner ?? string.Empty;
         GitHubRepoTextBox.Text = _config.GitHubRepo ?? string.Empty;
@@ -179,6 +181,13 @@ public partial class SettingsWindow : Window
             return;
         }
 
+        if (!int.TryParse(ServerPortTextBox.Text, out var serverPort) || serverPort is < 1 or > 65535)
+        {
+            ErrorText.Text = Loc.Instance["Settings.ServerPortError"];
+            ErrorText.Visibility = Visibility.Visible;
+            return;
+        }
+
         _config.ProfileRoot = ProfileRootTextBox.Text.Trim();
         _config.ClientFolderName = NullIfEmpty(ClientFolderNameTextBox.Text);
         _config.ClientSearchRoots = SplitLines(ClientSearchRootsTextBox.Text);
@@ -188,6 +197,8 @@ public partial class SettingsWindow : Window
         _config.ServerSearchRoots = SplitLines(ServerSearchRootsTextBox.Text);
 
         _config.ServerBatFileName = ServerBatFileNameTextBox.Text.Trim();
+        _config.ServerHost = NullIfEmpty(ServerHostTextBox.Text);
+        _config.ServerPort = serverPort;
         _config.ManifestUrl = ManifestUrlTextBox.Text.Trim();
         _config.GitHubOwner = GitHubRepoNameNormalizer.NormalizeOwner(GitHubOwnerTextBox.Text);
         _config.GitHubRepo = GitHubRepoNameNormalizer.Normalize(GitHubRepoTextBox.Text);

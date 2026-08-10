@@ -10,6 +10,7 @@ namespace VanillaLauncher.Client.UI;
 public partial class MainWindow : Window
 {
     private readonly HttpClient _http = new();
+    private readonly ServerReachabilityChecker _reachabilityChecker = new();
     private AppConfig? _config;
     private List<FilePlanItem>? _plan;
     private EngineUpdateInfo? _engineUpdateInfo;
@@ -23,6 +24,8 @@ public partial class MainWindow : Window
     private object[] _statusArgs = Array.Empty<object>();
     private string? _engineStatusKey;
     private object[] _engineStatusArgs = Array.Empty<object>();
+    private string? _serverStatusKey;
+    private object[] _serverStatusArgs = Array.Empty<object>();
 
     private void SetStatus(string key, params object[] args)
     {
@@ -36,6 +39,13 @@ public partial class MainWindow : Window
         _engineStatusKey = key;
         _engineStatusArgs = args;
         EngineStatusText.Text = args.Length == 0 ? Loc.Instance[key] : string.Format(Loc.Instance[key], args);
+    }
+
+    private void SetServerStatus(string key, params object[] args)
+    {
+        _serverStatusKey = key;
+        _serverStatusArgs = args;
+        ServerReachabilityText.Text = args.Length == 0 ? Loc.Instance[key] : string.Format(Loc.Instance[key], args);
     }
 
     public MainWindow()
@@ -65,6 +75,8 @@ public partial class MainWindow : Window
             SetStatus(_statusKey, _statusArgs);
         if (_engineStatusKey is not null)
             SetEngineStatus(_engineStatusKey, _engineStatusArgs);
+        if (_serverStatusKey is not null)
+            SetServerStatus(_serverStatusKey, _serverStatusArgs);
 
         if (_config is null)
             return;
@@ -140,6 +152,47 @@ public partial class MainWindow : Window
 
         CheckButton.IsEnabled = true;
         await CheckForUpdatesAsync();
+
+        // ServerHost пуст, если админ ещё не настроил Tailscale-адрес в "Настройках" —
+        // тогда строка проверки остаётся скрытой (RefreshServerReachabilityVisibility),
+        // не занимает место непонятным "не настроено" у модпаков, где этим не пользуются.
+        RefreshServerReachabilityVisibility();
+        if (!string.IsNullOrWhiteSpace(_config.ServerHost))
+            _ = CheckServerReachabilityAsync();
+    }
+
+    private void RefreshServerReachabilityVisibility()
+    {
+        ServerReachabilityRow.Visibility = string.IsNullOrWhiteSpace(_config?.ServerHost)
+            ? Visibility.Collapsed
+            : Visibility.Visible;
+    }
+
+    private async void CheckServerButton_Click(object sender, RoutedEventArgs e) => await CheckServerReachabilityAsync();
+
+    /// <summary>
+    /// TCP-проверка адреса:порта сервера (обычно Tailscale IP/MagicDNS-имя) перед игрой — см.
+    /// ServerReachabilityChecker. Не блокирует обновление мода/докачку, вызывается отдельно и
+    /// не мешает остальному флоу проверки обновлений при ошибке/недоступности.
+    /// </summary>
+    private async Task CheckServerReachabilityAsync()
+    {
+        if (_config is null || string.IsNullOrWhiteSpace(_config.ServerHost))
+            return;
+
+        CheckServerButton.IsEnabled = false;
+        ServerReachabilityText.Foreground = (System.Windows.Media.Brush)FindResource("MutedTextBrush");
+        SetServerStatus("Main.ServerChecking.Status");
+
+        var reachable = await _reachabilityChecker.IsReachableAsync(
+            _config.ServerHost, _config.ServerPort, TimeSpan.FromSeconds(3));
+
+        ServerReachabilityText.Foreground = (System.Windows.Media.Brush)FindResource(reachable ? "SuccessBrush" : "DangerBrush");
+        SetServerStatus(
+            reachable ? "Main.ServerReachable.Status" : "Main.ServerUnreachable.Status",
+            _config.ServerHost, _config.ServerPort);
+
+        CheckServerButton.IsEnabled = true;
     }
 
     private async void SetupButton_Click(object sender, RoutedEventArgs e)

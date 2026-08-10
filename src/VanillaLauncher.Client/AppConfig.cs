@@ -18,6 +18,13 @@ public sealed class AppConfig
     public string ServerBatFileName { get; set; } = "start.bat";
     public int MaxBackupsToKeep { get; set; } = 5;
 
+    // Адрес/порт сервера для проверки TCP-доступности перед игрой (Этап 7, ServerReachabilityChecker) —
+    // обычно Tailscale IP/MagicDNS-имя машины админа. Пусто = проверка отключена в MainWindow:
+    // старые/неадаптированные конфиги не должны внезапно показывать "сервер недоступен" только
+    // потому что админ ещё не заполнил это поле в "Настройках".
+    public string? ServerHost { get; set; }
+    public int ServerPort { get; set; } = 25565;
+
     // Только для публикации обновлений (Этап 5). ProfileRoot одновременно служит
     // "эталонной сборкой", откуда генерируется манифест и синхронизируются файлы сервера.
     public string? GitHubOwner { get; set; }

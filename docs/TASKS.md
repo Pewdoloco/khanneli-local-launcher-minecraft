@@ -21,7 +21,7 @@
 - [x] **`engine-v1.9.2`** — три бага из живого тестирования: `SetAdminPasswordWindow` обрезала кнопки, watermark "Версия релиза" не переводился, поля гайдов в "Настройках" не переключались на английский. Детали в CHANGELOG.md, docs/ARCHITECTURE.md.
 - [x] **`engine-v1.10.0`** — интерактивная консоль сервера (поле ввода команд в Admin-режиме, `ServerProcessController.SendCommandAsync`), фикс кодировки вывода `cmd.exe` (`GetOEMCP()` вместо ненадёжного `CultureInfo.CurrentCulture`). Детали в CHANGELOG.md, docs/ARCHITECTURE.md. Закрывает часть "разделение лог/команды консоли" из Этапа 7 ниже.
 - [x] **`engine-v1.10.1`** — индикатор успеха/провала запуска сервера (зелёный/красный текст), отдельная панель "Ошибки" (дублирует ERROR/Exception-строки из консоли), убрано модальное окно после остановки сервера. Детали в CHANGELOG.md, docs/ARCHITECTURE.md.
-- [ ] Этап 7 (остаток, опционально) — статус игроков онлайн, доступ к серверу через Tailscale-проверку
+- [x] **`engine-v1.11.0`** — остаток Этапа 7: индикатор игроков онлайн в `AdminWindow` (парсинг консоли, `PlayerActivityParser`), TCP-проверка доступности сервера перед игрой в `MainWindow` (`ServerReachabilityChecker`, поля `ServerHost`/`ServerPort` в "Настройках"). Детали в CHANGELOG.md, docs/ARCHITECTURE.md. Этап 7 закрыт целиком.
 
 ## Как передавать этапы в Claude Code
 Открой `docs/SPEC.md` и `docs/ARCHITECTURE.md` в контексте, затем:

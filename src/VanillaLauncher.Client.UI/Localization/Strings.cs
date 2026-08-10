@@ -89,6 +89,13 @@ internal static class Strings
         ["Main.EngineUpdateError.Status"] = ("Ошибка обновления лаунчера.", "Launcher update error."),
         ["Main.EngineUpdateError.Log"] = ("Ошибка обновления лаунчера: {0}", "Launcher update error: {0}"),
 
+        ["Main.ServerCheckButton"] = ("Проверить сервер", "Check Server"),
+        ["Main.ServerChecking.Status"] = ("Проверка доступности сервера...", "Checking server availability..."),
+        ["Main.ServerReachable.Status"] = ("Сервер доступен ({0}:{1}).", "Server is reachable ({0}:{1})."),
+        ["Main.ServerUnreachable.Status"] = (
+            "Сервер недоступен ({0}:{1}). Проверь, что Tailscale включён и подключён к сети администратора.",
+            "Server unreachable ({0}:{1}). Make sure Tailscale is running and connected to the admin's network."),
+
         // --- AdminWindow ---
         ["Admin.StatusStopped"] = ("Сервер остановлен.", "Server stopped."),
         ["Admin.StartButton"] = ("Запустить сервер", "Start Server"),
@@ -108,6 +115,8 @@ internal static class Strings
         ["Admin.StartOutcomeSuccess"] = ("Успешный запуск", "Started successfully"),
         ["Admin.StartOutcomeFailure"] = ("Не успешный запуск", "Failed to start"),
         ["Admin.ErrorsHeader"] = ("Ошибки:", "Errors:"),
+        ["Admin.PlayersOnlineEmpty"] = ("Игроков онлайн: 0", "Players online: 0"),
+        ["Admin.PlayersOnlineCount"] = ("Игроков онлайн ({0}): {1}", "Players online ({0}): {1}"),
 
         ["Admin.SelectServerDirDialog.Title"] = ("Выбери (или создай) папку сервера", "Select (or create) the server folder"),
         ["Admin.ServerDirAutoDetected.Status"] = ("Серверная папка определена автоматически: {0}", "Server folder auto-detected: {0}"),
@@ -185,6 +194,11 @@ internal static class Strings
             "Доп. корни поиска сервера (по одному пути на строку, тоже с поддержкой %VAR%; папка рядом с .exe проверяется всегда)",
             "Additional server search roots (one path per line, %VAR% supported too; the folder next to the .exe is always checked)"),
         ["Settings.ServerBatFileNameLabel"] = ("Имя .bat-файла сервера (ServerBatFileName)", "Server .bat file name (ServerBatFileName)"),
+        ["Settings.ServerHostLabel"] = ("Адрес сервера для проверки доступности (ServerHost)", "Server address for reachability check (ServerHost)"),
+        ["Settings.ServerHostHint"] = (
+            "Обычно Tailscale IP (100.x.y.z) или MagicDNS-имя машины админа — тот же адрес, который игрок вводит в Minecraft при подключении к серверу. Используется только для TCP-проверки \"сервер доступен\" в главном окне игрока (кнопка «Проверить сервер»), не для самого подключения к игре. Пусто = проверка отключена, строка не показывается.",
+            "Usually the Tailscale IP (100.x.y.z) or the admin machine's MagicDNS name — the same address the player enters in Minecraft to connect. Used only for the \"server reachable\" TCP check in the player's main window (\"Check Server\" button), not for the actual game connection. Empty = check disabled, the row isn't shown."),
+        ["Settings.ServerPortLabel"] = ("Игровой порт (ServerPort)", "Game port (ServerPort)"),
         ["Settings.ManifestUrlLabel"] = ("ManifestUrl *", "ManifestUrl *"),
         ["Settings.ManifestUrlHint"] = (
             "Ссылка на manifest.json — список файлов сборки для клиента. Обычно не нужно вычислять вручную: если ниже задан репозиторий модпака (GitHubOwner/GitHubRepo) и хотя бы раз опубликовано обновление, подходит https://github.com/{Owner}/{Repo}/releases/latest/download/manifest.json — этот адрес всегда указывает на файл из САМОГО СВЕЖЕГО релиза.",
@@ -229,6 +243,9 @@ internal static class Strings
         ["Settings.MaxBackupsError"] = (
             "MaxBackupsToKeep должен быть целым числом ≥ 1 (нужно хранить хотя бы один бэкап).",
             "MaxBackupsToKeep must be an integer ≥ 1 (at least one backup must be kept)."),
+        ["Settings.ServerPortError"] = (
+            "ServerPort должен быть целым числом от 1 до 65535.",
+            "ServerPort must be an integer between 1 and 65535."),
         ["Settings.AutoDetectClientError"] = ("Автопоиск клиентской папки не нашёл совпадений — укажи путь вручную (Обзор...).", "Client folder auto-detection found no match — select the path manually (Browse...)."),
         ["Settings.AutoDetectServerError"] = ("Автопоиск серверной папки не нашёл совпадений — укажи путь вручную (Обзор...).", "Server folder auto-detection found no match — select the path manually (Browse...)."),
         ["Settings.BrowseProfileRootDialog.Title"] = ("Выбери папку клиентской сборки", "Select the client build folder"),
