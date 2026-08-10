@@ -226,6 +226,37 @@ public class PublishPipelineTests : IDisposable
     }
 
     [Fact]
+    public async Task RunAsync_SmokeTestCrashes_NamesModFlaggedErrorByForgeInErrorMessage()
+    {
+        // Второй реальный сценарий инцидента: сервер доходит до отчёта о загрузке модов, и сам
+        // Forge помечает конкретный мод статусом ERROR в таблице — пайплайн должен вытащить имя
+        // файла из этой таблицы, а не только дублировать голый стектрейс без указания причины.
+        var crashingBat = string.Join("\r\n", new[]
+        {
+            "@echo off",
+            "echo Server starting...",
+            "echo \t\tVoidFog-1.20.1-2.0.23.jar   ^|VoidFog   ^|voidfog   ^|1.20.1-2.0.23   ^|ERROR   ^|Manifest: NOSIGNATURE",
+            "echo [main/ERROR] [minecraft/Main]: Failed to start the minecraft server",
+            "exit /b 1"
+        });
+        File.WriteAllText(Path.Combine(_serverDir, "crashing3.bat"), crashingBat);
+
+        var controller = new ServerProcessController(_serverDir, "crashing3.bat");
+        var worldBackup = new WorldBackupService(_serverDir, Path.Combine(_serverDir, "backups"), maxBackupsToKeep: 5);
+        var publisher = CreateFakePublisher(out var fake);
+        var log = new System.Collections.Concurrent.ConcurrentQueue<string>();
+
+        var ex = await Assert.ThrowsAsync<InvalidOperationException>(() => new PublishPipeline().RunAsync(
+            controller, worldBackup, "world", _serverDir, _buildSourceRoot,
+            new[] { "mods" }, "v1", publisher, new Progress<string>(log.Enqueue),
+            stopTimeout: TimeSpan.FromSeconds(5), smokeTestTimeout: TimeSpan.FromSeconds(10)));
+
+        Assert.Contains("VoidFog-1.20.1-2.0.23.jar", ex.Message);
+        Assert.Contains("ServerExcludeMods", ex.Message);
+        Assert.Empty(fake.Requests);
+    }
+
+    [Fact]
     public async Task RunAsync_SmokeTestTimesOut_KillsHungProcessAndAbortsBeforePublish()
     {
         var hangingBat = string.Join("\r\n", new[]

@@ -92,6 +92,7 @@
 
         <ListBox x:Name="LogList" Grid.Row="6" FontFamily="Consolas"
                  ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                 VirtualizingPanel.ScrollUnit="Item"
                  SelectionMode="Extended">
             <ListBox.InputBindings>
                 <KeyBinding Key="C" Modifiers="Control" Command="ApplicationCommands.Copy" />
@@ -141,6 +142,7 @@
         <ListBox x:Name="ErrorLogList" Grid.Row="10" FontFamily="Consolas"
                  Foreground="{StaticResource DangerBrush}"
                  ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                 VirtualizingPanel.ScrollUnit="Item"
                  SelectionMode="Extended">
             <ListBox.InputBindings>
                 <KeyBinding Key="C" Modifiers="Control" Command="ApplicationCommands.Copy" />

@@ -86,6 +86,7 @@
                    Text="{Binding Source={x:Static loc:Loc.Instance}, Path=[Main.LogHeader]}" />
 
         <ListBox x:Name="LogList" Grid.Row="6" ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                 VirtualizingPanel.ScrollUnit="Item"
                  SelectionMode="Extended">
             <ListBox.InputBindings>
                 <KeyBinding Key="C" Modifiers="Control" Command="ApplicationCommands.Copy" />

@@ -68,16 +68,37 @@ public sealed class PublishPipeline
                 ? "сервер не дошёл до готовности за отведённое время"
                 : "процесс сервера завершился раньше готовности (краш)";
 
-            // Известный, надёжно детектируемый (не эвристика) класс краша Forge/NeoForge при
-            // сканировании mods — ZIP-запись STORED с флагом data descriptor. Java-класс, на
-            // котором это падает (securejarhandler), не логирует имя виновного файла — сканер
-            // называет кандидатов сам, вместо голого стектрейса без имён.
+            var culpritNotes = new List<string>();
+
+            // Приоритет 1 — сам Forge/NeoForge помечает статус ERROR у конкретного мода в
+            // отчёте о загрузке (таблица "ИмяФайла.jar |Имя |modid |версия |СТАТУС |..."):
+            // самый надёжный источник, называет виновника напрямую, но появляется только если
+            // сервер дошёл до этой стадии (после первичного сканирования папки mods).
+            var failedMods = ForgeModStateTableParser.FindFailedModJars(smokeTest.Output);
+            if (failedMods.Count > 0)
+            {
+                culpritNotes.Add(
+                    "Forge/NeoForge сам пометил статус ERROR при загрузке: " +
+                    $"{string.Join(", ", failedMods)}. Обычно значит, что это клиентский мод, " +
+                    "которому не место на дедик-сервере — добавь имя файла в ServerExcludeMods " +
+                    "(экран «Настройки») и убери сам jar из папки mods на сервере, затем " +
+                    "опубликуй снова.");
+            }
+
+            // Приоритет 2 — известный, надёжно детектируемый (не эвристика) класс краша при
+            // сканировании mods — ZIP-запись STORED с флагом data descriptor. Крашит РАНЬШЕ,
+            // чем сервер успевает дойти до отчёта о загрузке модов (см. выше), поэтому это
+            // отдельная, непересекающаяся проверка, а не альтернатива первой.
             var suspiciousJars = JarDataDescriptorScanner.FindSuspiciousJars(Path.Combine(serverDirectory, "mods"));
-            var suspiciousNote = suspiciousJars.Count > 0
-                ? "Вероятный виновник — ZIP-дефект в файле(ах), из-за которого Forge/NeoForge падает " +
-                  "при сканировании mods (сам файл не обязательно повреждён, так его просто собрал " +
-                  $"автор мода): {string.Join(", ", suspiciousJars)}. "
-                : "";
+            if (suspiciousJars.Count > 0)
+            {
+                culpritNotes.Add(
+                    "Похоже на ZIP-дефект в файле(ах), из-за которого Forge/NeoForge падает при " +
+                    "сканировании mods (сам файл не обязательно повреждён, так его просто собрал " +
+                    $"автор мода): {string.Join(", ", suspiciousJars)}.");
+            }
+
+            var culpritNote = culpritNotes.Count > 0 ? string.Join(" ", culpritNotes) + " " : "";
 
             var details = smokeTest.ErrorLines.Count > 0
                 ? "Похожие на ошибку строки из вывода:\n" + string.Join("\n", smokeTest.ErrorLines)
@@ -85,9 +106,8 @@ public sealed class PublishPipeline
 
             throw new InvalidOperationException(
                 $"Тестовый запуск сервера не удался ({reason}). Публикация прервана, на GitHub " +
-                $"ничего не загружено — вероятно, дело в моде, который просочился на сервер. " +
-                $"{suspiciousNote}Синхронизированные файлы сервера остались как есть, проверь их " +
-                $"вручную. {details}");
+                $"ничего не загружено. {culpritNote}Синхронизированные файлы сервера остались как " +
+                $"есть, проверь их вручную. {details}");
         }
 
         progress.Report("Шаг 5/5: генерация и публикация манифеста...");
