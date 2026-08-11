@@ -28,6 +28,7 @@
 - [x] **`engine-v1.15.0`** — indeterminate-индикатор запуска сервера в `AdminWindow` (`ServerProcessController.Started`, `StartupProgressBar`), работает и для ручного старта, и для смоук-теста публикации. Точный % признан ненадёжным (нет единого сигнала прогресса ни в одном форке). Детали в CHANGELOG.md, docs/ARCHITECTURE.md.
 - [x] **`engine-v1.16.0`** — панель "Итоги" в `AdminWindow` (сжатая хронология статусов вместо пустого места), убрана модалка после успешной публикации (осталась только для ошибок), `ServerLogLineClassifier.IsErrorLine` теперь требует реального маркера уровня ERROR/FATAL вместо голого `Contains("Exception")` — WARN-строки с упоминанием исключения больше не попадают в панель "Ошибки". Детали в CHANGELOG.md, docs/ARCHITECTURE.md.
 - [x] **`engine-v1.17.0`** — все `MessageBox.Show` (10 в `AdminWindow`, 1 в `MainWindow`, краш-диалог в `App.xaml.cs`) теперь передают явного владельца — диалоги центрируются на активном окне (Client/Admin), а не на случайном месте экрана (заметно на многомониторных настройках). Детали в CHANGELOG.md, docs/ARCHITECTURE.md.
+- [x] **`engine-v1.18.0`** — адрес сервера с кнопкой "Копировать" в `AdminWindow` (переиспользует `ServerHost`/`ServerPort` из `v1.11.0`), памятка команд (whitelist/ban/op/kick и т.д.) выпадающим списком под полем ввода команды — замена изначально запрошенного крупного экрана редактирования whitelist/server.properties файлов. Детали в CHANGELOG.md, docs/ARCHITECTURE.md.
 
 ## Как передавать этапы в Claude Code
 Открой `docs/SPEC.md` и `docs/ARCHITECTURE.md` в контексте, затем:

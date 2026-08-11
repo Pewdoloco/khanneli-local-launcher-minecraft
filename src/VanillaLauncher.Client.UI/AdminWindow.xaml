@@ -26,6 +26,7 @@
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
             <RowDefinition Height="1*" />
         </Grid.RowDefinitions>
 
@@ -54,7 +55,15 @@
         </Grid>
 
         <StackPanel Grid.Row="1" Grid.Column="0" Margin="0,0,0,8">
-            <TextBlock x:Name="PlayersOnlineText"
+            <StackPanel Orientation="Horizontal">
+                <TextBlock x:Name="ServerAddressText"
+                           Foreground="{StaticResource MutedTextBrush}" TextWrapping="Wrap"
+                           VerticalAlignment="Center" />
+                <Button x:Name="CopyServerAddressButton" Padding="8,2" Margin="8,0,0,0"
+                        Content="{Binding Source={x:Static loc:Loc.Instance}, Path=[Admin.CopyServerAddressButton]}"
+                        Visibility="Collapsed" Click="CopyServerAddressButton_Click" />
+            </StackPanel>
+            <TextBlock x:Name="PlayersOnlineText" Margin="0,4,0,0"
                        Foreground="{StaticResource MutedTextBrush}" TextWrapping="Wrap" />
             <ProgressBar x:Name="StartupProgressBar" Height="4" Margin="0,4,0,0"
                          IsIndeterminate="True" Visibility="Collapsed" />
@@ -179,13 +188,20 @@
                     Click="SendCommandButton_Click" />
         </Grid>
 
-        <Border Grid.Row="8" Grid.ColumnSpan="2" BorderThickness="0,1,0,0" BorderBrush="{StaticResource BorderBrush2}"
+        <StackPanel Grid.Row="8" Grid.ColumnSpan="2" Orientation="Horizontal" Margin="0,4,0,0">
+            <TextBlock VerticalAlignment="Center" Margin="0,0,8,0"
+                       Text="{Binding Source={x:Static loc:Loc.Instance}, Path=[Admin.CommandCheatSheetLabel]}" />
+            <ComboBox x:Name="CommandCheatSheetCombo" IsEnabled="False" MinWidth="260"
+                      SelectionChanged="CommandCheatSheetCombo_SelectionChanged" />
+        </StackPanel>
+
+        <Border Grid.Row="9" Grid.ColumnSpan="2" BorderThickness="0,1,0,0" BorderBrush="{StaticResource BorderBrush2}"
                 Margin="0,12,0,8" />
 
-        <TextBlock Grid.Row="9" Grid.ColumnSpan="2" FontWeight="Bold" Margin="0,0,0,4"
+        <TextBlock Grid.Row="10" Grid.ColumnSpan="2" FontWeight="Bold" Margin="0,0,0,4"
                    Text="{Binding Source={x:Static loc:Loc.Instance}, Path=[Admin.ErrorsHeader]}" />
 
-        <ListBox x:Name="ErrorLogList" Grid.Row="10" Grid.ColumnSpan="2" FontFamily="Consolas"
+        <ListBox x:Name="ErrorLogList" Grid.Row="11" Grid.ColumnSpan="2" FontFamily="Consolas"
                  Foreground="{StaticResource DangerBrush}"
                  ScrollViewer.HorizontalScrollBarVisibility="Disabled"
                  VirtualizingPanel.ScrollUnit="Item"

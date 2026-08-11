@@ -103,6 +103,69 @@ public partial class AdminWindow : Window
             : string.Format(Loc.Instance["Admin.VersionWatermarkPrevious"], _lastPublishedTag));
     }
 
+    /// <summary>
+    /// Адрес сервера (ServerHost/ServerPort из "Настроек" — то же значение, что использует
+    /// проверка доступности в MainWindow, см. ServerReachabilityChecker) — показывается здесь
+    /// же, чтобы админу не нужно было идти в "Настройки" каждый раз, когда его просят скинуть
+    /// адрес игроку. Кнопка "Копировать" скрыта, если поле не заполнено.
+    /// </summary>
+    private void RefreshServerAddressText()
+    {
+        if (string.IsNullOrWhiteSpace(_config.ServerHost))
+        {
+            ServerAddressText.Text = Loc.Instance["Admin.ServerAddressNotConfigured"];
+            CopyServerAddressButton.Visibility = Visibility.Collapsed;
+            return;
+        }
+
+        ServerAddressText.Text = string.Format(Loc.Instance["Admin.ServerAddressConfigured"], _config.ServerHost, _config.ServerPort);
+        CopyServerAddressButton.Visibility = Visibility.Visible;
+    }
+
+    private void CopyServerAddressButton_Click(object sender, RoutedEventArgs e)
+    {
+        if (string.IsNullOrWhiteSpace(_config.ServerHost))
+            return;
+
+        var address = $"{_config.ServerHost}:{_config.ServerPort}";
+        Clipboard.SetText(address);
+        Log(string.Format(Loc.Instance["Admin.ServerAddressCopied.Log"], address));
+    }
+
+    // Быстрые команды сервера (whitelist/бан-лист/op и т.д.) — синтаксис Minecraft-команд
+    // одинаков независимо от языка интерфейса, локализуется только плейсхолдер "<ник>"/"<name>"
+    // внутри шаблона. Выбор из списка подставляет шаблон в поле ввода (не отправляет сразу) —
+    // часть команд требует подставить имя игрока/IP/причину вручную перед отправкой.
+    private static readonly string[] CommandCheatSheetTemplates =
+    {
+        "whitelist add ", "whitelist remove ", "whitelist list", "whitelist on", "whitelist off", "whitelist reload",
+        "ban ", "pardon ", "ban-ip ", "pardon-ip ",
+        "op ", "deop ", "kick ",
+        "list", "say ", "save-all",
+        "difficulty ", "gamemode survival ", "gamemode creative ",
+        "time set day", "time set night", "weather clear",
+    };
+
+    private void PopulateCommandCheatSheet()
+    {
+        CommandCheatSheetCombo.ItemsSource = CommandCheatSheetTemplates;
+    }
+
+    private void CommandCheatSheetCombo_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
+    {
+        if (CommandCheatSheetCombo.SelectedItem is not string template)
+            return;
+
+        CommandInputTextBox.Text = template;
+        CommandInputTextBox.CaretIndex = template.Length;
+        CommandInputTextBox.Focus();
+
+        // Сброс выбора — иначе повторный выбор того же пункта подряд не порождает
+        // SelectionChanged (WPF не считает это изменением), и поле ввода останется со старым
+        // текстом, если админ успел его отредактировать между двумя одинаковыми выборами.
+        CommandCheatSheetCombo.SelectedIndex = -1;
+    }
+
     // Ввод команд имеет смысл ровно тогда же, когда доступна "Остановить сервер" — сервер
     // запущен и стабилен (не в процессе старта/остановки/публикации). Выставляется везде,
     // где меняется StopButton.IsEnabled, а не биндится напрямую на него — самих мест мало
@@ -112,6 +175,7 @@ public partial class AdminWindow : Window
     {
         CommandInputTextBox.IsEnabled = enabled;
         SendCommandButton.IsEnabled = enabled;
+        CommandCheatSheetCombo.IsEnabled = enabled;
     }
 
     public AdminWindow(AppConfig config)
@@ -124,6 +188,8 @@ public partial class AdminWindow : Window
 
         RefreshVersionWatermark();
         UpdatePlayersOnlineText();
+        RefreshServerAddressText();
+        PopulateCommandCheatSheet();
         _ = LoadLastPublishedVersionAsync();
     }
 
@@ -158,6 +224,7 @@ public partial class AdminWindow : Window
         }
         RefreshVersionWatermark();
         UpdatePlayersOnlineText();
+        RefreshServerAddressText();
 
         _config.Language = language;
         try { _config.Save(); } catch (IOException) { } catch (UnauthorizedAccessException) { }
@@ -266,6 +333,7 @@ public partial class AdminWindow : Window
 
             RefreshLanguageButtons();
             RefreshServerDirectoryState();
+            RefreshServerAddressText();
         }
     }
 

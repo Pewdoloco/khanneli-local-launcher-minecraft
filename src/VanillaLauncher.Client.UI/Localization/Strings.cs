@@ -118,6 +118,13 @@ internal static class Strings
         ["Admin.ErrorsHeader"] = ("Ошибки:", "Errors:"),
         ["Admin.PlayersOnlineEmpty"] = ("Игроков онлайн: 0", "Players online: 0"),
         ["Admin.PlayersOnlineCount"] = ("Игроков онлайн ({0}): {1}", "Players online ({0}): {1}"),
+        ["Admin.ServerAddressConfigured"] = ("Адрес сервера: {0}:{1}", "Server address: {0}:{1}"),
+        ["Admin.ServerAddressNotConfigured"] = (
+            "Адрес сервера не настроен (ServerHost/ServerPort в «Настройках»)",
+            "Server address not configured (ServerHost/ServerPort in Settings)"),
+        ["Admin.CopyServerAddressButton"] = ("Копировать", "Copy"),
+        ["Admin.ServerAddressCopied.Log"] = ("Адрес сервера скопирован: {0}", "Server address copied: {0}"),
+        ["Admin.CommandCheatSheetLabel"] = ("Памятка команд:", "Command cheat sheet:"),
 
         ["Admin.SelectServerDirDialog.Title"] = ("Выбери (или создай) папку сервера", "Select (or create) the server folder"),
         ["Admin.ServerDirAutoDetected.Status"] = ("Серверная папка определена автоматически: {0}", "Server folder auto-detected: {0}"),
