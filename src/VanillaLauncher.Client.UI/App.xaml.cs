@@ -44,11 +44,20 @@ public partial class App : Application
         // разбора причины уже после закрытия приложения.
         Logger.Log($"НЕОБРАБОТАННОЕ ИСКЛЮЧЕНИЕ: {e.Exception}");
 
-        MessageBox.Show(
-            string.Format(Loc.Instance["App.UnhandledError.Message"], e.Exception.Message),
-            Loc.Instance["App.UnhandledError.Title"],
-            MessageBoxButton.OK,
-            MessageBoxImage.Error);
+        // Явный владелец — то же самое, зачем он проставлен во всех остальных MessageBox.Show
+        // по коду (AdminWindow/MainWindow): без него WPF не гарантированно центрирует диалог на
+        // активном окне пользователя (Client или Admin), диалог может выскочить не там, где
+        // сейчас находится внимание администратора/игрока. IsActive — на случай краша, когда
+        // активного окна нет (например, между окнами) — тогда фоллбек на MainWindow, а если и
+        // его почему-то ещё/уже нет — на оверлоад без владельца (центрируется на экране).
+        var owner = Windows.OfType<Window>().FirstOrDefault(w => w.IsActive) ?? MainWindow;
+        var message = string.Format(Loc.Instance["App.UnhandledError.Message"], e.Exception.Message);
+        var title = Loc.Instance["App.UnhandledError.Title"];
+
+        if (owner is not null)
+            MessageBox.Show(owner, message, title, MessageBoxButton.OK, MessageBoxImage.Error);
+        else
+            MessageBox.Show(message, title, MessageBoxButton.OK, MessageBoxImage.Error);
 
         e.Handled = true;
     }

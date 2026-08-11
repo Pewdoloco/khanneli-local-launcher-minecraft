@@ -394,6 +394,7 @@ public partial class MainWindow : Window
             return;
 
         var confirm = MessageBox.Show(
+            this,
             string.Format(Loc.Instance["Main.EngineUpdateConfirm.Text"], _engineUpdateInfo.LatestVersion, EngineVersion.Current),
             Loc.Instance["Main.EngineUpdateConfirm.Title"],
             MessageBoxButton.YesNo,

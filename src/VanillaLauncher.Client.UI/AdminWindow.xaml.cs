@@ -402,6 +402,7 @@ public partial class AdminWindow : Window
         if (_controller?.IsRunning == true)
         {
             MessageBox.Show(
+                this,
                 Loc.Instance["Admin.RecreateWorldRunning.MessageBox"],
                 Loc.Instance["Common.AdminWindowTitle"],
                 MessageBoxButton.OK,
@@ -411,6 +412,7 @@ public partial class AdminWindow : Window
 
         var levelName = ServerPropertiesReader.GetLevelName(_config.ServerDirectory);
         var confirm = MessageBox.Show(
+            this,
             string.Format(Loc.Instance["Admin.RecreateWorldConfirm.Text"], levelName),
             Loc.Instance["Admin.RecreateWorldConfirm.Title"],
             MessageBoxButton.YesNo,
@@ -462,14 +464,14 @@ public partial class AdminWindow : Window
         var version = VersionTextBox.Text.Trim();
         if (string.IsNullOrEmpty(version))
         {
-            MessageBox.Show(Loc.Instance["Admin.PublishNoVersion.MessageBox"],
+            MessageBox.Show(this, Loc.Instance["Admin.PublishNoVersion.MessageBox"],
                 Loc.Instance["Common.AdminWindowTitle"], MessageBoxButton.OK, MessageBoxImage.Warning);
             return;
         }
 
         if (string.IsNullOrWhiteSpace(_config.GitHubOwner) || string.IsNullOrWhiteSpace(_config.GitHubRepo))
         {
-            MessageBox.Show(Loc.Instance["Admin.PublishNoRepo.MessageBox"],
+            MessageBox.Show(this, Loc.Instance["Admin.PublishNoRepo.MessageBox"],
                 Loc.Instance["Common.AdminWindowTitle"], MessageBoxButton.OK, MessageBoxImage.Warning);
             return;
         }
@@ -481,11 +483,12 @@ public partial class AdminWindow : Window
         }
         catch (Exception ex)
         {
-            MessageBox.Show(ex.Message, Loc.Instance["Common.AdminWindowTitle"], MessageBoxButton.OK, MessageBoxImage.Error);
+            MessageBox.Show(this, ex.Message, Loc.Instance["Common.AdminWindowTitle"], MessageBoxButton.OK, MessageBoxImage.Error);
             return;
         }
 
         var confirm = MessageBox.Show(
+            this,
             string.Format(Loc.Instance["Admin.PublishConfirm.Text"], version, _config.ProfileRoot),
             Loc.Instance["Admin.PublishConfirm.Title"],
             MessageBoxButton.YesNo,
@@ -536,7 +539,7 @@ public partial class AdminWindow : Window
         {
             SetStatus("Admin.PublishError.Status");
             Log(string.Format(Loc.Instance["Admin.PublishError.Log"], ex.Message));
-            MessageBox.Show(string.Format(Loc.Instance["Admin.PublishError.MessageBox"], ex.Message), Loc.Instance["Common.AdminWindowTitle"],
+            MessageBox.Show(this, string.Format(Loc.Instance["Admin.PublishError.MessageBox"], ex.Message), Loc.Instance["Common.AdminWindowTitle"],
                 MessageBoxButton.OK, MessageBoxImage.Error);
         }
         finally
@@ -601,6 +604,7 @@ public partial class AdminWindow : Window
         e.Cancel = true;
 
         var confirm = MessageBox.Show(
+            this,
             Loc.Instance["Admin.CloseConfirm.Text"],
             Loc.Instance["Common.AdminWindowTitle"],
             MessageBoxButton.YesNo,
@@ -623,13 +627,14 @@ public partial class AdminWindow : Window
         if (!stopped)
         {
             MessageBox.Show(
+                this,
                 Loc.Instance["Admin.ClosingStopTimeout.MessageBox"],
                 Loc.Instance["Common.AdminWindowTitle"], MessageBoxButton.OK, MessageBoxImage.Error);
             StopButton.IsEnabled = true;
             return;
         }
 
-        MessageBox.Show(Loc.Instance["Admin.ClosingStopped.MessageBox"], Loc.Instance["Common.AdminWindowTitle"],
+        MessageBox.Show(this, Loc.Instance["Admin.ClosingStopped.MessageBox"], Loc.Instance["Common.AdminWindowTitle"],
             MessageBoxButton.OK, MessageBoxImage.Information);
 
         _closingAfterServerStopped = true;
