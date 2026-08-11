@@ -109,6 +109,7 @@ internal static class Strings
         ["Admin.VersionWatermarkPrevious"] = ("было: {0}", "previous: {0}"),
         ["Admin.PublishButton"] = ("Опубликовать обновление", "Publish Update"),
         ["Admin.ConsoleHeader"] = ("Консоль сервера:", "Server console:"),
+        ["Admin.ResultsHeader"] = ("Итоги:", "Results:"),
         ["Admin.CommandInputWatermark"] = ("Команда серверу (например: say привет, list)", "Server command (e.g. say hello, list)"),
         ["Admin.SendCommandButton"] = ("Отправить", "Send"),
         ["Admin.CommandSendError"] = ("Не удалось отправить команду: {0}", "Failed to send command: {0}"),
@@ -155,9 +156,6 @@ internal static class Strings
         ["Admin.PublishConfirm.Title"] = ("Опубликовать обновление", "Publish Update"),
         ["Admin.Publishing.Status"] = ("Публикация «{0}»...", "Publishing \"{0}\"..."),
         ["Admin.PublishDone.Status"] = ("Опубликовано: {0}.", "Published: {0}."),
-        ["Admin.PublishDone.MessageBox"] = (
-            "Релиз «{0}» опубликован. Сервер остановлен — запусти его сам, когда будешь готов.",
-            "Release \"{0}\" published. The server is stopped — start it yourself when you're ready."),
         ["Admin.PublishError.Status"] = ("Ошибка публикации.", "Publish error."),
         ["Admin.PublishError.Log"] = ("Ошибка: {0}", "Error: {0}"),
         ["Admin.PublishError.MessageBox"] = ("Публикация не удалась: {0}", "Publish failed: {0}"),

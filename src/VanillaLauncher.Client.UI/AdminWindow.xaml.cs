@@ -59,6 +59,7 @@ public partial class AdminWindow : Window
         StartOutcomeText.Visibility = Visibility.Visible;
         StartOutcomeText.Text = Loc.Instance[success ? "Admin.StartOutcomeSuccess" : "Admin.StartOutcomeFailure"];
         StartOutcomeText.Foreground = (System.Windows.Media.Brush)FindResource(success ? "SuccessBrush" : "DangerBrush");
+        AppendResult(StartOutcomeText.Text);
     }
 
     private void ClearStartOutcome()
@@ -73,6 +74,26 @@ public partial class AdminWindow : Window
         _statusKey = key;
         _statusArgs = args;
         StatusText.Text = args.Length == 0 ? Loc.Instance[key] : string.Format(Loc.Instance[key], args);
+        AppendResult(StatusText.Text);
+    }
+
+    // Панель "Итоги" (ResultsList) — сжатая хронология значимых событий (старт/остановка
+    // сервера, ход и итог публикации), а не полный вывод сервера, как в LogList. Единая точка
+    // добавления — сам SetStatus/SetStartOutcome, а не отдельные места по коду: так гарантия
+    // "туда попадает всё, что меняет видимый статус" не требует ручной синхронизации при
+    // добавлении новых статусов. _suppressResultAppend — SetLanguage() вызывает SetStatus/
+    // SetStartOutcome ПОВТОРНО только чтобы перерисовать уже показанный статус на новом языке
+    // (см. комментарий там) — это не новое событие, дублировать его в "Итоги" не нужно.
+    private bool _suppressResultAppend;
+
+    private void AppendResult(string message)
+    {
+        if (_suppressResultAppend)
+            return;
+
+        ResultsList.Items.Add($"{DateTime.Now:HH:mm:ss}  {message}");
+        if (ResultsList.Items.Count > 0)
+            ResultsList.ScrollIntoView(ResultsList.Items[^1]);
     }
 
     private void RefreshVersionWatermark()
@@ -121,10 +142,20 @@ public partial class AdminWindow : Window
         Loc.Instance.Language = language;
         RefreshLanguageButtons();
 
-        if (_statusKey is not null)
-            SetStatus(_statusKey, _statusArgs);
-        if (_startOutcomeSuccess is { } success)
-            SetStartOutcome(success);
+        // SetStatus/SetStartOutcome ниже перерисовывают уже показанный статус на новом языке —
+        // это не новое событие, подавляем добавление в "Итоги" (см. AppendResult).
+        _suppressResultAppend = true;
+        try
+        {
+            if (_statusKey is not null)
+                SetStatus(_statusKey, _statusArgs);
+            if (_startOutcomeSuccess is { } success)
+                SetStartOutcome(success);
+        }
+        finally
+        {
+            _suppressResultAppend = false;
+        }
         RefreshVersionWatermark();
         UpdatePlayersOnlineText();
 
@@ -497,13 +528,9 @@ public partial class AdminWindow : Window
                 serverExcludeFileNames: _config.ServerExcludeMods);
 
             SetStatus("Admin.PublishDone.Status", version);
-
-            // Пассивного обновления StatusText/лога недостаточно — та же причина, что и у
-            // явного окна после "Остановить сервер" (см. StopButton_Click): легко пропустить,
-            // если не смотреть на окно именно в момент завершения долгой публикации.
-            MessageBox.Show(
-                string.Format(Loc.Instance["Admin.PublishDone.MessageBox"], version),
-                Loc.Instance["Common.AdminWindowTitle"], MessageBoxButton.OK, MessageBoxImage.Information);
+            // Явного модального окна с подтверждением больше нет — тот же принцип, что и у
+            // StopButton_Click (см. комментарий там): StatusText + запись в "Итоги" уже
+            // достаточно заметны, а лишний модальный клик мешал переключаться между окнами.
         }
         catch (Exception ex)
         {
@@ -625,6 +652,13 @@ public partial class AdminWindow : Window
     private void CopySelectedErrorLog_Click(object sender, RoutedEventArgs e) => CopySelectedLines(ErrorLogList);
 
     private void CopyAllErrorLog_Click(object sender, RoutedEventArgs e) => CopyAllLines(ErrorLogList);
+
+    private void CopySelectedResults_Executed(object sender, System.Windows.Input.ExecutedRoutedEventArgs e) =>
+        CopySelectedLines(ResultsList);
+
+    private void CopySelectedResults_Click(object sender, RoutedEventArgs e) => CopySelectedLines(ResultsList);
+
+    private void CopyAllResults_Click(object sender, RoutedEventArgs e) => CopyAllLines(ResultsList);
 
     private static void CopySelectedLines(System.Windows.Controls.ListBox listBox)
     {

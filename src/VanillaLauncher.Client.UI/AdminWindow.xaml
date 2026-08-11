@@ -7,10 +7,14 @@
         xmlns:loc="clr-namespace:VanillaLauncher.Client.UI.Localization"
         mc:Ignorable="d"
         Title="{Binding Source={x:Static loc:Loc.Instance}, Path=[Common.AdminWindowTitle]}"
-        Height="760" Width="760"
+        Height="760" Width="980"
         WindowStartupLocation="CenterScreen"
         Closing="Window_Closing">
     <Grid Margin="16">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="240" />
+        </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
@@ -25,7 +29,7 @@
             <RowDefinition Height="1*" />
         </Grid.RowDefinitions>
 
-        <Grid Grid.Row="0" Margin="0,0,0,8">
+        <Grid Grid.Row="0" Grid.ColumnSpan="2" Margin="0,0,0,8">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*" />
                 <ColumnDefinition Width="Auto" />
@@ -49,14 +53,14 @@
             </Border>
         </Grid>
 
-        <StackPanel Grid.Row="1" Margin="0,0,0,8">
+        <StackPanel Grid.Row="1" Grid.Column="0" Margin="0,0,0,8">
             <TextBlock x:Name="PlayersOnlineText"
                        Foreground="{StaticResource MutedTextBrush}" TextWrapping="Wrap" />
             <ProgressBar x:Name="StartupProgressBar" Height="4" Margin="0,4,0,0"
                          IsIndeterminate="True" Visibility="Collapsed" />
         </StackPanel>
 
-        <WrapPanel Grid.Row="2" Orientation="Horizontal" Margin="0,0,0,8">
+        <WrapPanel Grid.Row="2" Grid.Column="0" Orientation="Horizontal" Margin="0,0,0,8">
             <Button x:Name="StartButton" Padding="12,6" Margin="0,0,8,4"
                     Content="{Binding Source={x:Static loc:Loc.Instance}, Path=[Admin.StartButton]}"
                     Click="StartButton_Click" />
@@ -75,13 +79,13 @@
                     Click="GuideButton_Click" />
         </WrapPanel>
 
-        <StackPanel Grid.Row="3" Orientation="Horizontal" Margin="0,0,0,8">
+        <StackPanel Grid.Row="3" Grid.Column="0" Orientation="Horizontal" Margin="0,0,0,8">
             <Button x:Name="RecreateWorldButton" Padding="12,6"
                     Content="{Binding Source={x:Static loc:Loc.Instance}, Path=[Admin.RecreateWorldButton]}"
                     Click="RecreateWorldButton_Click" />
         </StackPanel>
 
-        <StackPanel Grid.Row="4" Orientation="Horizontal" Margin="0,0,0,8">
+        <StackPanel Grid.Row="4" Grid.Column="0" Orientation="Horizontal" Margin="0,0,0,8">
             <TextBlock VerticalAlignment="Center" Margin="0,0,8,0"
                        Text="{Binding Source={x:Static loc:Loc.Instance}, Path=[Admin.VersionLabel]}" />
             <TextBox x:Name="VersionTextBox" Width="220" VerticalContentAlignment="Center" Margin="0,0,8,0" />
@@ -91,10 +95,48 @@
                     Click="PublishButton_Click" />
         </StackPanel>
 
-        <TextBlock Grid.Row="5" FontWeight="Bold" Margin="0,0,0,4"
+        <Grid Grid.Row="1" Grid.RowSpan="4" Grid.Column="1" Margin="12,0,0,8">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+            <TextBlock Grid.Row="0" FontWeight="Bold" Margin="0,0,0,4"
+                       Text="{Binding Source={x:Static loc:Loc.Instance}, Path=[Admin.ResultsHeader]}" />
+            <ListBox x:Name="ResultsList" Grid.Row="1" FontSize="11"
+                     ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                     VirtualizingPanel.ScrollUnit="Item"
+                     SelectionMode="Extended">
+                <ListBox.InputBindings>
+                    <KeyBinding Key="C" Modifiers="Control" Command="ApplicationCommands.Copy" />
+                </ListBox.InputBindings>
+                <ListBox.CommandBindings>
+                    <CommandBinding Command="ApplicationCommands.Copy" Executed="CopySelectedResults_Executed" />
+                </ListBox.CommandBindings>
+                <ListBox.ContextMenu>
+                    <ContextMenu>
+                        <MenuItem Click="CopySelectedResults_Click"
+                                  Header="{Binding Source={x:Static loc:Loc.Instance}, Path=[Main.CopySelected]}" />
+                        <MenuItem Click="CopyAllResults_Click"
+                                  Header="{Binding Source={x:Static loc:Loc.Instance}, Path=[Main.CopyAll]}" />
+                    </ContextMenu>
+                </ListBox.ContextMenu>
+                <ListBox.ItemContainerStyle>
+                    <Style TargetType="ListBoxItem">
+                        <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                    </Style>
+                </ListBox.ItemContainerStyle>
+                <ListBox.ItemTemplate>
+                    <DataTemplate>
+                        <TextBlock Text="{Binding}" TextWrapping="Wrap" />
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
+            </ListBox>
+        </Grid>
+
+        <TextBlock Grid.Row="5" Grid.ColumnSpan="2" FontWeight="Bold" Margin="0,0,0,4"
                    Text="{Binding Source={x:Static loc:Loc.Instance}, Path=[Admin.ConsoleHeader]}" />
 
-        <ListBox x:Name="LogList" Grid.Row="6" FontFamily="Consolas"
+        <ListBox x:Name="LogList" Grid.Row="6" Grid.ColumnSpan="2" FontFamily="Consolas"
                  ScrollViewer.HorizontalScrollBarVisibility="Disabled"
                  VirtualizingPanel.ScrollUnit="Item"
                  SelectionMode="Extended">
@@ -124,7 +166,7 @@
             </ListBox.ItemTemplate>
         </ListBox>
 
-        <Grid Grid.Row="7" Margin="0,8,0,0">
+        <Grid Grid.Row="7" Grid.ColumnSpan="2" Margin="0,8,0,0">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*" />
                 <ColumnDefinition Width="Auto" />
@@ -137,13 +179,13 @@
                     Click="SendCommandButton_Click" />
         </Grid>
 
-        <Border Grid.Row="8" BorderThickness="0,1,0,0" BorderBrush="{StaticResource BorderBrush2}"
+        <Border Grid.Row="8" Grid.ColumnSpan="2" BorderThickness="0,1,0,0" BorderBrush="{StaticResource BorderBrush2}"
                 Margin="0,12,0,8" />
 
-        <TextBlock Grid.Row="9" FontWeight="Bold" Margin="0,0,0,4"
+        <TextBlock Grid.Row="9" Grid.ColumnSpan="2" FontWeight="Bold" Margin="0,0,0,4"
                    Text="{Binding Source={x:Static loc:Loc.Instance}, Path=[Admin.ErrorsHeader]}" />
 
-        <ListBox x:Name="ErrorLogList" Grid.Row="10" FontFamily="Consolas"
+        <ListBox x:Name="ErrorLogList" Grid.Row="10" Grid.ColumnSpan="2" FontFamily="Consolas"
                  Foreground="{StaticResource DangerBrush}"
                  ScrollViewer.HorizontalScrollBarVisibility="Disabled"
                  VirtualizingPanel.ScrollUnit="Item"
