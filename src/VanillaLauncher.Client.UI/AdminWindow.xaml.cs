@@ -104,30 +104,67 @@ public partial class AdminWindow : Window
     }
 
     /// <summary>
-    /// Адрес сервера (ServerHost/ServerPort из "Настроек" — то же значение, что использует
-    /// проверка доступности в MainWindow, см. ServerReachabilityChecker) — показывается здесь
-    /// же, чтобы админу не нужно было идти в "Настройки" каждый раз, когда его просят скинуть
-    /// адрес игроку. Кнопка "Копировать" скрыта, если поле не заполнено.
+    /// Адрес сервера — редактируемые поля, а не просто отображение. Источник значения при
+    /// загрузке: server.properties (server-ip/server-port), если папка сервера известна и там
+    /// заполнено — это "то, чем сервер реально пользуется", включая случай, когда админ уже
+    /// прописал туда Tailscale IP до того, как вообще открыл лаунчер. Фоллбек —
+    /// AppConfig.ServerHost/ServerPort (то же значение, что использует проверка доступности в
+    /// MainWindow, см. ServerReachabilityChecker), если файла/папки ещё нет или там пусто.
+    /// Не вызывается из SetLanguage() — сами значения не зависят от языка интерфейса, только
+    /// соседняя подпись/подсказка (перерисовываются через обычный XAML-биндинг).
     /// </summary>
-    private void RefreshServerAddressText()
+    private void RefreshServerAddressFields()
     {
-        if (string.IsNullOrWhiteSpace(_config.ServerHost))
+        string? host = _config.ServerHost;
+        var port = _config.ServerPort;
+
+        if (!string.IsNullOrWhiteSpace(_config.ServerDirectory) && System.IO.Directory.Exists(_config.ServerDirectory))
         {
-            ServerAddressText.Text = Loc.Instance["Admin.ServerAddressNotConfigured"];
-            CopyServerAddressButton.Visibility = Visibility.Collapsed;
+            var fileIp = ServerPropertiesReader.GetServerIp(_config.ServerDirectory);
+            var filePort = ServerPropertiesReader.GetServerPort(_config.ServerDirectory);
+            if (fileIp is not null)
+                host = fileIp;
+            if (filePort is not null)
+                port = filePort.Value;
+        }
+
+        ServerHostInlineTextBox.Text = host ?? string.Empty;
+        ServerPortInlineTextBox.Text = port.ToString();
+    }
+
+    /// <summary>
+    /// Пишет адрес и в AppConfig (appsettings.json — используется проверкой доступности в
+    /// MainWindow), и в server.properties (если папка сервера известна — используется самим
+    /// сервером). Не перезапускает сервер и не проверяет, запущен ли он — Minecraft читает
+    /// server.properties только при старте, изменение на лету эффекта не имеет (см. подсказку
+    /// под полями в разметке).
+    /// </summary>
+    private void SaveServerAddressButton_Click(object sender, RoutedEventArgs e)
+    {
+        if (!int.TryParse(ServerPortInlineTextBox.Text.Trim(), out var port) || port is < 1 or > 65535)
+        {
+            Log(Loc.Instance["Settings.ServerPortError"]);
             return;
         }
 
-        ServerAddressText.Text = string.Format(Loc.Instance["Admin.ServerAddressConfigured"], _config.ServerHost, _config.ServerPort);
-        CopyServerAddressButton.Visibility = Visibility.Visible;
+        var host = ServerHostInlineTextBox.Text.Trim();
+        _config.ServerHost = string.IsNullOrWhiteSpace(host) ? null : host;
+        _config.ServerPort = port;
+        try { _config.Save(); } catch (IOException) { } catch (UnauthorizedAccessException) { }
+
+        if (!string.IsNullOrWhiteSpace(_config.ServerDirectory) && System.IO.Directory.Exists(_config.ServerDirectory))
+            ServerPropertiesReader.SetServerAddress(_config.ServerDirectory, _config.ServerHost, port);
+
+        Log(string.Format(Loc.Instance["Admin.ServerAddressSaved.Log"], _config.ServerHost, port));
     }
 
     private void CopyServerAddressButton_Click(object sender, RoutedEventArgs e)
     {
-        if (string.IsNullOrWhiteSpace(_config.ServerHost))
+        var host = ServerHostInlineTextBox.Text.Trim();
+        if (string.IsNullOrEmpty(host))
             return;
 
-        var address = $"{_config.ServerHost}:{_config.ServerPort}";
+        var address = $"{host}:{ServerPortInlineTextBox.Text.Trim()}";
         Clipboard.SetText(address);
         Log(string.Format(Loc.Instance["Admin.ServerAddressCopied.Log"], address));
     }
@@ -188,7 +225,7 @@ public partial class AdminWindow : Window
 
         RefreshVersionWatermark();
         UpdatePlayersOnlineText();
-        RefreshServerAddressText();
+        RefreshServerAddressFields();
         PopulateCommandCheatSheet();
         _ = LoadLastPublishedVersionAsync();
     }
@@ -224,7 +261,6 @@ public partial class AdminWindow : Window
         }
         RefreshVersionWatermark();
         UpdatePlayersOnlineText();
-        RefreshServerAddressText();
 
         _config.Language = language;
         try { _config.Save(); } catch (IOException) { } catch (UnauthorizedAccessException) { }
@@ -319,6 +355,7 @@ public partial class AdminWindow : Window
         _config.Save();
         Log(string.Format(Loc.Instance["Admin.ServerDirSet.Log"], dialog.FolderName));
         RefreshServerDirectoryState();
+        RefreshServerAddressFields();
     }
 
     private void SettingsButton_Click(object sender, RoutedEventArgs e)
@@ -333,7 +370,7 @@ public partial class AdminWindow : Window
 
             RefreshLanguageButtons();
             RefreshServerDirectoryState();
-            RefreshServerAddressText();
+            RefreshServerAddressFields();
         }
     }
 

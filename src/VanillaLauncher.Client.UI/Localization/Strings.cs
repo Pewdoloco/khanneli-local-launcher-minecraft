@@ -14,7 +14,6 @@ internal static class Strings
     private static readonly Dictionary<string, (string Ru, string En)> Map = new()
     {
         // --- Общее ---
-        ["Common.AppTitle"] = ("VanillaLauncher", "VanillaLauncher"),
         ["Common.AdminWindowTitle"] = ("VanillaLauncher — Admin", "VanillaLauncher — Admin"),
         ["Common.Browse"] = ("Обзор...", "Browse..."),
         ["Common.Cancel"] = ("Отмена", "Cancel"),
@@ -118,10 +117,12 @@ internal static class Strings
         ["Admin.ErrorsHeader"] = ("Ошибки:", "Errors:"),
         ["Admin.PlayersOnlineEmpty"] = ("Игроков онлайн: 0", "Players online: 0"),
         ["Admin.PlayersOnlineCount"] = ("Игроков онлайн ({0}): {1}", "Players online ({0}): {1}"),
-        ["Admin.ServerAddressConfigured"] = ("Адрес сервера: {0}:{1}", "Server address: {0}:{1}"),
-        ["Admin.ServerAddressNotConfigured"] = (
-            "Адрес сервера не настроен (ServerHost/ServerPort в «Настройках»)",
-            "Server address not configured (ServerHost/ServerPort in Settings)"),
+        ["Admin.ServerAddressLabel"] = ("Адрес сервера:", "Server address:"),
+        ["Admin.ServerHostWatermark"] = ("хост / Tailscale IP", "host / Tailscale IP"),
+        ["Admin.ServerAddressHint"] = (
+            "Читается и пишется в server.properties (server-ip/server-port) — вступает в силу после следующего перезапуска сервера.",
+            "Read from and written to server.properties (server-ip/server-port) — takes effect after the next server restart."),
+        ["Admin.ServerAddressSaved.Log"] = ("Адрес сервера сохранён: {0}:{1}.", "Server address saved: {0}:{1}."),
         ["Admin.CopyServerAddressButton"] = ("Копировать", "Copy"),
         ["Admin.ServerAddressCopied.Log"] = ("Адрес сервера скопирован: {0}", "Server address copied: {0}"),
         ["Admin.CommandCheatSheetLabel"] = ("Памятка команд:", "Command cheat sheet:"),
@@ -137,7 +138,6 @@ internal static class Strings
         ["Admin.ServerStopping.Status"] = ("Останавливаем сервер (ждём штатного завершения)...", "Stopping server (waiting for graceful shutdown)..."),
         ["Admin.ServerStopTimeout.Status"] = ("Сервер не завершился штатно за 60 секунд.", "Server didn't shut down gracefully within 60 seconds."),
         ["Admin.ServerStopTimeout.Log"] = ("Сервер не ответил на stop за отведённое время — возможно, завис.", "Server didn't respond to stop within the time limit — it may be hung."),
-        ["Admin.ServerStopped.MessageBox"] = ("Сервер остановлен.", "Server stopped."),
 
         ["Admin.RecreateWorldRunning.MessageBox"] = (
             "Сначала останови сервер — пересоздавать мир на работающем сервере нельзя.",

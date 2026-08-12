@@ -56,13 +56,21 @@
 
         <StackPanel Grid.Row="1" Grid.Column="0" Margin="0,0,0,8">
             <StackPanel Orientation="Horizontal">
-                <TextBlock x:Name="ServerAddressText"
-                           Foreground="{StaticResource MutedTextBrush}" TextWrapping="Wrap"
-                           VerticalAlignment="Center" />
-                <Button x:Name="CopyServerAddressButton" Padding="8,2" Margin="8,0,0,0"
+                <TextBlock Text="{Binding Source={x:Static loc:Loc.Instance}, Path=[Admin.ServerAddressLabel]}"
+                           VerticalAlignment="Center" Margin="0,0,4,0" Foreground="{StaticResource MutedTextBrush}" />
+                <TextBox x:Name="ServerHostInlineTextBox" Width="150" VerticalContentAlignment="Center" Margin="0,0,2,0"
+                         local:Watermark.Hint="{Binding Source={x:Static loc:Loc.Instance}, Path=[Admin.ServerHostWatermark]}" />
+                <TextBlock Text=":" VerticalAlignment="Center" Foreground="{StaticResource MutedTextBrush}" />
+                <TextBox x:Name="ServerPortInlineTextBox" Width="60" VerticalContentAlignment="Center" Margin="2,0,8,0" />
+                <Button x:Name="SaveServerAddressButton" Padding="8,2" Margin="0,0,4,0"
+                        Content="{Binding Source={x:Static loc:Loc.Instance}, Path=[Common.Save]}"
+                        Click="SaveServerAddressButton_Click" />
+                <Button x:Name="CopyServerAddressButton" Padding="8,2"
                         Content="{Binding Source={x:Static loc:Loc.Instance}, Path=[Admin.CopyServerAddressButton]}"
-                        Visibility="Collapsed" Click="CopyServerAddressButton_Click" />
+                        Click="CopyServerAddressButton_Click" />
             </StackPanel>
+            <TextBlock Text="{Binding Source={x:Static loc:Loc.Instance}, Path=[Admin.ServerAddressHint]}"
+                       Foreground="{StaticResource MutedTextBrush}" FontSize="11" TextWrapping="Wrap" Margin="0,2,0,0" />
             <TextBlock x:Name="PlayersOnlineText" Margin="0,4,0,0"
                        Foreground="{StaticResource MutedTextBrush}" TextWrapping="Wrap" />
             <ProgressBar x:Name="StartupProgressBar" Height="4" Margin="0,4,0,0"
