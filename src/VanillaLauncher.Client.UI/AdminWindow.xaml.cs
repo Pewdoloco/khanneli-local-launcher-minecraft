@@ -433,11 +433,11 @@ public partial class AdminWindow : Window
                 _awaitingStartupOutcome = false;
                 ClearOnlinePlayers();
 
-                // Во время публикации сервер может сам стартовать и останавливаться (смоук-тест
-                // в PublishPipeline, см. ServerSmokeTestRunner) — не перетираем статус публикации
-                // и не включаем кнопки раньше времени. PublishButton.IsEnabled — надёжный признак
-                // "публикация ещё идёт": это единственное место, которое его выключает/включает
-                // (см. PublishButton_Click).
+                // Во время публикации ИЛИ синхронизации без публикации сервер может сам стартовать
+                // и останавливаться (смоук-тест в PublishPipeline, см. ServerSmokeTestRunner) — не
+                // перетираем статус и не включаем кнопки раньше времени. PublishButton.IsEnabled —
+                // надёжный признак "публикация или синхронизация ещё идёт": PublishButton_Click и
+                // SyncOnlyButton_Click оба выключают/включают его синхронно с SyncOnlyButton.
                 if (!PublishButton.IsEnabled)
                     return;
 
@@ -606,6 +606,7 @@ public partial class AdminWindow : Window
         var controller = EnsureController();
 
         PublishButton.IsEnabled = false;
+        SyncOnlyButton.IsEnabled = false;
         StartButton.IsEnabled = false;
         StopButton.IsEnabled = false;
         RecreateWorldButton.IsEnabled = false;
@@ -650,6 +651,59 @@ public partial class AdminWindow : Window
         finally
         {
             PublishButton.IsEnabled = true;
+            SyncOnlyButton.IsEnabled = true;
+            StartButton.IsEnabled = !controller.IsRunning;
+            StopButton.IsEnabled = controller.IsRunning;
+            SetCommandInputEnabled(controller.IsRunning);
+            RecreateWorldButton.IsEnabled = true;
+        }
+    }
+
+    private async void SyncOnlyButton_Click(object sender, RoutedEventArgs e)
+    {
+        if (string.IsNullOrWhiteSpace(_config.ServerDirectory))
+            return;
+
+        var controller = EnsureController();
+
+        PublishButton.IsEnabled = false;
+        SyncOnlyButton.IsEnabled = false;
+        StartButton.IsEnabled = false;
+        StopButton.IsEnabled = false;
+        RecreateWorldButton.IsEnabled = false;
+        SetCommandInputEnabled(false);
+        SetStatus("Admin.SyncOnly.Status");
+
+        try
+        {
+            var backupsDir = System.IO.Path.Combine(_config.ServerDirectory, "backups");
+            var worldBackup = new WorldBackupService(_config.ServerDirectory, backupsDir, _config.MaxBackupsToKeep);
+            var levelName = ServerPropertiesReader.GetLevelName(_config.ServerDirectory);
+            var progress = new Progress<string>(Log);
+
+            await new PublishPipeline().SyncOnlyAsync(
+                controller,
+                worldBackup,
+                levelName,
+                _config.ServerDirectory,
+                _config.ProfileRoot,
+                _config.IncludeFolders,
+                progress,
+                serverExcludeFileNames: _config.ServerExcludeMods);
+
+            SetStatus("Admin.SyncOnlyDone.Status");
+        }
+        catch (Exception ex)
+        {
+            SetStatus("Admin.SyncOnlyError.Status");
+            Log(string.Format(Loc.Instance["Admin.SyncOnlyError.Log"], ex.Message));
+            MessageBox.Show(this, string.Format(Loc.Instance["Admin.SyncOnlyError.MessageBox"], ex.Message), Loc.Instance["Common.AdminWindowTitle"],
+                MessageBoxButton.OK, MessageBoxImage.Error);
+        }
+        finally
+        {
+            PublishButton.IsEnabled = true;
+            SyncOnlyButton.IsEnabled = true;
             StartButton.IsEnabled = !controller.IsRunning;
             StopButton.IsEnabled = controller.IsRunning;
             SetCommandInputEnabled(controller.IsRunning);

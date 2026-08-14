@@ -96,10 +96,17 @@
                     Click="GuideButton_Click" />
         </WrapPanel>
 
-        <StackPanel Grid.Row="3" Grid.Column="0" Orientation="Horizontal" Margin="0,0,0,8">
-            <Button x:Name="RecreateWorldButton" Padding="12,6"
-                    Content="{Binding Source={x:Static loc:Loc.Instance}, Path=[Admin.RecreateWorldButton]}"
-                    Click="RecreateWorldButton_Click" />
+        <StackPanel Grid.Row="3" Grid.Column="0" Margin="0,0,0,8">
+            <StackPanel Orientation="Horizontal">
+                <Button x:Name="RecreateWorldButton" Padding="12,6" Margin="0,0,8,0"
+                        Content="{Binding Source={x:Static loc:Loc.Instance}, Path=[Admin.RecreateWorldButton]}"
+                        Click="RecreateWorldButton_Click" />
+                <Button x:Name="SyncOnlyButton" Padding="12,6"
+                        Content="{Binding Source={x:Static loc:Loc.Instance}, Path=[Admin.SyncOnlyButton]}"
+                        Click="SyncOnlyButton_Click" />
+            </StackPanel>
+            <TextBlock Text="{Binding Source={x:Static loc:Loc.Instance}, Path=[Admin.SyncOnlyHint]}"
+                       Foreground="{StaticResource MutedTextBrush}" FontSize="11" TextWrapping="Wrap" Margin="0,2,0,0" />
         </StackPanel>
 
         <StackPanel Grid.Row="4" Grid.Column="0" Orientation="Horizontal" Margin="0,0,0,8">

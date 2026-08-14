@@ -1,11 +1,18 @@
 namespace VanillaLauncher.Admin;
 
 /// <summary>
-/// Полный пайплайн публикации обновления одной кнопкой:
+/// Полный пайплайн публикации одной кнопкой:
 /// бэкап мира -> остановка сервера -> синхронизация серверных файлов ->
 /// тестовый запуск сервера (смоук-тест) -> генерация и публикация манифеста.
 ///
-/// Сервер после публикации НЕ запускается обратно автоматически (было так раньше —
+/// Первые 4 шага (бэкап -> остановка -> синхронизация -> смоук-тест) вынесены в
+/// <see cref="SyncAndSmokeTestAsync"/> и переиспользуются также в <see cref="SyncOnlyAsync"/> —
+/// том же наборе действий без загрузки чего-либо на GitHub, для кнопки "Синхронизировать с
+/// сервером (без публикации)" в AdminWindow. До неё единственным способом проверить, не
+/// сломает ли смена модов сервер, была либо реальная публикация (риск потратить время на
+/// смоук-тест ради этого), либо ручная правка файлов на сервере в обход лаунчера.
+///
+/// Сервер после публикации/синхронизации НЕ запускается обратно автоматически (было так раньше —
 /// убрано по запросу: админ должен явно нажать "Запустить сервер" сам, когда готов,
 /// а не обнаруживать постфактум, что сервер уже поднялся без его участия). Если
 /// какой-то шаг падает, пайплайн не пытается восстановить предыдущее состояние — он
@@ -37,28 +44,82 @@ public sealed class PublishPipeline
         TimeSpan? smokeTestTimeout = null,
         CancellationToken ct = default)
     {
+        await SyncAndSmokeTestAsync(
+            serverController, worldBackup, levelName, serverDirectory, buildSourceRoot, includeFolders,
+            progress, totalSteps: 5, serverExcludeFileNames, stopTimeout, smokeTestTimeout, ct);
+
+        progress.Report("Шаг 5/5: генерация и публикация манифеста...");
+        await publisher.PublishAsync(buildSourceRoot, includeFolders, version, progress, ct);
+
+        progress.Report(
+            "Публикация завершена. Тестовый запуск прошёл успешно, сервер снова остановлен — " +
+            "запусти его вручную кнопкой «Запустить сервер», когда будешь готов.");
+    }
+
+    /// <summary>
+    /// Те же бэкап -> остановка -> синхронизация -> смоук-тест, что и первые 4 шага
+    /// <see cref="RunAsync"/>, но без токена GitHub, без подтверждения необратимого действия и
+    /// без загрузки манифеста/релиза. Позволяет проверить смену модов на клиенте против
+    /// реального сервера локально, не рискуя публичным релизом.
+    /// </summary>
+    public async Task SyncOnlyAsync(
+        ServerProcessController serverController,
+        WorldBackupService worldBackup,
+        string levelName,
+        string serverDirectory,
+        string buildSourceRoot,
+        IReadOnlyList<string> includeFolders,
+        IProgress<string> progress,
+        IReadOnlyList<string>? serverExcludeFileNames = null,
+        TimeSpan? stopTimeout = null,
+        TimeSpan? smokeTestTimeout = null,
+        CancellationToken ct = default)
+    {
+        await SyncAndSmokeTestAsync(
+            serverController, worldBackup, levelName, serverDirectory, buildSourceRoot, includeFolders,
+            progress, totalSteps: 4, serverExcludeFileNames, stopTimeout, smokeTestTimeout, ct);
+
+        progress.Report(
+            "Синхронизация завершена. Тестовый запуск прошёл успешно, сервер снова остановлен — " +
+            "запусти его вручную кнопкой «Запустить сервер», когда будешь готов.");
+    }
+
+    private static async Task SyncAndSmokeTestAsync(
+        ServerProcessController serverController,
+        WorldBackupService worldBackup,
+        string levelName,
+        string serverDirectory,
+        string buildSourceRoot,
+        IReadOnlyList<string> includeFolders,
+        IProgress<string> progress,
+        int totalSteps,
+        IReadOnlyList<string>? serverExcludeFileNames,
+        TimeSpan? stopTimeout,
+        TimeSpan? smokeTestTimeout,
+        CancellationToken ct)
+    {
         var effectiveStopTimeout = stopTimeout ?? TimeSpan.FromSeconds(60);
 
-        progress.Report("Шаг 1/5: бэкап мира...");
+        progress.Report($"Шаг 1/{totalSteps}: бэкап мира...");
         worldBackup.BackupWorld(levelName);
 
         if (serverController.IsRunning)
         {
-            progress.Report("Шаг 2/5: остановка сервера...");
+            progress.Report($"Шаг 2/{totalSteps}: остановка сервера...");
             var stopped = await serverController.StopAsync(effectiveStopTimeout, ct);
             if (!stopped)
                 throw new InvalidOperationException(
-                    "Сервер не остановился штатно — публикация прервана, сервер оставлен как есть.");
+                    "Сервер не остановился штатно — операция прервана, сервер оставлен как есть.");
         }
         else
         {
-            progress.Report("Шаг 2/5: сервер уже остановлен.");
+            progress.Report($"Шаг 2/{totalSteps}: сервер уже остановлен.");
         }
 
-        progress.Report("Шаг 3/5: синхронизация серверных файлов...");
+        progress.Report($"Шаг 3/{totalSteps}: синхронизация серверных файлов...");
         await ServerFileSync.MirrorAsync(buildSourceRoot, serverDirectory, includeFolders, serverExcludeFileNames, progress, ct);
 
-        progress.Report("Шаг 4/5: тестовый запуск сервера (проверка, что моды не роняют старт)...");
+        progress.Report($"Шаг 4/{totalSteps}: тестовый запуск сервера (проверка, что моды не роняют старт)...");
         var smokeTest = await new ServerSmokeTestRunner().RunAsync(
             serverController, smokeTestTimeout ?? TimeSpan.FromSeconds(120), effectiveStopTimeout, ct);
 
@@ -82,7 +143,7 @@ public sealed class PublishPipeline
                     $"{string.Join(", ", failedMods)}. Обычно значит, что это клиентский мод, " +
                     "которому не место на дедик-сервере — добавь имя файла в ServerExcludeMods " +
                     "(экран «Настройки») и убери сам jar из папки mods на сервере, затем " +
-                    "опубликуй снова.");
+                    "попробуй снова.");
             }
 
             // Приоритет 2 — известный, надёжно детектируемый (не эвристика) класс краша при
@@ -105,16 +166,8 @@ public sealed class PublishPipeline
                 : "Строк, похожих на ошибку, не найдено — смотри полный лог в консоли.";
 
             throw new InvalidOperationException(
-                $"Тестовый запуск сервера не удался ({reason}). Публикация прервана, на GitHub " +
-                $"ничего не загружено. {culpritNote}Синхронизированные файлы сервера остались как " +
-                $"есть, проверь их вручную. {details}");
+                $"Тестовый запуск сервера не удался ({reason}). {culpritNote}Синхронизированные " +
+                $"файлы сервера остались как есть, проверь их вручную. {details}");
         }
-
-        progress.Report("Шаг 5/5: генерация и публикация манифеста...");
-        await publisher.PublishAsync(buildSourceRoot, includeFolders, version, progress, ct);
-
-        progress.Report(
-            "Публикация завершена. Тестовый запуск прошёл успешно, сервер снова остановлен — " +
-            "запусти его вручную кнопкой «Запустить сервер», когда будешь готов.");
     }
 }

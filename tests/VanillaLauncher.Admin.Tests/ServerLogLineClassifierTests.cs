@@ -23,6 +23,8 @@ public class ServerLogLineClassifierTests
     [InlineData("\tat some.package.Class.method(Class.java:10)", true)]
     [InlineData("Caused by: java.lang.RuntimeException", true)]
     [InlineData("VoidFog-1.20.1-2.0.23.jar |VoidFog |voidfog |1.20.1-2.0.23 |ERROR |Manifest: NOSIGNATURE", true)]
+    [InlineData("java.util.concurrent.ExecutionException: java.lang.AbstractMethodError: Receiver class apoli.util.PowerRestrictedCraftingRecipe does not define or inherit an implementation of the resolved method", true)]
+    [InlineData("java.lang.NoClassDefFoundError: net/minecraft/client/MouseHandler", true)]
     [InlineData("Server starting...", false)]
     [InlineData("[15:32:07] [Server thread/INFO]: Done (12.345s)! For help, type \"help\"", false)]
     public void IsErrorLine_DetectsErrorIndicators(string line, bool expected)

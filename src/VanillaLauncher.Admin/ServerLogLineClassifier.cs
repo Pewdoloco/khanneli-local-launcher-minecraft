@@ -1,3 +1,5 @@
+using System.Text.RegularExpressions;
+
 namespace VanillaLauncher.Admin;
 
 /// <summary>
@@ -8,6 +10,18 @@ namespace VanillaLauncher.Admin;
 /// </summary>
 public static class ServerLogLineClassifier
 {
+    /// <summary>
+    /// Заголовок необёрнутого Java-исключения без уровня Log4j — например
+    /// <c>java.util.concurrent.ExecutionException: java.lang.AbstractMethodError: ...</c>.
+    /// Реальный случай: краш от библиотеки apoli внутри Origins (Fabric) на живом сервере не
+    /// начинался ни с "Exception in thread", ни содержал [ERROR]/[FATAL] — первая строка
+    /// обёртки ExecutionException проходила мимо всех прежних маркеров. Якорь на начало строки
+    /// (после Trim) — не ловим упоминание исключения внутри чужого сообщения, только строку,
+    /// которая САМА является именем класса исключения.
+    /// </summary>
+    private static readonly Regex WrappedExceptionHeader =
+        new(@"^[\w.$]*(Exception|Error)(:|$)", RegexOptions.Compiled);
+
     /// <summary>
     /// "Done (12.345s)! For help, type "help"" — стандартная строка готовности сервера,
     /// неизменна много лет во всех форках (vanilla/Forge/Fabric/Paper).
@@ -36,10 +50,11 @@ public static class ServerLogLineClassifier
         if (line.Contains('|') && line.Split('|').Any(column => column.Trim().Equals("ERROR", StringComparison.OrdinalIgnoreCase)))
             return true;
 
-        var trimmed = line.TrimStart();
+        var trimmed = line.Trim();
         return trimmed.StartsWith("Exception in thread")
             || trimmed.StartsWith("at ")
             || trimmed.StartsWith("Caused by:")
-            || trimmed.StartsWith("Suppressed:");
+            || trimmed.StartsWith("Suppressed:")
+            || WrappedExceptionHeader.IsMatch(trimmed);
     }
 }

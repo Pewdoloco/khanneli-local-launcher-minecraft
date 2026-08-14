@@ -167,6 +167,16 @@ internal static class Strings
         ["Admin.PublishError.Log"] = ("Ошибка: {0}", "Error: {0}"),
         ["Admin.PublishError.MessageBox"] = ("Публикация не удалась: {0}", "Publish failed: {0}"),
 
+        ["Admin.SyncOnlyButton"] = ("Синхронизировать с сервером (без публикации)", "Sync to Server (No Publish)"),
+        ["Admin.SyncOnlyHint"] = (
+            "Прогоняет тот же бэкап/остановку/синхронизацию/тестовый запуск, что и публикация, но без GitHub — для проверки текущей клиентской сборки против реального сервера.",
+            "Runs the same backup/stop/sync/test-start as publishing, but without GitHub — to test the current client build against the real server."),
+        ["Admin.SyncOnly.Status"] = ("Синхронизация с сервером...", "Syncing to server..."),
+        ["Admin.SyncOnlyDone.Status"] = ("Синхронизация с сервером завершена.", "Sync to server complete."),
+        ["Admin.SyncOnlyError.Status"] = ("Ошибка синхронизации с сервером.", "Sync to server error."),
+        ["Admin.SyncOnlyError.Log"] = ("Ошибка: {0}", "Error: {0}"),
+        ["Admin.SyncOnlyError.MessageBox"] = ("Синхронизация с сервером не удалась: {0}", "Sync to server failed: {0}"),
+
         ["Admin.CloseConfirm.Text"] = ("Сервер всё ещё запущен. Остановить его и закрыть лаунчер?", "The server is still running. Stop it and close the launcher?"),
         ["Admin.ClosingStoppingServer.Status"] = ("Останавливаем сервер перед закрытием лаунчера...", "Stopping server before closing the launcher..."),
         ["Admin.ClosingStoppingServer.Log"] = ("Останавливаем сервер перед закрытием лаунчера...", "Stopping server before closing the launcher..."),
