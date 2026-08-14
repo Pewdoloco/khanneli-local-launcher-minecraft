@@ -1,0 +1,37 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <!-- Тёмная тема — те же ключи, что в Theme.Light.xaml, см. комментарий там. -->
+
+    <Color x:Key="AccentColor">#3B82F6</Color>
+    <Color x:Key="AccentHoverColor">#579BFA</Color>
+    <Color x:Key="AccentPressedColor">#2E6FDB</Color>
+    <Color x:Key="WindowBackgroundColor">#1E1E20</Color>
+    <Color x:Key="SurfaceColor">#28282B</Color>
+    <Color x:Key="BorderColor">#3A3A3F</Color>
+    <Color x:Key="BorderHoverColor">#4C4C53</Color>
+    <Color x:Key="TextColor">#F2F2F3</Color>
+    <Color x:Key="MutedTextColor">#9A9AA1</Color>
+    <Color x:Key="ButtonFaceColor">#333338</Color>
+    <Color x:Key="ButtonFaceHoverColor">#3D3D43</Color>
+    <Color x:Key="ButtonFacePressedColor">#47474D</Color>
+    <Color x:Key="GhostHoverColor">#2E2E33</Color>
+
+    <SolidColorBrush x:Key="AccentBrush" Color="{StaticResource AccentColor}" />
+    <SolidColorBrush x:Key="AccentHoverBrush" Color="{StaticResource AccentHoverColor}" />
+    <SolidColorBrush x:Key="AccentPressedBrush" Color="{StaticResource AccentPressedColor}" />
+    <SolidColorBrush x:Key="WindowBackgroundBrush" Color="{StaticResource WindowBackgroundColor}" />
+    <SolidColorBrush x:Key="SurfaceBrush" Color="{StaticResource SurfaceColor}" />
+    <SolidColorBrush x:Key="BorderBrush2" Color="{StaticResource BorderColor}" />
+    <SolidColorBrush x:Key="BorderHoverBrush" Color="{StaticResource BorderHoverColor}" />
+    <SolidColorBrush x:Key="TextBrush" Color="{StaticResource TextColor}" />
+    <SolidColorBrush x:Key="MutedTextBrush" Color="{StaticResource MutedTextColor}" />
+    <SolidColorBrush x:Key="ButtonFaceBrush" Color="{StaticResource ButtonFaceColor}" />
+    <SolidColorBrush x:Key="ButtonFaceHoverBrush" Color="{StaticResource ButtonFaceHoverColor}" />
+    <SolidColorBrush x:Key="ButtonFacePressedBrush" Color="{StaticResource ButtonFacePressedColor}" />
+    <SolidColorBrush x:Key="GhostHoverBrush" Color="{StaticResource GhostHoverColor}" />
+    <SolidColorBrush x:Key="AccentForegroundBrush" Color="White" />
+    <SolidColorBrush x:Key="SuccessBrush" Color="#3DDC6E" />
+    <SolidColorBrush x:Key="DangerBrush" Color="#FF6B62" />
+
+</ResourceDictionary>

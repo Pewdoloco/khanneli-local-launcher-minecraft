@@ -221,6 +221,8 @@ public partial class AdminWindow : Window
         _config = config;
         Loc.Instance.Language = _config.Language;
         RefreshLanguageButtons();
+        ThemeManager.Apply(_config.Theme);
+        RefreshThemeButtons();
         RefreshServerDirectoryState();
 
         RefreshVersionWatermark();
@@ -263,6 +265,36 @@ public partial class AdminWindow : Window
         UpdatePlayersOnlineText();
 
         _config.Language = language;
+        try { _config.Save(); } catch (IOException) { } catch (UnauthorizedAccessException) { }
+    }
+
+    private void RefreshThemeButtons()
+    {
+        ThemeLightButton.Tag = ThemeManager.Current == "light" ? "Active" : null;
+        ThemeDarkButton.Tag = ThemeManager.Current == "dark" ? "Active" : null;
+    }
+
+    private void ThemeLightButton_Click(object sender, RoutedEventArgs e) => SetTheme("light");
+
+    private void ThemeDarkButton_Click(object sender, RoutedEventArgs e) => SetTheme("dark");
+
+    private void SetTheme(string theme)
+    {
+        ThemeManager.Apply(theme);
+        RefreshThemeButtons();
+
+        // StartOutcomeText.Foreground берётся через FindResource в момент вызова
+        // SetStartOutcome (не DynamicResource-биндинг) — без повторного вызова цвет остался бы
+        // от прежней темы до следующего старта/остановки сервера. Тот же принцип re-draw'а, что
+        // у SetLanguage выше, только не для текста, а для цвета.
+        if (_startOutcomeSuccess is { } success)
+        {
+            _suppressResultAppend = true;
+            try { SetStartOutcome(success); }
+            finally { _suppressResultAppend = false; }
+        }
+
+        _config.Theme = theme;
         try { _config.Save(); } catch (IOException) { } catch (UnauthorizedAccessException) { }
     }
 

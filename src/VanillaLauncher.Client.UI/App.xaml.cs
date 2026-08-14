@@ -20,16 +20,18 @@ public partial class App : Application
 
     protected override void OnStartup(StartupEventArgs e)
     {
-        // Язык применяется до создания стартового окна (StartupUri), чтобы MainWindow сразу
-        // отрисовалась на сохранённом языке, не мигая дефолтным RU на долю секунды. Best-effort:
-        // AppConfig.Load() сама не бросает на пустом/отсутствующем файле (см. AppConfig.Load),
-        // но на всякий случай не роняем запуск, если что-то пойдёт не так на этом самом раннем
-        // этапе — язык просто останется дефолтным ("ru").
+        // Язык и тема применяются до создания стартового окна (StartupUri), чтобы MainWindow
+        // сразу отрисовалась на сохранённых значениях, не мигая дефолтными (RU/светлая) на долю
+        // секунды. Best-effort: AppConfig.Load() сама не бросает на пустом/отсутствующем файле
+        // (см. AppConfig.Load), но на всякий случай не роняем запуск, если что-то пойдёт не так
+        // на этом самом раннем этапе — язык/тема просто останутся дефолтными.
         try
         {
-            Loc.Instance.Language = AppConfig.Load().Language;
+            var config = AppConfig.Load();
+            Loc.Instance.Language = config.Language;
+            ThemeManager.Apply(config.Theme);
         }
-        catch { /* см. комментарий выше — язык останется дефолтным */ }
+        catch { /* см. комментарий выше — язык/тема останутся дефолтными */ }
 
         base.OnStartup(e);
         DispatcherUnhandledException += OnDispatcherUnhandledException;

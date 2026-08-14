@@ -13,6 +13,12 @@ public sealed class AppConfig
     // как "ru" — см. Loc.Language.
     public string Language { get; set; } = "ru";
 
+    // Тема оформления ("light"/"dark", engine-v1.21.0) — переключается тумблером в MainWindow/
+    // AdminWindow рядом с языковым, применяется мгновенно ко всем открытым окнам (см.
+    // Client.UI.ThemeManager), сохраняется в appsettings.json как обычное поле. Любое значение,
+    // кроме "dark", трактуется как "light" — см. ThemeManager.Apply.
+    public string Theme { get; set; } = "light";
+
     // Только для Admin-режима (Этап 3+). В чисто клиентской сборке можно не задавать.
     public string? ServerDirectory { get; set; }
     public string ServerBatFileName { get; set; } = "start.bat";

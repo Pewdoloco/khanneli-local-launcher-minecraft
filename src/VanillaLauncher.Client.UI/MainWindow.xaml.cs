@@ -53,6 +53,9 @@ public partial class MainWindow : Window
         InitializeComponent();
         Title = $"VanillaLauncher {EngineVersion.Current}";
         RefreshLanguageButtons();
+        // Тема уже применена глобально в App.OnStartup (до создания этого окна) — здесь только
+        // синхронизируем состояние тумблера с тем, что реально подключено.
+        RefreshThemeButtons();
         Loaded += async (_, _) => await InitializeAsync();
     }
 
@@ -85,6 +88,28 @@ public partial class MainWindow : Window
         try { _config.Save(); } catch (IOException) { } catch (UnauthorizedAccessException) { }
     }
 
+    private void RefreshThemeButtons()
+    {
+        ThemeLightButton.Tag = ThemeManager.Current == "light" ? "Active" : null;
+        ThemeDarkButton.Tag = ThemeManager.Current == "dark" ? "Active" : null;
+    }
+
+    private void ThemeLightButton_Click(object sender, RoutedEventArgs e) => SetTheme("light");
+
+    private void ThemeDarkButton_Click(object sender, RoutedEventArgs e) => SetTheme("dark");
+
+    private void SetTheme(string theme)
+    {
+        ThemeManager.Apply(theme);
+        RefreshThemeButtons();
+
+        if (_config is null)
+            return;
+
+        _config.Theme = theme;
+        try { _config.Save(); } catch (IOException) { } catch (UnauthorizedAccessException) { }
+    }
+
     /// <summary>
     /// ProfileRoot в appsettings.json — это папка сборки конкретного человека, у каждого
     /// своя. Значение, зашитое при сборке exe, подходит только автору сборки; у всех
@@ -98,6 +123,8 @@ public partial class MainWindow : Window
             _config = AppConfig.Load();
             Loc.Instance.Language = _config.Language;
             RefreshLanguageButtons();
+            ThemeManager.Apply(_config.Theme);
+            RefreshThemeButtons();
         }
         catch (Exception ex)
         {

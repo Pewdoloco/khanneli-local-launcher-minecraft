@@ -16,7 +16,7 @@
 
         <ScrollViewer Grid.Row="0" VerticalScrollBarVisibility="Auto">
             <StackPanel>
-                <TextBlock TextWrapping="Wrap" Foreground="{StaticResource MutedTextBrush}" Margin="0,0,0,12">
+                <TextBlock TextWrapping="Wrap" Foreground="{DynamicResource MutedTextBrush}" Margin="0,0,0,12">
                     <Run Text="{Binding Source={x:Static loc:Loc.Instance}, Path=[Settings.Intro], Mode=OneWay}" />
                     <Run Text="*" Foreground="Red" FontWeight="Bold" />
                     <Run Text="{Binding Source={x:Static loc:Loc.Instance}, Path=[Settings.IntroAfterStar], Mode=OneWay}" />
@@ -35,7 +35,7 @@
                             Content="{Binding Source={x:Static loc:Loc.Instance}, Path=[Common.Browse]}" />
                 </Grid>
                 <TextBlock Margin="0,4,0,4" Text="{Binding Source={x:Static loc:Loc.Instance}, Path=[Settings.ClientFolderNameLabel]}" />
-                <TextBlock TextWrapping="Wrap" Foreground="{StaticResource MutedTextBrush}" Margin="0,0,0,4"
+                <TextBlock TextWrapping="Wrap" Foreground="{DynamicResource MutedTextBrush}" Margin="0,0,0,4"
                            Text="{Binding Source={x:Static loc:Loc.Instance}, Path=[Settings.ClientFolderNameHint]}" />
                 <TextBox x:Name="ClientFolderNameTextBox" Padding="4" Margin="0,0,0,4" local:Watermark.Hint="MyModpack" />
                 <TextBlock Margin="0,4,0,4" TextWrapping="Wrap"
@@ -59,7 +59,7 @@
                             Content="{Binding Source={x:Static loc:Loc.Instance}, Path=[Common.Browse]}" />
                 </Grid>
                 <TextBlock Margin="0,4,0,4" Text="{Binding Source={x:Static loc:Loc.Instance}, Path=[Settings.ServerFolderNameLabel]}" />
-                <TextBlock TextWrapping="Wrap" Foreground="{StaticResource MutedTextBrush}" Margin="0,0,0,4"
+                <TextBlock TextWrapping="Wrap" Foreground="{DynamicResource MutedTextBrush}" Margin="0,0,0,4"
                            Text="{Binding Source={x:Static loc:Loc.Instance}, Path=[Settings.ServerFolderNameHint]}" />
                 <TextBox x:Name="ServerFolderNameTextBox" Padding="4" Margin="0,0,0,4" local:Watermark.Hint="MyServer" />
                 <TextBlock Margin="0,4,0,4" TextWrapping="Wrap"
@@ -75,7 +75,7 @@
 
                 <TextBlock FontWeight="Bold" Margin="0,0,0,4"
                            Text="{Binding Source={x:Static loc:Loc.Instance}, Path=[Settings.ServerHostLabel]}" />
-                <TextBlock Margin="0,0,0,4" TextWrapping="Wrap" Foreground="{StaticResource MutedTextBrush}"
+                <TextBlock Margin="0,0,0,4" TextWrapping="Wrap" Foreground="{DynamicResource MutedTextBrush}"
                            Text="{Binding Source={x:Static loc:Loc.Instance}, Path=[Settings.ServerHostHint]}" />
                 <TextBox x:Name="ServerHostTextBox" Padding="4" Margin="0,0,0,8" local:Watermark.Hint="100.x.y.z" />
                 <TextBlock Margin="0,0,0,4" Text="{Binding Source={x:Static loc:Loc.Instance}, Path=[Settings.ServerPortLabel]}" />
@@ -84,14 +84,14 @@
 
                 <TextBlock FontWeight="Bold" Margin="0,0,0,4"
                            Text="{Binding Source={x:Static loc:Loc.Instance}, Path=[Settings.ManifestUrlLabel]}" />
-                <TextBlock Margin="0,0,0,4" TextWrapping="Wrap" Foreground="{StaticResource MutedTextBrush}"
+                <TextBlock Margin="0,0,0,4" TextWrapping="Wrap" Foreground="{DynamicResource MutedTextBrush}"
                            Text="{Binding Source={x:Static loc:Loc.Instance}, Path=[Settings.ManifestUrlHint]}" />
                 <TextBox x:Name="ManifestUrlTextBox" Padding="4" Margin="0,0,0,16"
                          local:Watermark.Hint="https://github.com/Owner/Repo/releases/latest/download/manifest.json" />
 
                 <TextBlock FontWeight="Bold" Margin="0,0,0,4" TextWrapping="Wrap"
                            Text="{Binding Source={x:Static loc:Loc.Instance}, Path=[Settings.ModpackRepoHeader]}" />
-                <TextBlock Margin="0,0,0,4" TextWrapping="Wrap" Foreground="{StaticResource MutedTextBrush}"
+                <TextBlock Margin="0,0,0,4" TextWrapping="Wrap" Foreground="{DynamicResource MutedTextBrush}"
                            Text="{Binding Source={x:Static loc:Loc.Instance}, Path=[Settings.ModpackRepoHint]}" />
                 <TextBlock Margin="0,0,0,4" Text="{Binding Source={x:Static loc:Loc.Instance}, Path=[Settings.GitHubOwnerLabel]}" />
                 <TextBox x:Name="GitHubOwnerTextBox" Padding="4" Margin="0,0,0,8" local:Watermark.Hint="MyName" />
@@ -100,7 +100,7 @@
 
                 <TextBlock FontWeight="Bold" Margin="0,0,0,4" TextWrapping="Wrap"
                            Text="{Binding Source={x:Static loc:Loc.Instance}, Path=[Settings.EngineRepoHeader]}" />
-                <TextBlock Margin="0,0,0,4" TextWrapping="Wrap" Foreground="{StaticResource MutedTextBrush}"
+                <TextBlock Margin="0,0,0,4" TextWrapping="Wrap" Foreground="{DynamicResource MutedTextBrush}"
                            Text="{Binding Source={x:Static loc:Loc.Instance}, Path=[Settings.EngineRepoHint]}" />
                 <TextBlock Margin="0,0,0,4" Text="{Binding Source={x:Static loc:Loc.Instance}, Path=[Settings.EngineOwnerLabel]}" />
                 <TextBox x:Name="EngineGitHubOwnerTextBox" Padding="4" Margin="0,0,0,8"
@@ -116,7 +116,7 @@
 
                 <TextBlock FontWeight="Bold" Margin="0,0,0,4"
                            Text="{Binding Source={x:Static loc:Loc.Instance}, Path=[Settings.ExcludeModsLabel]}" />
-                <TextBlock Margin="0,0,0,4" TextWrapping="Wrap" Foreground="{StaticResource MutedTextBrush}"
+                <TextBlock Margin="0,0,0,4" TextWrapping="Wrap" Foreground="{DynamicResource MutedTextBrush}"
                            Text="{Binding Source={x:Static loc:Loc.Instance}, Path=[Settings.ExcludeModsHint]}" />
                 <TextBox x:Name="ServerExcludeModsTextBox" Padding="4" Margin="0,0,0,4"
                          AcceptsReturn="True" TextWrapping="Wrap" Height="100"
@@ -131,7 +131,7 @@
 
                 <TextBlock FontWeight="Bold" FontSize="14" Margin="0,8,0,4"
                            Text="{Binding Source={x:Static loc:Loc.Instance}, Path=[Settings.GuidesHeader]}" />
-                <TextBlock TextWrapping="Wrap" Foreground="{StaticResource MutedTextBrush}" Margin="0,0,0,8"
+                <TextBlock TextWrapping="Wrap" Foreground="{DynamicResource MutedTextBrush}" Margin="0,0,0,8"
                            Text="{Binding Source={x:Static loc:Loc.Instance}, Path=[Settings.GuidesHint]}" />
 
                 <Grid Margin="0,0,0,4">

@@ -2,63 +2,61 @@
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 
     <!--
-      Единый минималистичный стиль (светлая тема, в духе Windows 11 / macOS) — плоские кнопки
-      со скруглёнными углами, нейтральная палитра, один акцентный цвет. Подключается один раз в
-      App.xaml (merged dictionary) и каскадно применяется implicit-стилями (TargetType без x:Key)
-      ко всем окнам — ни одно окно не подключает его по отдельности и не переопределяет.
+      Единый минималистичный стиль (в духе Windows 11 / macOS) — плоские кнопки со скруглёнными
+      углами, нейтральная палитра, один акцентный цвет, карточки для группировки. Подключается
+      один раз в App.xaml (merged dictionary, вместе с Theme.Light.xaml/Theme.Dark.xaml) и
+      каскадно применяется implicit-стилями (TargetType без x:Key) ко всем окнам — ни одно окно
+      не подключает его по отдельности и не переопределяет.
       Сознательно не трогаем системный chrome окна (заголовок/рамка/кнопки свернуть-закрыть) —
       кастомный WindowChrome ломает штатное перетаскивание/resize и не окупает риск здесь.
-      Тёмная тема не реализована в этой версии (см. CHANGELOG.md, engine-v1.9.0) — осознанное
-      сужение объёма.
+
+      Цветовые токены (AccentBrush/SurfaceBrush/TextBrush и т.д.) здесь НЕ определяются — они
+      живут в Theme.Light.xaml/Theme.Dark.xaml и подключаются ThemeManager (engine-v1.21.0,
+      см. ThemeManager.cs) как отдельная merged dictionary поверх этой. Все ссылки на них ниже —
+      DynamicResource, а не StaticResource: только так переключение темы обновляет уже открытые
+      окна на лету (StaticResource резолвится один раз при загрузке и не видит подмену словаря).
     -->
-
-    <Color x:Key="AccentColor">#2563EB</Color>
-    <Color x:Key="AccentHoverColor">#1D4FD1</Color>
-    <Color x:Key="AccentPressedColor">#1741B0</Color>
-    <Color x:Key="WindowBackgroundColor">#F5F5F7</Color>
-    <Color x:Key="SurfaceColor">#FFFFFF</Color>
-    <Color x:Key="BorderColor">#D9D9DE</Color>
-    <Color x:Key="BorderHoverColor">#B8B8C0</Color>
-    <Color x:Key="TextColor">#1D1D1F</Color>
-    <Color x:Key="MutedTextColor">#6E6E73</Color>
-    <Color x:Key="ButtonFaceColor">#ECECEE</Color>
-    <Color x:Key="ButtonFaceHoverColor">#E2E2E6</Color>
-    <Color x:Key="ButtonFacePressedColor">#D6D6DC</Color>
-
-    <SolidColorBrush x:Key="AccentBrush" Color="{StaticResource AccentColor}" />
-    <SolidColorBrush x:Key="AccentHoverBrush" Color="{StaticResource AccentHoverColor}" />
-    <SolidColorBrush x:Key="AccentPressedBrush" Color="{StaticResource AccentPressedColor}" />
-    <SolidColorBrush x:Key="WindowBackgroundBrush" Color="{StaticResource WindowBackgroundColor}" />
-    <SolidColorBrush x:Key="SurfaceBrush" Color="{StaticResource SurfaceColor}" />
-    <SolidColorBrush x:Key="BorderBrush2" Color="{StaticResource BorderColor}" />
-    <SolidColorBrush x:Key="BorderHoverBrush" Color="{StaticResource BorderHoverColor}" />
-    <SolidColorBrush x:Key="TextBrush" Color="{StaticResource TextColor}" />
-    <SolidColorBrush x:Key="MutedTextBrush" Color="{StaticResource MutedTextColor}" />
-    <SolidColorBrush x:Key="ButtonFaceBrush" Color="{StaticResource ButtonFaceColor}" />
-    <SolidColorBrush x:Key="ButtonFaceHoverBrush" Color="{StaticResource ButtonFaceHoverColor}" />
-    <SolidColorBrush x:Key="ButtonFacePressedBrush" Color="{StaticResource ButtonFacePressedColor}" />
-    <SolidColorBrush x:Key="AccentForegroundBrush" Color="White" />
-    <SolidColorBrush x:Key="SuccessBrush" Color="#1E8E3E" />
-    <SolidColorBrush x:Key="DangerBrush" Color="#D93025" />
 
     <FontFamily x:Key="AppFontFamily">Segoe UI Variable Text, Segoe UI</FontFamily>
 
     <Style TargetType="Window">
-        <Setter Property="Background" Value="{StaticResource WindowBackgroundBrush}" />
+        <Setter Property="Background" Value="{DynamicResource WindowBackgroundBrush}" />
         <Setter Property="FontFamily" Value="{StaticResource AppFontFamily}" />
         <Setter Property="FontSize" Value="13" />
-        <Setter Property="TextElement.Foreground" Value="{StaticResource TextBrush}" />
+        <Setter Property="TextElement.Foreground" Value="{DynamicResource TextBrush}" />
     </Style>
 
     <Style TargetType="TextBlock">
-        <Setter Property="Foreground" Value="{StaticResource TextBrush}" />
+        <Setter Property="Foreground" Value="{DynamicResource TextBrush}" />
+    </Style>
+
+    <!-- Приглушённый заголовок секции внутри карточки — отличает "Сервер"/"Консоль сервера" и
+         т.п. от основного статус-текста (16px) и от текста кнопок, создавая понятную иерархию:
+         акцентная кнопка > обычный текст/кнопки > этот приглушённый заголовок > подсказки. -->
+    <Style x:Key="SectionHeading" TargetType="TextBlock">
+        <Setter Property="Foreground" Value="{DynamicResource MutedTextBrush}" />
+        <Setter Property="FontSize" Value="11" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+        <Setter Property="Margin" Value="0,0,0,10" />
+    </Style>
+
+    <!-- Карточка — единица визуальной группировки (engine-v1.21.0). Один плоский борд с
+         поверхностным фоном (SurfaceBrush), без тени — тень плохо сочетается с "плоским" стилем
+         остального интерфейса и не нужна для отделения от фона: контраста SurfaceBrush/
+         WindowBackgroundBrush + тонкой рамки достаточно в обеих темах. -->
+    <Style x:Key="Card" TargetType="Border">
+        <Setter Property="Background" Value="{DynamicResource SurfaceBrush}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush2}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="CornerRadius" Value="10" />
+        <Setter Property="Padding" Value="16" />
     </Style>
 
     <!-- Обычная (нейтральная) кнопка — flat, скруглённые углы, hover/pressed через Border. -->
     <Style TargetType="Button">
-        <Setter Property="Background" Value="{StaticResource ButtonFaceBrush}" />
-        <Setter Property="Foreground" Value="{StaticResource TextBrush}" />
-        <Setter Property="BorderBrush" Value="{StaticResource BorderBrush2}" />
+        <Setter Property="Background" Value="{DynamicResource ButtonFaceBrush}" />
+        <Setter Property="Foreground" Value="{DynamicResource TextBrush}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush2}" />
         <Setter Property="BorderThickness" Value="1" />
         <Setter Property="Padding" Value="12,6" />
         <Setter Property="Cursor" Value="Hand" />
@@ -75,11 +73,11 @@
                     </Border>
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsMouseOver" Value="True">
-                            <Setter TargetName="Root" Property="Background" Value="{StaticResource ButtonFaceHoverBrush}" />
-                            <Setter TargetName="Root" Property="BorderBrush" Value="{StaticResource BorderHoverBrush}" />
+                            <Setter TargetName="Root" Property="Background" Value="{DynamicResource ButtonFaceHoverBrush}" />
+                            <Setter TargetName="Root" Property="BorderBrush" Value="{DynamicResource BorderHoverBrush}" />
                         </Trigger>
                         <Trigger Property="IsPressed" Value="True">
-                            <Setter TargetName="Root" Property="Background" Value="{StaticResource ButtonFacePressedBrush}" />
+                            <Setter TargetName="Root" Property="Background" Value="{DynamicResource ButtonFacePressedBrush}" />
                         </Trigger>
                         <Trigger Property="IsEnabled" Value="False">
                             <Setter TargetName="Root" Property="Opacity" Value="0.45" />
@@ -94,9 +92,9 @@
          Применяется явно (Style="{StaticResource AccentButton}") на кнопках главного действия
          экрана — не implicit, чтобы не перекрашивать вообще все кнопки подряд. -->
     <Style x:Key="AccentButton" TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
-        <Setter Property="Background" Value="{StaticResource AccentBrush}" />
-        <Setter Property="Foreground" Value="{StaticResource AccentForegroundBrush}" />
-        <Setter Property="BorderBrush" Value="{StaticResource AccentBrush}" />
+        <Setter Property="Background" Value="{DynamicResource AccentBrush}" />
+        <Setter Property="Foreground" Value="{DynamicResource AccentForegroundBrush}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource AccentBrush}" />
         <Setter Property="FontWeight" Value="SemiBold" />
         <Setter Property="Template">
             <Setter.Value>
@@ -110,11 +108,44 @@
                     </Border>
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsMouseOver" Value="True">
-                            <Setter TargetName="Root" Property="Background" Value="{StaticResource AccentHoverBrush}" />
-                            <Setter TargetName="Root" Property="BorderBrush" Value="{StaticResource AccentHoverBrush}" />
+                            <Setter TargetName="Root" Property="Background" Value="{DynamicResource AccentHoverBrush}" />
+                            <Setter TargetName="Root" Property="BorderBrush" Value="{DynamicResource AccentHoverBrush}" />
                         </Trigger>
                         <Trigger Property="IsPressed" Value="True">
-                            <Setter TargetName="Root" Property="Background" Value="{StaticResource AccentPressedBrush}" />
+                            <Setter TargetName="Root" Property="Background" Value="{DynamicResource AccentPressedBrush}" />
+                        </Trigger>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter TargetName="Root" Property="Opacity" Value="0.45" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- Призрачная (tertiary) кнопка — без фона/рамки в состоянии покоя, только лёгкая заливка
+         по hover. Для второстепенных, не-разрушительных действий (Настройки/Инструкция/
+         Сохранить/Копировать) — чтобы они не спорили по весу с основными действиями экрана
+         (Старт/Стоп, Опубликовать), которые остаются на обычной/акцентной кнопке. -->
+    <Style x:Key="GhostButton" TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="BorderBrush" Value="Transparent" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <Border x:Name="Root" Background="{TemplateBinding Background}"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="{TemplateBinding BorderThickness}"
+                            CornerRadius="6" SnapsToDevicePixels="True">
+                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"
+                                          Margin="{TemplateBinding Padding}" RecognizesAccessKey="True" />
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="Root" Property="Background" Value="{DynamicResource GhostHoverBrush}" />
+                        </Trigger>
+                        <Trigger Property="IsPressed" Value="True">
+                            <Setter TargetName="Root" Property="Background" Value="{DynamicResource ButtonFacePressedBrush}" />
                         </Trigger>
                         <Trigger Property="IsEnabled" Value="False">
                             <Setter TargetName="Root" Property="Opacity" Value="0.45" />
@@ -127,7 +158,8 @@
 
     <!-- Плоский тумблер языка (сегментированный контрол RU|EN) — используется одинаково в
          MainWindow/AdminWindow. Toggle-часть (какой сегмент активен) — в code-behind через
-         Tag/клик, здесь только внешний вид. -->
+         Tag/клик, здесь только внешний вид. Тот же стиль переиспользуется тумблером темы
+         (☀/🌙, см. ThemeManager) — оба живут в одном LanguageToggleContainer через SegmentGroup. -->
     <Style x:Key="LanguageToggleButton" TargetType="Button">
         <Setter Property="Padding" Value="10,4" />
         <Setter Property="MinWidth" Value="44" />
@@ -137,7 +169,7 @@
         <Setter Property="FocusVisualStyle" Value="{x:Null}" />
         <Setter Property="BorderThickness" Value="0" />
         <Setter Property="Background" Value="Transparent" />
-        <Setter Property="Foreground" Value="{StaticResource MutedTextBrush}" />
+        <Setter Property="Foreground" Value="{DynamicResource MutedTextBrush}" />
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="Button">
@@ -147,7 +179,7 @@
                     </Border>
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsMouseOver" Value="True">
-                            <Setter TargetName="Root" Property="Background" Value="{StaticResource SurfaceBrush}" />
+                            <Setter TargetName="Root" Property="Background" Value="{DynamicResource SurfaceBrush}" />
                         </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>
@@ -155,28 +187,28 @@
         </Setter>
         <Style.Triggers>
             <Trigger Property="Tag" Value="Active">
-                <Setter Property="Background" Value="{StaticResource SurfaceBrush}" />
-                <Setter Property="Foreground" Value="{StaticResource TextBrush}" />
+                <Setter Property="Background" Value="{DynamicResource SurfaceBrush}" />
+                <Setter Property="Foreground" Value="{DynamicResource TextBrush}" />
             </Trigger>
         </Style.Triggers>
     </Style>
 
     <Style x:Key="LanguageToggleContainer" TargetType="Border">
-        <Setter Property="Background" Value="{StaticResource ButtonFaceBrush}" />
-        <Setter Property="BorderBrush" Value="{StaticResource BorderBrush2}" />
+        <Setter Property="Background" Value="{DynamicResource ButtonFaceBrush}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush2}" />
         <Setter Property="BorderThickness" Value="1" />
         <Setter Property="CornerRadius" Value="6" />
         <Setter Property="Padding" Value="2" />
     </Style>
 
     <Style TargetType="TextBox">
-        <Setter Property="Background" Value="{StaticResource SurfaceBrush}" />
-        <Setter Property="Foreground" Value="{StaticResource TextBrush}" />
-        <Setter Property="BorderBrush" Value="{StaticResource BorderBrush2}" />
+        <Setter Property="Background" Value="{DynamicResource SurfaceBrush}" />
+        <Setter Property="Foreground" Value="{DynamicResource TextBrush}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush2}" />
         <Setter Property="BorderThickness" Value="1" />
         <Setter Property="Padding" Value="6,4" />
-        <Setter Property="CaretBrush" Value="{StaticResource TextBrush}" />
-        <Setter Property="SelectionBrush" Value="{StaticResource AccentBrush}" />
+        <Setter Property="CaretBrush" Value="{DynamicResource TextBrush}" />
+        <Setter Property="SelectionBrush" Value="{DynamicResource AccentBrush}" />
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="TextBox">
@@ -189,7 +221,7 @@
                     </Border>
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsFocused" Value="True">
-                            <Setter TargetName="Root" Property="BorderBrush" Value="{StaticResource AccentBrush}" />
+                            <Setter TargetName="Root" Property="BorderBrush" Value="{DynamicResource AccentBrush}" />
                         </Trigger>
                         <Trigger Property="IsEnabled" Value="False">
                             <Setter TargetName="Root" Property="Opacity" Value="0.6" />
@@ -201,13 +233,13 @@
     </Style>
 
     <Style TargetType="PasswordBox">
-        <Setter Property="Background" Value="{StaticResource SurfaceBrush}" />
-        <Setter Property="Foreground" Value="{StaticResource TextBrush}" />
-        <Setter Property="BorderBrush" Value="{StaticResource BorderBrush2}" />
+        <Setter Property="Background" Value="{DynamicResource SurfaceBrush}" />
+        <Setter Property="Foreground" Value="{DynamicResource TextBrush}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush2}" />
         <Setter Property="BorderThickness" Value="1" />
         <Setter Property="Padding" Value="6,4" />
-        <Setter Property="CaretBrush" Value="{StaticResource TextBrush}" />
-        <Setter Property="SelectionBrush" Value="{StaticResource AccentBrush}" />
+        <Setter Property="CaretBrush" Value="{DynamicResource TextBrush}" />
+        <Setter Property="SelectionBrush" Value="{DynamicResource AccentBrush}" />
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="PasswordBox">
@@ -220,7 +252,7 @@
                     </Border>
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsFocused" Value="True">
-                            <Setter TargetName="Root" Property="BorderBrush" Value="{StaticResource AccentBrush}" />
+                            <Setter TargetName="Root" Property="BorderBrush" Value="{DynamicResource AccentBrush}" />
                         </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>
@@ -229,8 +261,8 @@
     </Style>
 
     <Style TargetType="ListBox">
-        <Setter Property="Background" Value="{StaticResource SurfaceBrush}" />
-        <Setter Property="BorderBrush" Value="{StaticResource BorderBrush2}" />
+        <Setter Property="Background" Value="{DynamicResource SurfaceBrush}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush2}" />
         <Setter Property="BorderThickness" Value="1" />
         <Setter Property="Padding" Value="2" />
         <Setter Property="Template">
@@ -260,10 +292,10 @@
                     </Border>
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsMouseOver" Value="True">
-                            <Setter TargetName="Root" Property="Background" Value="{StaticResource ButtonFaceBrush}" />
+                            <Setter TargetName="Root" Property="Background" Value="{DynamicResource ButtonFaceBrush}" />
                         </Trigger>
                         <Trigger Property="IsSelected" Value="True">
-                            <Setter TargetName="Root" Property="Background" Value="{StaticResource ButtonFaceHoverBrush}" />
+                            <Setter TargetName="Root" Property="Background" Value="{DynamicResource ButtonFaceHoverBrush}" />
                         </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>
@@ -272,19 +304,104 @@
     </Style>
 
     <Style TargetType="RadioButton">
-        <Setter Property="Foreground" Value="{StaticResource TextBrush}" />
+        <Setter Property="Foreground" Value="{DynamicResource TextBrush}" />
         <Setter Property="Padding" Value="6,0,0,0" />
         <Setter Property="VerticalContentAlignment" Value="Center" />
     </Style>
 
     <Style TargetType="CheckBox">
-        <Setter Property="Foreground" Value="{StaticResource TextBrush}" />
+        <Setter Property="Foreground" Value="{DynamicResource TextBrush}" />
         <Setter Property="Padding" Value="6,0,0,0" />
         <Setter Property="VerticalContentAlignment" Value="Center" />
     </Style>
 
     <Style TargetType="ScrollViewer">
         <Setter Property="Background" Value="Transparent" />
+    </Style>
+
+    <!-- ComboBox без своего стиля тянул хардкодный белый фон WPF по умолчанию — в тёмной теме
+         это выглядело бы белым пятном поверх остального интерфейса (engine-v1.21.0). -->
+    <Style TargetType="ComboBoxItem">
+        <Setter Property="Padding" Value="6,4" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="ComboBoxItem">
+                    <Border x:Name="Root" Background="Transparent" CornerRadius="4"
+                            Padding="{TemplateBinding Padding}" SnapsToDevicePixels="True">
+                        <ContentPresenter />
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="Root" Property="Background" Value="{DynamicResource ButtonFaceBrush}" />
+                        </Trigger>
+                        <Trigger Property="IsSelected" Value="True">
+                            <Setter TargetName="Root" Property="Background" Value="{DynamicResource ButtonFaceHoverBrush}" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style TargetType="ComboBox">
+        <Setter Property="Background" Value="{DynamicResource SurfaceBrush}" />
+        <Setter Property="Foreground" Value="{DynamicResource TextBrush}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush2}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="Padding" Value="6,4" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="ComboBox">
+                    <Grid>
+                        <ToggleButton x:Name="ToggleHost"
+                                      IsChecked="{Binding IsDropDownOpen, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}"
+                                      Focusable="False" ClickMode="Press">
+                            <ToggleButton.Template>
+                                <ControlTemplate TargetType="ToggleButton">
+                                    <Border x:Name="Root" Background="{DynamicResource SurfaceBrush}"
+                                            BorderBrush="{DynamicResource BorderBrush2}" BorderThickness="1"
+                                            CornerRadius="6" SnapsToDevicePixels="True">
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*" />
+                                                <ColumnDefinition Width="20" />
+                                            </Grid.ColumnDefinitions>
+                                            <Path Grid.Column="1" Data="M0,0 L4,4 L8,0 Z" Fill="{DynamicResource MutedTextBrush}"
+                                                  HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                        </Grid>
+                                    </Border>
+                                    <ControlTemplate.Triggers>
+                                        <Trigger Property="IsMouseOver" Value="True">
+                                            <Setter TargetName="Root" Property="BorderBrush" Value="{DynamicResource BorderHoverBrush}" />
+                                        </Trigger>
+                                    </ControlTemplate.Triggers>
+                                </ControlTemplate>
+                            </ToggleButton.Template>
+                        </ToggleButton>
+                        <ContentPresenter x:Name="ContentSite" IsHitTestVisible="False"
+                                          Content="{TemplateBinding SelectionBoxItem}"
+                                          ContentTemplate="{TemplateBinding SelectionBoxItemTemplate}"
+                                          Margin="{TemplateBinding Padding}"
+                                          HorizontalAlignment="Left" VerticalAlignment="Center" />
+                        <Popup x:Name="Popup" Placement="Bottom" IsOpen="{TemplateBinding IsDropDownOpen}"
+                               AllowsTransparency="True" Focusable="False" PopupAnimation="Slide">
+                            <Border Background="{DynamicResource SurfaceBrush}" BorderBrush="{DynamicResource BorderBrush2}"
+                                    BorderThickness="1" CornerRadius="6" MinWidth="{TemplateBinding ActualWidth}"
+                                    MaxHeight="240" Margin="0,4,0,0">
+                                <ScrollViewer SnapsToDevicePixels="True">
+                                    <ItemsPresenter />
+                                </ScrollViewer>
+                            </Border>
+                        </Popup>
+                    </Grid>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter Property="Opacity" Value="0.6" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
     </Style>
 
 </ResourceDictionary>

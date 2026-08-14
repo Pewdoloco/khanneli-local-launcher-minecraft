@@ -46,7 +46,7 @@
         <TextBlock Grid.Row="3" Margin="0,0,0,4" TextWrapping="Wrap"
                     Text="{Binding Source={x:Static loc:Loc.Instance}, Path=[SelectMods.Instruction]}" />
         <TextBlock x:Name="AutoDetectSummaryText" Grid.Row="4" Margin="0,0,0,4" TextWrapping="Wrap"
-                   Foreground="{StaticResource MutedTextBrush}" FontStyle="Italic" />
+                   Foreground="{DynamicResource MutedTextBrush}" FontStyle="Italic" />
         <ListBox x:Name="ModsListBox" Grid.Row="5" Margin="0,0,0,8" />
 
         <Grid Grid.Row="6" Margin="0,0,0,8">

@@ -27,16 +27,28 @@
             <TextBlock x:Name="StatusText" Grid.Column="0"
                        Text="{Binding Source={x:Static loc:Loc.Instance}, Path=[Main.StatusInitial]}"
                        FontSize="16" TextWrapping="Wrap" VerticalAlignment="Center" />
-            <Border Grid.Column="1" Style="{StaticResource LanguageToggleContainer}" VerticalAlignment="Top">
-                <StackPanel Orientation="Horizontal">
-                    <Button x:Name="LangRuButton" Style="{StaticResource LanguageToggleButton}"
-                            Content="{Binding Source={x:Static loc:Loc.Instance}, Path=[Common.LangRu]}"
-                            Click="LangRuButton_Click" />
-                    <Button x:Name="LangEnButton" Style="{StaticResource LanguageToggleButton}"
-                            Content="{Binding Source={x:Static loc:Loc.Instance}, Path=[Common.LangEn]}"
-                            Click="LangEnButton_Click" />
-                </StackPanel>
-            </Border>
+            <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Top">
+                <Border Style="{StaticResource LanguageToggleContainer}" Margin="0,0,6,0">
+                    <StackPanel Orientation="Horizontal">
+                        <Button x:Name="LangRuButton" Style="{StaticResource LanguageToggleButton}"
+                                Content="{Binding Source={x:Static loc:Loc.Instance}, Path=[Common.LangRu]}"
+                                Click="LangRuButton_Click" />
+                        <Button x:Name="LangEnButton" Style="{StaticResource LanguageToggleButton}"
+                                Content="{Binding Source={x:Static loc:Loc.Instance}, Path=[Common.LangEn]}"
+                                Click="LangEnButton_Click" />
+                    </StackPanel>
+                </Border>
+                <Border Style="{StaticResource LanguageToggleContainer}">
+                    <StackPanel Orientation="Horizontal">
+                        <Button x:Name="ThemeLightButton" Style="{StaticResource LanguageToggleButton}"
+                                Content="{Binding Source={x:Static loc:Loc.Instance}, Path=[Common.ThemeLight]}"
+                                Click="ThemeLightButton_Click" />
+                        <Button x:Name="ThemeDarkButton" Style="{StaticResource LanguageToggleButton}"
+                                Content="{Binding Source={x:Static loc:Loc.Instance}, Path=[Common.ThemeDark]}"
+                                Click="ThemeDarkButton_Click" />
+                    </StackPanel>
+                </Border>
+            </StackPanel>
         </Grid>
 
         <ProgressBar x:Name="ProgressBar" Grid.Row="1" Height="20" Minimum="0" Maximum="100"
@@ -71,7 +83,7 @@
                     Content="{Binding Source={x:Static loc:Loc.Instance}, Path=[Main.UpdateEngineButton]}"
                     Click="UpdateEngineButton_Click" />
             <TextBlock x:Name="EngineStatusText" VerticalAlignment="Center" Margin="4,0,0,4" TextWrapping="Wrap"
-                       Foreground="{StaticResource MutedTextBrush}" />
+                       Foreground="{DynamicResource MutedTextBrush}" />
         </WrapPanel>
 
         <WrapPanel x:Name="ServerReachabilityRow" Grid.Row="4" Orientation="Horizontal"

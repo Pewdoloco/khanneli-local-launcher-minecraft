@@ -22,6 +22,12 @@ internal static class Strings
         ["Common.Error"] = ("Ошибка: {0}", "Error: {0}"),
         ["Common.LangRu"] = ("РУС", "RUS"),
         ["Common.LangEn"] = ("ENG", "ENG"),
+        ["Common.ThemeLight"] = ("☀", "☀"),
+        ["Common.ThemeDark"] = ("☾", "☾"),
+
+        ["Admin.ServerCardHeader"] = ("Сервер", "Server"),
+        ["Admin.WorldCardHeader"] = ("Мир и синхронизация", "World & Sync"),
+        ["Admin.PublishCardHeader"] = ("Публикация", "Publish"),
 
         // --- App.xaml.cs ---
         ["App.UnhandledError.Message"] = (

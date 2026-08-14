@@ -6,6 +6,11 @@
     <Application.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
+                <!-- Тема — первая: Styles.xaml ссылается на её ключи через DynamicResource.
+                     ThemeManager подменяет эту запись целиком при переключении темы (см.
+                     ThemeManager.cs) — стартовый выбор здесь чисто дефолт на случай, если
+                     что-то отрисуется до первого вызова ThemeManager.Apply в App.OnStartup. -->
+                <ResourceDictionary Source="Theme.Light.xaml" />
                 <ResourceDictionary Source="Styles.xaml" />
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>

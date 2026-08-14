@@ -7,30 +7,25 @@
         xmlns:loc="clr-namespace:VanillaLauncher.Client.UI.Localization"
         mc:Ignorable="d"
         Title="{Binding Source={x:Static loc:Loc.Instance}, Path=[Common.AdminWindowTitle]}"
-        Height="760" Width="980"
+        Height="920" Width="1040" MinHeight="700" MinWidth="820"
         WindowStartupLocation="CenterScreen"
         Closing="Window_Closing">
-    <Grid Margin="16">
+    <Grid Margin="20">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*" />
-            <ColumnDefinition Width="240" />
+            <ColumnDefinition Width="260" />
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="Auto" />
             <RowDefinition Height="2*" />
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="Auto" />
             <RowDefinition Height="1*" />
         </Grid.RowDefinitions>
 
-        <Grid Grid.Row="0" Grid.ColumnSpan="2" Margin="0,0,0,8">
+        <!-- Заголовок: статус запуска + переключатели языка/темы -->
+        <Grid Grid.Row="0" Grid.ColumnSpan="2" Margin="0,0,0,16">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*" />
                 <ColumnDefinition Width="Auto" />
@@ -42,209 +37,258 @@
                 <TextBlock x:Name="StartOutcomeText" FontSize="16" FontWeight="SemiBold"
                            Margin="12,0,0,0" VerticalAlignment="Center" Visibility="Collapsed" />
             </StackPanel>
-            <Border Grid.Column="1" Style="{StaticResource LanguageToggleContainer}" VerticalAlignment="Top">
+            <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Top">
+                <Border Style="{StaticResource LanguageToggleContainer}" Margin="0,0,6,0">
+                    <StackPanel Orientation="Horizontal">
+                        <Button x:Name="LangRuButton" Style="{StaticResource LanguageToggleButton}"
+                                Content="{Binding Source={x:Static loc:Loc.Instance}, Path=[Common.LangRu]}"
+                                Click="LangRuButton_Click" />
+                        <Button x:Name="LangEnButton" Style="{StaticResource LanguageToggleButton}"
+                                Content="{Binding Source={x:Static loc:Loc.Instance}, Path=[Common.LangEn]}"
+                                Click="LangEnButton_Click" />
+                    </StackPanel>
+                </Border>
+                <Border Style="{StaticResource LanguageToggleContainer}">
+                    <StackPanel Orientation="Horizontal">
+                        <Button x:Name="ThemeLightButton" Style="{StaticResource LanguageToggleButton}"
+                                Content="{Binding Source={x:Static loc:Loc.Instance}, Path=[Common.ThemeLight]}"
+                                Click="ThemeLightButton_Click" />
+                        <Button x:Name="ThemeDarkButton" Style="{StaticResource LanguageToggleButton}"
+                                Content="{Binding Source={x:Static loc:Loc.Instance}, Path=[Common.ThemeDark]}"
+                                Click="ThemeDarkButton_Click" />
+                    </StackPanel>
+                </Border>
+            </StackPanel>
+        </Grid>
+
+        <!-- Карточка "Сервер": адрес, игроки онлайн, старт/стоп и вспомогательные окна -->
+        <Border Grid.Row="1" Grid.Column="0" Style="{StaticResource Card}" Margin="0,0,12,12" VerticalAlignment="Top">
+            <StackPanel>
+                <TextBlock Style="{StaticResource SectionHeading}"
+                           Text="{Binding Source={x:Static loc:Loc.Instance}, Path=[Admin.ServerCardHeader]}" />
                 <StackPanel Orientation="Horizontal">
-                    <Button x:Name="LangRuButton" Style="{StaticResource LanguageToggleButton}"
-                            Content="{Binding Source={x:Static loc:Loc.Instance}, Path=[Common.LangRu]}"
-                            Click="LangRuButton_Click" />
-                    <Button x:Name="LangEnButton" Style="{StaticResource LanguageToggleButton}"
-                            Content="{Binding Source={x:Static loc:Loc.Instance}, Path=[Common.LangEn]}"
-                            Click="LangEnButton_Click" />
+                    <TextBlock Text="{Binding Source={x:Static loc:Loc.Instance}, Path=[Admin.ServerAddressLabel]}"
+                               VerticalAlignment="Center" Margin="0,0,6,0" Foreground="{DynamicResource MutedTextBrush}" />
+                    <TextBox x:Name="ServerHostInlineTextBox" Width="150" VerticalContentAlignment="Center" Margin="0,0,2,0"
+                             local:Watermark.Hint="{Binding Source={x:Static loc:Loc.Instance}, Path=[Admin.ServerHostWatermark]}" />
+                    <TextBlock Text=":" VerticalAlignment="Center" Foreground="{DynamicResource MutedTextBrush}" />
+                    <TextBox x:Name="ServerPortInlineTextBox" Width="60" VerticalContentAlignment="Center" Margin="2,0,8,0" />
+                    <Button x:Name="SaveServerAddressButton" Style="{StaticResource GhostButton}" Padding="8,4" Margin="0,0,4,0"
+                            Content="{Binding Source={x:Static loc:Loc.Instance}, Path=[Common.Save]}"
+                            Click="SaveServerAddressButton_Click" />
+                    <Button x:Name="CopyServerAddressButton" Style="{StaticResource GhostButton}" Padding="8,4"
+                            Content="{Binding Source={x:Static loc:Loc.Instance}, Path=[Admin.CopyServerAddressButton]}"
+                            Click="CopyServerAddressButton_Click" />
                 </StackPanel>
-            </Border>
-        </Grid>
+                <TextBlock Text="{Binding Source={x:Static loc:Loc.Instance}, Path=[Admin.ServerAddressHint]}"
+                           Foreground="{DynamicResource MutedTextBrush}" FontSize="11" TextWrapping="Wrap" Margin="0,4,0,0" />
+                <TextBlock x:Name="PlayersOnlineText" Margin="0,10,0,0"
+                           Foreground="{DynamicResource MutedTextBrush}" TextWrapping="Wrap" />
+                <ProgressBar x:Name="StartupProgressBar" Height="4" Margin="0,8,0,0"
+                             IsIndeterminate="True" Visibility="Collapsed" />
 
-        <StackPanel Grid.Row="1" Grid.Column="0" Margin="0,0,0,8">
-            <StackPanel Orientation="Horizontal">
-                <TextBlock Text="{Binding Source={x:Static loc:Loc.Instance}, Path=[Admin.ServerAddressLabel]}"
-                           VerticalAlignment="Center" Margin="0,0,4,0" Foreground="{StaticResource MutedTextBrush}" />
-                <TextBox x:Name="ServerHostInlineTextBox" Width="150" VerticalContentAlignment="Center" Margin="0,0,2,0"
-                         local:Watermark.Hint="{Binding Source={x:Static loc:Loc.Instance}, Path=[Admin.ServerHostWatermark]}" />
-                <TextBlock Text=":" VerticalAlignment="Center" Foreground="{StaticResource MutedTextBrush}" />
-                <TextBox x:Name="ServerPortInlineTextBox" Width="60" VerticalContentAlignment="Center" Margin="2,0,8,0" />
-                <Button x:Name="SaveServerAddressButton" Padding="8,2" Margin="0,0,4,0"
-                        Content="{Binding Source={x:Static loc:Loc.Instance}, Path=[Common.Save]}"
-                        Click="SaveServerAddressButton_Click" />
-                <Button x:Name="CopyServerAddressButton" Padding="8,2"
-                        Content="{Binding Source={x:Static loc:Loc.Instance}, Path=[Admin.CopyServerAddressButton]}"
-                        Click="CopyServerAddressButton_Click" />
+                <WrapPanel Orientation="Horizontal" Margin="0,16,0,0">
+                    <Button x:Name="StartButton" Padding="12,6" Margin="0,0,8,8"
+                            Content="{Binding Source={x:Static loc:Loc.Instance}, Path=[Admin.StartButton]}"
+                            Click="StartButton_Click" />
+                    <Button x:Name="StopButton" Padding="12,6" IsEnabled="False" Margin="0,0,8,8"
+                            Content="{Binding Source={x:Static loc:Loc.Instance}, Path=[Admin.StopButton]}"
+                            Click="StopButton_Click" />
+                    <Button x:Name="SelectServerDirectoryButton" Padding="12,6"
+                            Margin="0,0,8,8" Visibility="Collapsed"
+                            Content="{Binding Source={x:Static loc:Loc.Instance}, Path=[Admin.SelectServerDirectoryButton]}"
+                            Click="SelectServerDirectoryButton_Click" />
+                    <Button x:Name="SettingsButton" Style="{StaticResource GhostButton}" Padding="12,6" Margin="0,0,8,8"
+                            Content="{Binding Source={x:Static loc:Loc.Instance}, Path=[Admin.SettingsButton]}"
+                            Click="SettingsButton_Click" />
+                    <Button x:Name="GuideButton" Style="{StaticResource GhostButton}" Padding="12,6" Margin="0,0,8,8"
+                            Content="{Binding Source={x:Static loc:Loc.Instance}, Path=[Admin.GuideButton]}"
+                            Click="GuideButton_Click" />
+                </WrapPanel>
             </StackPanel>
-            <TextBlock Text="{Binding Source={x:Static loc:Loc.Instance}, Path=[Admin.ServerAddressHint]}"
-                       Foreground="{StaticResource MutedTextBrush}" FontSize="11" TextWrapping="Wrap" Margin="0,2,0,0" />
-            <TextBlock x:Name="PlayersOnlineText" Margin="0,4,0,0"
-                       Foreground="{StaticResource MutedTextBrush}" TextWrapping="Wrap" />
-            <ProgressBar x:Name="StartupProgressBar" Height="4" Margin="0,4,0,0"
-                         IsIndeterminate="True" Visibility="Collapsed" />
-        </StackPanel>
+        </Border>
 
-        <WrapPanel Grid.Row="2" Grid.Column="0" Orientation="Horizontal" Margin="0,0,0,8">
-            <Button x:Name="StartButton" Padding="12,6" Margin="0,0,8,4"
-                    Content="{Binding Source={x:Static loc:Loc.Instance}, Path=[Admin.StartButton]}"
-                    Click="StartButton_Click" />
-            <Button x:Name="StopButton" Padding="12,6" IsEnabled="False" Margin="0,0,8,4"
-                    Content="{Binding Source={x:Static loc:Loc.Instance}, Path=[Admin.StopButton]}"
-                    Click="StopButton_Click" />
-            <Button x:Name="SelectServerDirectoryButton" Padding="12,6"
-                    Margin="0,0,8,4" Visibility="Collapsed"
-                    Content="{Binding Source={x:Static loc:Loc.Instance}, Path=[Admin.SelectServerDirectoryButton]}"
-                    Click="SelectServerDirectoryButton_Click" />
-            <Button x:Name="SettingsButton" Padding="12,6" Margin="0,0,8,4"
-                    Content="{Binding Source={x:Static loc:Loc.Instance}, Path=[Admin.SettingsButton]}"
-                    Click="SettingsButton_Click" />
-            <Button x:Name="GuideButton" Padding="12,6" Margin="0,0,8,4"
-                    Content="{Binding Source={x:Static loc:Loc.Instance}, Path=[Admin.GuideButton]}"
-                    Click="GuideButton_Click" />
-        </WrapPanel>
+        <!-- Карточка "Итоги" — растягивается на высоту карточек "Сервер"/"Мир"/"Публикация" -->
+        <Border Grid.Row="1" Grid.RowSpan="3" Grid.Column="1" Style="{StaticResource Card}" Margin="0,0,0,12">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+                <TextBlock Grid.Row="0" Style="{StaticResource SectionHeading}"
+                           Text="{Binding Source={x:Static loc:Loc.Instance}, Path=[Admin.ResultsHeader]}" />
+                <ListBox x:Name="ResultsList" Grid.Row="1" FontSize="11"
+                         ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                         VirtualizingPanel.ScrollUnit="Item"
+                         SelectionMode="Extended">
+                    <ListBox.InputBindings>
+                        <KeyBinding Key="C" Modifiers="Control" Command="ApplicationCommands.Copy" />
+                    </ListBox.InputBindings>
+                    <ListBox.CommandBindings>
+                        <CommandBinding Command="ApplicationCommands.Copy" Executed="CopySelectedResults_Executed" />
+                    </ListBox.CommandBindings>
+                    <ListBox.ContextMenu>
+                        <ContextMenu>
+                            <MenuItem Click="CopySelectedResults_Click"
+                                      Header="{Binding Source={x:Static loc:Loc.Instance}, Path=[Main.CopySelected]}" />
+                            <MenuItem Click="CopyAllResults_Click"
+                                      Header="{Binding Source={x:Static loc:Loc.Instance}, Path=[Main.CopyAll]}" />
+                        </ContextMenu>
+                    </ListBox.ContextMenu>
+                    <ListBox.ItemContainerStyle>
+                        <Style TargetType="ListBoxItem">
+                            <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                        </Style>
+                    </ListBox.ItemContainerStyle>
+                    <ListBox.ItemTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding}" TextWrapping="Wrap" />
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
+            </Grid>
+        </Border>
 
-        <StackPanel Grid.Row="3" Grid.Column="0" Margin="0,0,0,8">
-            <StackPanel Orientation="Horizontal">
-                <Button x:Name="RecreateWorldButton" Padding="12,6" Margin="0,0,8,0"
-                        Content="{Binding Source={x:Static loc:Loc.Instance}, Path=[Admin.RecreateWorldButton]}"
-                        Click="RecreateWorldButton_Click" />
-                <Button x:Name="SyncOnlyButton" Padding="12,6"
-                        Content="{Binding Source={x:Static loc:Loc.Instance}, Path=[Admin.SyncOnlyButton]}"
-                        Click="SyncOnlyButton_Click" />
+        <!-- Карточка "Мир и синхронизация": пересоздание мира, тестовая синхронизация без публикации -->
+        <Border Grid.Row="2" Grid.Column="0" Style="{StaticResource Card}" Margin="0,0,12,12" VerticalAlignment="Top">
+            <StackPanel>
+                <TextBlock Style="{StaticResource SectionHeading}"
+                           Text="{Binding Source={x:Static loc:Loc.Instance}, Path=[Admin.WorldCardHeader]}" />
+                <StackPanel Orientation="Horizontal">
+                    <Button x:Name="RecreateWorldButton" Padding="12,6" Margin="0,0,8,0"
+                            Content="{Binding Source={x:Static loc:Loc.Instance}, Path=[Admin.RecreateWorldButton]}"
+                            Click="RecreateWorldButton_Click" />
+                    <Button x:Name="SyncOnlyButton" Padding="12,6"
+                            Content="{Binding Source={x:Static loc:Loc.Instance}, Path=[Admin.SyncOnlyButton]}"
+                            Click="SyncOnlyButton_Click" />
+                </StackPanel>
+                <TextBlock Text="{Binding Source={x:Static loc:Loc.Instance}, Path=[Admin.SyncOnlyHint]}"
+                           Foreground="{DynamicResource MutedTextBrush}" FontSize="11" TextWrapping="Wrap" Margin="0,6,0,0" />
             </StackPanel>
-            <TextBlock Text="{Binding Source={x:Static loc:Loc.Instance}, Path=[Admin.SyncOnlyHint]}"
-                       Foreground="{StaticResource MutedTextBrush}" FontSize="11" TextWrapping="Wrap" Margin="0,2,0,0" />
-        </StackPanel>
+        </Border>
 
-        <StackPanel Grid.Row="4" Grid.Column="0" Orientation="Horizontal" Margin="0,0,0,8">
-            <TextBlock VerticalAlignment="Center" Margin="0,0,8,0"
-                       Text="{Binding Source={x:Static loc:Loc.Instance}, Path=[Admin.VersionLabel]}" />
-            <TextBox x:Name="VersionTextBox" Width="220" VerticalContentAlignment="Center" Margin="0,0,8,0" />
-            <Button x:Name="PublishButton" Padding="12,6"
-                    Content="{Binding Source={x:Static loc:Loc.Instance}, Path=[Admin.PublishButton]}"
-                    Style="{StaticResource AccentButton}"
-                    Click="PublishButton_Click" />
-        </StackPanel>
+        <!-- Карточка "Публикация": версия релиза + кнопка главного действия экрана -->
+        <Border Grid.Row="3" Grid.Column="0" Style="{StaticResource Card}" Margin="0,0,12,12" VerticalAlignment="Top">
+            <StackPanel>
+                <TextBlock Style="{StaticResource SectionHeading}"
+                           Text="{Binding Source={x:Static loc:Loc.Instance}, Path=[Admin.PublishCardHeader]}" />
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock VerticalAlignment="Center" Margin="0,0,8,0"
+                               Text="{Binding Source={x:Static loc:Loc.Instance}, Path=[Admin.VersionLabel]}" />
+                    <TextBox x:Name="VersionTextBox" Width="220" VerticalContentAlignment="Center" Margin="0,0,8,0" />
+                    <Button x:Name="PublishButton" Padding="12,6"
+                            Content="{Binding Source={x:Static loc:Loc.Instance}, Path=[Admin.PublishButton]}"
+                            Style="{StaticResource AccentButton}"
+                            Click="PublishButton_Click" />
+                </StackPanel>
+            </StackPanel>
+        </Border>
 
-        <Grid Grid.Row="1" Grid.RowSpan="4" Grid.Column="1" Margin="12,0,0,8">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="*" />
-            </Grid.RowDefinitions>
-            <TextBlock Grid.Row="0" FontWeight="Bold" Margin="0,0,0,4"
-                       Text="{Binding Source={x:Static loc:Loc.Instance}, Path=[Admin.ResultsHeader]}" />
-            <ListBox x:Name="ResultsList" Grid.Row="1" FontSize="11"
-                     ScrollViewer.HorizontalScrollBarVisibility="Disabled"
-                     VirtualizingPanel.ScrollUnit="Item"
-                     SelectionMode="Extended">
-                <ListBox.InputBindings>
-                    <KeyBinding Key="C" Modifiers="Control" Command="ApplicationCommands.Copy" />
-                </ListBox.InputBindings>
-                <ListBox.CommandBindings>
-                    <CommandBinding Command="ApplicationCommands.Copy" Executed="CopySelectedResults_Executed" />
-                </ListBox.CommandBindings>
-                <ListBox.ContextMenu>
-                    <ContextMenu>
-                        <MenuItem Click="CopySelectedResults_Click"
-                                  Header="{Binding Source={x:Static loc:Loc.Instance}, Path=[Main.CopySelected]}" />
-                        <MenuItem Click="CopyAllResults_Click"
-                                  Header="{Binding Source={x:Static loc:Loc.Instance}, Path=[Main.CopyAll]}" />
-                    </ContextMenu>
-                </ListBox.ContextMenu>
-                <ListBox.ItemContainerStyle>
-                    <Style TargetType="ListBoxItem">
-                        <Setter Property="HorizontalContentAlignment" Value="Stretch" />
-                    </Style>
-                </ListBox.ItemContainerStyle>
-                <ListBox.ItemTemplate>
-                    <DataTemplate>
-                        <TextBlock Text="{Binding}" TextWrapping="Wrap" />
-                    </DataTemplate>
-                </ListBox.ItemTemplate>
-            </ListBox>
-        </Grid>
+        <!-- Карточка "Консоль сервера": вывод, ввод команд, памятка -->
+        <Border Grid.Row="4" Grid.ColumnSpan="2" Style="{StaticResource Card}" Margin="0,0,0,12">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
 
-        <TextBlock Grid.Row="5" Grid.ColumnSpan="2" FontWeight="Bold" Margin="0,0,0,4"
-                   Text="{Binding Source={x:Static loc:Loc.Instance}, Path=[Admin.ConsoleHeader]}" />
+                <TextBlock Grid.Row="0" Style="{StaticResource SectionHeading}"
+                           Text="{Binding Source={x:Static loc:Loc.Instance}, Path=[Admin.ConsoleHeader]}" />
 
-        <ListBox x:Name="LogList" Grid.Row="6" Grid.ColumnSpan="2" FontFamily="Consolas"
-                 ScrollViewer.HorizontalScrollBarVisibility="Disabled"
-                 VirtualizingPanel.ScrollUnit="Item"
-                 SelectionMode="Extended">
-            <ListBox.InputBindings>
-                <KeyBinding Key="C" Modifiers="Control" Command="ApplicationCommands.Copy" />
-            </ListBox.InputBindings>
-            <ListBox.CommandBindings>
-                <CommandBinding Command="ApplicationCommands.Copy" Executed="CopySelectedLog_Executed" />
-            </ListBox.CommandBindings>
-            <ListBox.ContextMenu>
-                <ContextMenu>
-                    <MenuItem Click="CopySelectedLog_Click"
-                              Header="{Binding Source={x:Static loc:Loc.Instance}, Path=[Main.CopySelected]}" />
-                    <MenuItem Click="CopyAllLog_Click"
-                              Header="{Binding Source={x:Static loc:Loc.Instance}, Path=[Main.CopyAll]}" />
-                </ContextMenu>
-            </ListBox.ContextMenu>
-            <ListBox.ItemContainerStyle>
-                <Style TargetType="ListBoxItem">
-                    <Setter Property="HorizontalContentAlignment" Value="Stretch" />
-                </Style>
-            </ListBox.ItemContainerStyle>
-            <ListBox.ItemTemplate>
-                <DataTemplate>
-                    <TextBlock Text="{Binding}" TextWrapping="Wrap" />
-                </DataTemplate>
-            </ListBox.ItemTemplate>
-        </ListBox>
+                <ListBox x:Name="LogList" Grid.Row="1" FontFamily="Consolas" MinHeight="140"
+                         ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                         VirtualizingPanel.ScrollUnit="Item"
+                         SelectionMode="Extended">
+                    <ListBox.InputBindings>
+                        <KeyBinding Key="C" Modifiers="Control" Command="ApplicationCommands.Copy" />
+                    </ListBox.InputBindings>
+                    <ListBox.CommandBindings>
+                        <CommandBinding Command="ApplicationCommands.Copy" Executed="CopySelectedLog_Executed" />
+                    </ListBox.CommandBindings>
+                    <ListBox.ContextMenu>
+                        <ContextMenu>
+                            <MenuItem Click="CopySelectedLog_Click"
+                                      Header="{Binding Source={x:Static loc:Loc.Instance}, Path=[Main.CopySelected]}" />
+                            <MenuItem Click="CopyAllLog_Click"
+                                      Header="{Binding Source={x:Static loc:Loc.Instance}, Path=[Main.CopyAll]}" />
+                        </ContextMenu>
+                    </ListBox.ContextMenu>
+                    <ListBox.ItemContainerStyle>
+                        <Style TargetType="ListBoxItem">
+                            <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                        </Style>
+                    </ListBox.ItemContainerStyle>
+                    <ListBox.ItemTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding}" TextWrapping="Wrap" />
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
 
-        <Grid Grid.Row="7" Grid.ColumnSpan="2" Margin="0,8,0,0">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="Auto" />
-            </Grid.ColumnDefinitions>
-            <TextBox x:Name="CommandInputTextBox" Grid.Column="0" Padding="4" Margin="0,0,8,0"
-                     FontFamily="Consolas" IsEnabled="False" KeyDown="CommandInputTextBox_KeyDown"
-                     local:Watermark.Hint="{Binding Source={x:Static loc:Loc.Instance}, Path=[Admin.CommandInputWatermark]}" />
-            <Button x:Name="SendCommandButton" Grid.Column="1" Padding="12,6" IsEnabled="False"
-                    Content="{Binding Source={x:Static loc:Loc.Instance}, Path=[Admin.SendCommandButton]}"
-                    Click="SendCommandButton_Click" />
-        </Grid>
+                <Grid Grid.Row="2" Margin="0,10,0,0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <TextBox x:Name="CommandInputTextBox" Grid.Column="0" Padding="4" Margin="0,0,8,0"
+                             FontFamily="Consolas" IsEnabled="False" KeyDown="CommandInputTextBox_KeyDown"
+                             local:Watermark.Hint="{Binding Source={x:Static loc:Loc.Instance}, Path=[Admin.CommandInputWatermark]}" />
+                    <Button x:Name="SendCommandButton" Grid.Column="1" Padding="12,6" IsEnabled="False"
+                            Content="{Binding Source={x:Static loc:Loc.Instance}, Path=[Admin.SendCommandButton]}"
+                            Click="SendCommandButton_Click" />
+                </Grid>
 
-        <StackPanel Grid.Row="8" Grid.ColumnSpan="2" Orientation="Horizontal" Margin="0,4,0,0">
-            <TextBlock VerticalAlignment="Center" Margin="0,0,8,0"
-                       Text="{Binding Source={x:Static loc:Loc.Instance}, Path=[Admin.CommandCheatSheetLabel]}" />
-            <ComboBox x:Name="CommandCheatSheetCombo" IsEnabled="False" MinWidth="260"
-                      SelectionChanged="CommandCheatSheetCombo_SelectionChanged" />
-        </StackPanel>
+                <StackPanel Grid.Row="3" Orientation="Horizontal" Margin="0,8,0,0">
+                    <TextBlock VerticalAlignment="Center" Margin="0,0,8,0"
+                               Text="{Binding Source={x:Static loc:Loc.Instance}, Path=[Admin.CommandCheatSheetLabel]}" />
+                    <ComboBox x:Name="CommandCheatSheetCombo" IsEnabled="False" MinWidth="260"
+                              SelectionChanged="CommandCheatSheetCombo_SelectionChanged" />
+                </StackPanel>
+            </Grid>
+        </Border>
 
-        <Border Grid.Row="9" Grid.ColumnSpan="2" BorderThickness="0,1,0,0" BorderBrush="{StaticResource BorderBrush2}"
-                Margin="0,12,0,8" />
-
-        <TextBlock Grid.Row="10" Grid.ColumnSpan="2" FontWeight="Bold" Margin="0,0,0,4"
-                   Text="{Binding Source={x:Static loc:Loc.Instance}, Path=[Admin.ErrorsHeader]}" />
-
-        <ListBox x:Name="ErrorLogList" Grid.Row="11" Grid.ColumnSpan="2" FontFamily="Consolas"
-                 Foreground="{StaticResource DangerBrush}"
-                 ScrollViewer.HorizontalScrollBarVisibility="Disabled"
-                 VirtualizingPanel.ScrollUnit="Item"
-                 SelectionMode="Extended">
-            <ListBox.InputBindings>
-                <KeyBinding Key="C" Modifiers="Control" Command="ApplicationCommands.Copy" />
-            </ListBox.InputBindings>
-            <ListBox.CommandBindings>
-                <CommandBinding Command="ApplicationCommands.Copy" Executed="CopySelectedErrorLog_Executed" />
-            </ListBox.CommandBindings>
-            <ListBox.ContextMenu>
-                <ContextMenu>
-                    <MenuItem Click="CopySelectedErrorLog_Click"
-                              Header="{Binding Source={x:Static loc:Loc.Instance}, Path=[Main.CopySelected]}" />
-                    <MenuItem Click="CopyAllErrorLog_Click"
-                              Header="{Binding Source={x:Static loc:Loc.Instance}, Path=[Main.CopyAll]}" />
-                </ContextMenu>
-            </ListBox.ContextMenu>
-            <ListBox.ItemContainerStyle>
-                <Style TargetType="ListBoxItem">
-                    <Setter Property="HorizontalContentAlignment" Value="Stretch" />
-                </Style>
-            </ListBox.ItemContainerStyle>
-            <ListBox.ItemTemplate>
-                <DataTemplate>
-                    <TextBlock Text="{Binding}" TextWrapping="Wrap" />
-                </DataTemplate>
-            </ListBox.ItemTemplate>
-        </ListBox>
+        <!-- Карточка "Ошибки": отфильтрованные ERROR/FATAL-строки, см. ServerLogLineClassifier -->
+        <Border Grid.Row="5" Grid.ColumnSpan="2" Style="{StaticResource Card}">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+                <TextBlock Grid.Row="0" Style="{StaticResource SectionHeading}"
+                           Text="{Binding Source={x:Static loc:Loc.Instance}, Path=[Admin.ErrorsHeader]}" />
+                <ListBox x:Name="ErrorLogList" Grid.Row="1" FontFamily="Consolas" MinHeight="90"
+                         Foreground="{DynamicResource DangerBrush}"
+                         ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                         VirtualizingPanel.ScrollUnit="Item"
+                         SelectionMode="Extended">
+                    <ListBox.InputBindings>
+                        <KeyBinding Key="C" Modifiers="Control" Command="ApplicationCommands.Copy" />
+                    </ListBox.InputBindings>
+                    <ListBox.CommandBindings>
+                        <CommandBinding Command="ApplicationCommands.Copy" Executed="CopySelectedErrorLog_Executed" />
+                    </ListBox.CommandBindings>
+                    <ListBox.ContextMenu>
+                        <ContextMenu>
+                            <MenuItem Click="CopySelectedErrorLog_Click"
+                                      Header="{Binding Source={x:Static loc:Loc.Instance}, Path=[Main.CopySelected]}" />
+                            <MenuItem Click="CopyAllErrorLog_Click"
+                                      Header="{Binding Source={x:Static loc:Loc.Instance}, Path=[Main.CopyAll]}" />
+                        </ContextMenu>
+                    </ListBox.ContextMenu>
+                    <ListBox.ItemContainerStyle>
+                        <Style TargetType="ListBoxItem">
+                            <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                        </Style>
+                    </ListBox.ItemContainerStyle>
+                    <ListBox.ItemTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding}" TextWrapping="Wrap" />
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
+            </Grid>
+        </Border>
     </Grid>
 </Window>

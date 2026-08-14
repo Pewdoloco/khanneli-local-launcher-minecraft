@@ -29,21 +29,21 @@
 
         <TextBlock Grid.Row="1" FontWeight="Bold" Margin="0,0,0,4"
                     Text="{Binding Source={x:Static loc:Loc.Instance}, Path=[ClientSetup.OwnerLabel]}" />
-        <TextBlock Grid.Row="2" TextWrapping="Wrap" Foreground="{StaticResource MutedTextBrush}" Margin="0,0,0,4"
+        <TextBlock Grid.Row="2" TextWrapping="Wrap" Foreground="{DynamicResource MutedTextBrush}" Margin="0,0,0,4"
                     Text="{Binding Source={x:Static loc:Loc.Instance}, Path=[ClientSetup.OwnerHint]}" />
         <TextBox x:Name="GitHubOwnerTextBox" Grid.Row="3" Padding="4" Margin="0,0,0,12"
                  local:Watermark.Hint="MyName" />
 
         <TextBlock Grid.Row="4" FontWeight="Bold" Margin="0,0,0,4"
                     Text="{Binding Source={x:Static loc:Loc.Instance}, Path=[ClientSetup.RepoLabel]}" />
-        <TextBlock Grid.Row="5" TextWrapping="Wrap" Foreground="{StaticResource MutedTextBrush}" Margin="0,0,0,4"
+        <TextBlock Grid.Row="5" TextWrapping="Wrap" Foreground="{DynamicResource MutedTextBrush}" Margin="0,0,0,4"
                     Text="{Binding Source={x:Static loc:Loc.Instance}, Path=[ClientSetup.RepoHint]}" />
         <TextBox x:Name="GitHubRepoTextBox" Grid.Row="6" Padding="4" Margin="0,0,0,12"
                  local:Watermark.Hint="MyModpack-server" />
 
         <TextBlock Grid.Row="7" FontWeight="Bold" Margin="0,0,0,4"
                     Text="{Binding Source={x:Static loc:Loc.Instance}, Path=[ClientSetup.FolderNameLabel]}" />
-        <TextBlock Grid.Row="8" TextWrapping="Wrap" Foreground="{StaticResource MutedTextBrush}" Margin="0,0,0,4"
+        <TextBlock Grid.Row="8" TextWrapping="Wrap" Foreground="{DynamicResource MutedTextBrush}" Margin="0,0,0,4"
                     Text="{Binding Source={x:Static loc:Loc.Instance}, Path=[ClientSetup.FolderNameHint]}" />
         <TextBox x:Name="ClientFolderNameTextBox" Grid.Row="9" Padding="4" Margin="0,0,0,8"
                  local:Watermark.Hint="MyModpack" />
