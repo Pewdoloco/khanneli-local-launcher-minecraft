@@ -6,9 +6,10 @@
         xmlns:local="clr-namespace:VanillaLauncher.Client.UI"
         xmlns:loc="clr-namespace:VanillaLauncher.Client.UI.Localization"
         mc:Ignorable="d"
-        Title="{Binding Source={x:Static loc:Loc.Instance}, Path=[Settings.Title]}" Height="720" Width="560"
+        Title="{Binding Source={x:Static loc:Loc.Instance}, Path=[Settings.Title]}" Height="760" Width="600"
+        MinHeight="480" MinWidth="520"
         WindowStartupLocation="CenterOwner">
-    <Grid Margin="16">
+    <Grid Margin="20">
         <Grid.RowDefinitions>
             <RowDefinition Height="*" />
             <RowDefinition Height="Auto" />
@@ -16,214 +17,247 @@
 
         <ScrollViewer Grid.Row="0" VerticalScrollBarVisibility="Auto">
             <StackPanel>
-                <TextBlock TextWrapping="Wrap" Foreground="{DynamicResource MutedTextBrush}" Margin="0,0,0,12">
+                <TextBlock TextWrapping="Wrap" Foreground="{DynamicResource MutedTextBrush}" Margin="0,0,0,16">
                     <Run Text="{Binding Source={x:Static loc:Loc.Instance}, Path=[Settings.Intro], Mode=OneWay}" />
                     <Run Text="*" Foreground="Red" FontWeight="Bold" />
                     <Run Text="{Binding Source={x:Static loc:Loc.Instance}, Path=[Settings.IntroAfterStar], Mode=OneWay}" />
                 </TextBlock>
 
-                <TextBlock FontWeight="Bold" Margin="0,0,0,4"
-                           Text="{Binding Source={x:Static loc:Loc.Instance}, Path=[Settings.ProfileRootLabel]}" />
-                <Grid Margin="0,0,0,4">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*" />
-                        <ColumnDefinition Width="Auto" />
-                    </Grid.ColumnDefinitions>
-                    <TextBox x:Name="ProfileRootTextBox" Grid.Column="0" Padding="4" Margin="0,0,8,0"
-                             local:Watermark.Hint="C:\Users\...\curseforge\Instances\MyModpack" />
-                    <Button Grid.Column="1" Padding="10,4" Click="BrowseProfileRoot_Click"
-                            Content="{Binding Source={x:Static loc:Loc.Instance}, Path=[Common.Browse]}" />
-                </Grid>
-                <TextBlock Margin="0,4,0,4" Text="{Binding Source={x:Static loc:Loc.Instance}, Path=[Settings.ClientFolderNameLabel]}" />
-                <TextBlock TextWrapping="Wrap" Foreground="{DynamicResource MutedTextBrush}" Margin="0,0,0,4"
-                           Text="{Binding Source={x:Static loc:Loc.Instance}, Path=[Settings.ClientFolderNameHint]}" />
-                <TextBox x:Name="ClientFolderNameTextBox" Padding="4" Margin="0,0,0,4" local:Watermark.Hint="MyModpack" />
-                <TextBlock Margin="0,4,0,4" TextWrapping="Wrap"
-                           Text="{Binding Source={x:Static loc:Loc.Instance}, Path=[Settings.ClientSearchRootsLabel]}" />
-                <TextBox x:Name="ClientSearchRootsTextBox" Padding="4" Margin="0,0,0,4"
-                         AcceptsReturn="True" TextWrapping="Wrap" Height="50"
-                         local:Watermark.Hint="%USERPROFILE%\curseforge\Instances" />
-                <Button HorizontalAlignment="Left" Margin="0,0,0,16" Padding="10,4" Click="AutoDetectClient_Click"
-                        Content="{Binding Source={x:Static loc:Loc.Instance}, Path=[Settings.AutoDetectButton]}" />
+                <!-- Карточка "Клиент" -->
+                <Border Style="{StaticResource Card}" Margin="0,0,0,12">
+                    <StackPanel>
+                        <TextBlock Style="{StaticResource SectionHeading}"
+                                   Text="{Binding Source={x:Static loc:Loc.Instance}, Path=[Settings.ClientCardHeader]}" />
+                        <TextBlock FontWeight="Bold" Margin="0,0,0,4"
+                                   Text="{Binding Source={x:Static loc:Loc.Instance}, Path=[Settings.ProfileRootLabel]}" />
+                        <Grid Margin="0,0,0,4">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <TextBox x:Name="ProfileRootTextBox" Grid.Column="0" Padding="4" Margin="0,0,8,0"
+                                     local:Watermark.Hint="C:\Users\...\curseforge\Instances\MyModpack" />
+                            <Button Grid.Column="1" Padding="10,4" Click="BrowseProfileRoot_Click"
+                                    Content="{Binding Source={x:Static loc:Loc.Instance}, Path=[Common.Browse]}" />
+                        </Grid>
+                        <TextBlock Margin="0,4,0,4" Text="{Binding Source={x:Static loc:Loc.Instance}, Path=[Settings.ClientFolderNameLabel]}" />
+                        <TextBlock TextWrapping="Wrap" Foreground="{DynamicResource MutedTextBrush}" Margin="0,0,0,4"
+                                   Text="{Binding Source={x:Static loc:Loc.Instance}, Path=[Settings.ClientFolderNameHint]}" />
+                        <TextBox x:Name="ClientFolderNameTextBox" Padding="4" Margin="0,0,0,4" local:Watermark.Hint="MyModpack" />
+                        <TextBlock Margin="0,4,0,4" TextWrapping="Wrap"
+                                   Text="{Binding Source={x:Static loc:Loc.Instance}, Path=[Settings.ClientSearchRootsLabel]}" />
+                        <TextBox x:Name="ClientSearchRootsTextBox" Padding="4" Margin="0,0,0,4"
+                                 AcceptsReturn="True" TextWrapping="Wrap" Height="50"
+                                 local:Watermark.Hint="%USERPROFILE%\curseforge\Instances" />
+                        <Button HorizontalAlignment="Left" Padding="10,4" Click="AutoDetectClient_Click"
+                                Content="{Binding Source={x:Static loc:Loc.Instance}, Path=[Settings.AutoDetectButton]}" />
+                    </StackPanel>
+                </Border>
 
-                <TextBlock FontWeight="Bold" Margin="0,0,0,4"
-                           Text="{Binding Source={x:Static loc:Loc.Instance}, Path=[Settings.ServerDirectoryLabel]}" />
-                <Grid Margin="0,0,0,4">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*" />
-                        <ColumnDefinition Width="Auto" />
-                    </Grid.ColumnDefinitions>
-                    <TextBox x:Name="ServerDirectoryTextBox" Grid.Column="0" Padding="4" Margin="0,0,8,0"
-                             local:Watermark.Hint="D:\Servers\MyServer" />
-                    <Button Grid.Column="1" Padding="10,4" Click="BrowseServerDirectory_Click"
-                            Content="{Binding Source={x:Static loc:Loc.Instance}, Path=[Common.Browse]}" />
-                </Grid>
-                <TextBlock Margin="0,4,0,4" Text="{Binding Source={x:Static loc:Loc.Instance}, Path=[Settings.ServerFolderNameLabel]}" />
-                <TextBlock TextWrapping="Wrap" Foreground="{DynamicResource MutedTextBrush}" Margin="0,0,0,4"
-                           Text="{Binding Source={x:Static loc:Loc.Instance}, Path=[Settings.ServerFolderNameHint]}" />
-                <TextBox x:Name="ServerFolderNameTextBox" Padding="4" Margin="0,0,0,4" local:Watermark.Hint="MyServer" />
-                <TextBlock Margin="0,4,0,4" TextWrapping="Wrap"
-                           Text="{Binding Source={x:Static loc:Loc.Instance}, Path=[Settings.ServerSearchRootsLabel]}" />
-                <TextBox x:Name="ServerSearchRootsTextBox" Padding="4" Margin="0,0,0,4"
-                         AcceptsReturn="True" TextWrapping="Wrap" Height="50" />
-                <Button HorizontalAlignment="Left" Margin="0,0,0,16" Padding="10,4" Click="AutoDetectServer_Click"
-                        Content="{Binding Source={x:Static loc:Loc.Instance}, Path=[Settings.AutoDetectButton]}" />
+                <!-- Карточка "Сервер" -->
+                <Border Style="{StaticResource Card}" Margin="0,0,0,12">
+                    <StackPanel>
+                        <TextBlock Style="{StaticResource SectionHeading}"
+                                   Text="{Binding Source={x:Static loc:Loc.Instance}, Path=[Settings.ServerCardHeader]}" />
+                        <TextBlock FontWeight="Bold" Margin="0,0,0,4"
+                                   Text="{Binding Source={x:Static loc:Loc.Instance}, Path=[Settings.ServerDirectoryLabel]}" />
+                        <Grid Margin="0,0,0,4">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <TextBox x:Name="ServerDirectoryTextBox" Grid.Column="0" Padding="4" Margin="0,0,8,0"
+                                     local:Watermark.Hint="D:\Servers\MyServer" />
+                            <Button Grid.Column="1" Padding="10,4" Click="BrowseServerDirectory_Click"
+                                    Content="{Binding Source={x:Static loc:Loc.Instance}, Path=[Common.Browse]}" />
+                        </Grid>
+                        <TextBlock Margin="0,4,0,4" Text="{Binding Source={x:Static loc:Loc.Instance}, Path=[Settings.ServerFolderNameLabel]}" />
+                        <TextBlock TextWrapping="Wrap" Foreground="{DynamicResource MutedTextBrush}" Margin="0,0,0,4"
+                                   Text="{Binding Source={x:Static loc:Loc.Instance}, Path=[Settings.ServerFolderNameHint]}" />
+                        <TextBox x:Name="ServerFolderNameTextBox" Padding="4" Margin="0,0,0,4" local:Watermark.Hint="MyServer" />
+                        <TextBlock Margin="0,4,0,4" TextWrapping="Wrap"
+                                   Text="{Binding Source={x:Static loc:Loc.Instance}, Path=[Settings.ServerSearchRootsLabel]}" />
+                        <TextBox x:Name="ServerSearchRootsTextBox" Padding="4" Margin="0,0,0,4"
+                                 AcceptsReturn="True" TextWrapping="Wrap" Height="50" />
+                        <Button HorizontalAlignment="Left" Margin="0,0,0,16" Padding="10,4" Click="AutoDetectServer_Click"
+                                Content="{Binding Source={x:Static loc:Loc.Instance}, Path=[Settings.AutoDetectButton]}" />
 
-                <TextBlock FontWeight="Bold" Margin="0,0,0,4"
-                           Text="{Binding Source={x:Static loc:Loc.Instance}, Path=[Settings.ServerBatFileNameLabel]}" />
-                <TextBox x:Name="ServerBatFileNameTextBox" Padding="4" Margin="0,0,0,16" local:Watermark.Hint="start.bat" />
+                        <TextBlock FontWeight="Bold" Margin="0,0,0,4"
+                                   Text="{Binding Source={x:Static loc:Loc.Instance}, Path=[Settings.ServerBatFileNameLabel]}" />
+                        <TextBox x:Name="ServerBatFileNameTextBox" Padding="4" local:Watermark.Hint="start.bat" />
+                    </StackPanel>
+                </Border>
 
-                <TextBlock FontWeight="Bold" Margin="0,0,0,4"
-                           Text="{Binding Source={x:Static loc:Loc.Instance}, Path=[Settings.ServerHostLabel]}" />
-                <TextBlock Margin="0,0,0,4" TextWrapping="Wrap" Foreground="{DynamicResource MutedTextBrush}"
-                           Text="{Binding Source={x:Static loc:Loc.Instance}, Path=[Settings.ServerHostHint]}" />
-                <TextBox x:Name="ServerHostTextBox" Padding="4" Margin="0,0,0,8" local:Watermark.Hint="100.x.y.z" />
-                <TextBlock Margin="0,0,0,4" Text="{Binding Source={x:Static loc:Loc.Instance}, Path=[Settings.ServerPortLabel]}" />
-                <TextBox x:Name="ServerPortTextBox" Padding="4" Margin="0,0,0,16" Width="100" HorizontalAlignment="Left"
-                         local:Watermark.Hint="25565" />
+                <!-- Карточка "Подключение" -->
+                <Border Style="{StaticResource Card}" Margin="0,0,0,12">
+                    <StackPanel>
+                        <TextBlock Style="{StaticResource SectionHeading}"
+                                   Text="{Binding Source={x:Static loc:Loc.Instance}, Path=[Settings.ConnectionCardHeader]}" />
+                        <TextBlock FontWeight="Bold" Margin="0,0,0,4"
+                                   Text="{Binding Source={x:Static loc:Loc.Instance}, Path=[Settings.ServerHostLabel]}" />
+                        <TextBlock Margin="0,0,0,4" TextWrapping="Wrap" Foreground="{DynamicResource MutedTextBrush}"
+                                   Text="{Binding Source={x:Static loc:Loc.Instance}, Path=[Settings.ServerHostHint]}" />
+                        <TextBox x:Name="ServerHostTextBox" Padding="4" Margin="0,0,0,8" local:Watermark.Hint="100.x.y.z" />
+                        <TextBlock Margin="0,0,0,4" Text="{Binding Source={x:Static loc:Loc.Instance}, Path=[Settings.ServerPortLabel]}" />
+                        <TextBox x:Name="ServerPortTextBox" Padding="4" Width="100" HorizontalAlignment="Left"
+                                 local:Watermark.Hint="25565" />
+                    </StackPanel>
+                </Border>
 
-                <TextBlock FontWeight="Bold" Margin="0,0,0,4"
-                           Text="{Binding Source={x:Static loc:Loc.Instance}, Path=[Settings.ManifestUrlLabel]}" />
-                <TextBlock Margin="0,0,0,4" TextWrapping="Wrap" Foreground="{DynamicResource MutedTextBrush}"
-                           Text="{Binding Source={x:Static loc:Loc.Instance}, Path=[Settings.ManifestUrlHint]}" />
-                <TextBox x:Name="ManifestUrlTextBox" Padding="4" Margin="0,0,0,16"
-                         local:Watermark.Hint="https://github.com/Owner/Repo/releases/latest/download/manifest.json" />
+                <!-- Карточка "Публикация модпака" -->
+                <Border Style="{StaticResource Card}" Margin="0,0,0,12">
+                    <StackPanel>
+                        <TextBlock Style="{StaticResource SectionHeading}"
+                                   Text="{Binding Source={x:Static loc:Loc.Instance}, Path=[Settings.PublishCardHeader]}" />
+                        <TextBlock FontWeight="Bold" Margin="0,0,0,4"
+                                   Text="{Binding Source={x:Static loc:Loc.Instance}, Path=[Settings.ManifestUrlLabel]}" />
+                        <TextBlock Margin="0,0,0,4" TextWrapping="Wrap" Foreground="{DynamicResource MutedTextBrush}"
+                                   Text="{Binding Source={x:Static loc:Loc.Instance}, Path=[Settings.ManifestUrlHint]}" />
+                        <TextBox x:Name="ManifestUrlTextBox" Padding="4" Margin="0,0,0,16"
+                                 local:Watermark.Hint="https://github.com/Owner/Repo/releases/latest/download/manifest.json" />
 
-                <TextBlock FontWeight="Bold" Margin="0,0,0,4" TextWrapping="Wrap"
-                           Text="{Binding Source={x:Static loc:Loc.Instance}, Path=[Settings.ModpackRepoHeader]}" />
-                <TextBlock Margin="0,0,0,4" TextWrapping="Wrap" Foreground="{DynamicResource MutedTextBrush}"
-                           Text="{Binding Source={x:Static loc:Loc.Instance}, Path=[Settings.ModpackRepoHint]}" />
-                <TextBlock Margin="0,0,0,4" Text="{Binding Source={x:Static loc:Loc.Instance}, Path=[Settings.GitHubOwnerLabel]}" />
-                <TextBox x:Name="GitHubOwnerTextBox" Padding="4" Margin="0,0,0,8" local:Watermark.Hint="MyName" />
-                <TextBlock Margin="0,0,0,4" Text="{Binding Source={x:Static loc:Loc.Instance}, Path=[Settings.GitHubRepoLabel]}" />
-                <TextBox x:Name="GitHubRepoTextBox" Padding="4" Margin="0,0,0,16" local:Watermark.Hint="MyModpack-server" />
+                        <TextBlock FontWeight="Bold" Margin="0,0,0,4" TextWrapping="Wrap"
+                                   Text="{Binding Source={x:Static loc:Loc.Instance}, Path=[Settings.ModpackRepoHeader]}" />
+                        <TextBlock Margin="0,0,0,4" TextWrapping="Wrap" Foreground="{DynamicResource MutedTextBrush}"
+                                   Text="{Binding Source={x:Static loc:Loc.Instance}, Path=[Settings.ModpackRepoHint]}" />
+                        <TextBlock Margin="0,0,0,4" Text="{Binding Source={x:Static loc:Loc.Instance}, Path=[Settings.GitHubOwnerLabel]}" />
+                        <TextBox x:Name="GitHubOwnerTextBox" Padding="4" Margin="0,0,0,8" local:Watermark.Hint="MyName" />
+                        <TextBlock Margin="0,0,0,4" Text="{Binding Source={x:Static loc:Loc.Instance}, Path=[Settings.GitHubRepoLabel]}" />
+                        <TextBox x:Name="GitHubRepoTextBox" Padding="4" Margin="0,0,0,16" local:Watermark.Hint="MyModpack-server" />
 
-                <TextBlock FontWeight="Bold" Margin="0,0,0,4" TextWrapping="Wrap"
-                           Text="{Binding Source={x:Static loc:Loc.Instance}, Path=[Settings.EngineRepoHeader]}" />
-                <TextBlock Margin="0,0,0,4" TextWrapping="Wrap" Foreground="{DynamicResource MutedTextBrush}"
-                           Text="{Binding Source={x:Static loc:Loc.Instance}, Path=[Settings.EngineRepoHint]}" />
-                <TextBlock Margin="0,0,0,4" Text="{Binding Source={x:Static loc:Loc.Instance}, Path=[Settings.EngineOwnerLabel]}" />
-                <TextBox x:Name="EngineGitHubOwnerTextBox" Padding="4" Margin="0,0,0,8"
-                         local:Watermark.Hint="Pewdoloco (по умолчанию)" />
-                <TextBlock Margin="0,0,0,4" Text="{Binding Source={x:Static loc:Loc.Instance}, Path=[Settings.EngineRepoLabel]}" />
-                <TextBox x:Name="EngineGitHubRepoTextBox" Padding="4" Margin="0,0,0,16"
-                         local:Watermark.Hint="khanneli-local-launcher-minecraft (по умолчанию)" />
+                        <TextBlock FontWeight="Bold" Margin="0,0,0,4" TextWrapping="Wrap"
+                                   Text="{Binding Source={x:Static loc:Loc.Instance}, Path=[Settings.EngineRepoHeader]}" />
+                        <TextBlock Margin="0,0,0,4" TextWrapping="Wrap" Foreground="{DynamicResource MutedTextBrush}"
+                                   Text="{Binding Source={x:Static loc:Loc.Instance}, Path=[Settings.EngineRepoHint]}" />
+                        <TextBlock Margin="0,0,0,4" Text="{Binding Source={x:Static loc:Loc.Instance}, Path=[Settings.EngineOwnerLabel]}" />
+                        <TextBox x:Name="EngineGitHubOwnerTextBox" Padding="4" Margin="0,0,0,8"
+                                 local:Watermark.Hint="Pewdoloco (по умолчанию)" />
+                        <TextBlock Margin="0,0,0,4" Text="{Binding Source={x:Static loc:Loc.Instance}, Path=[Settings.EngineRepoLabel]}" />
+                        <TextBox x:Name="EngineGitHubRepoTextBox" Padding="4" Margin="0,0,0,16"
+                                 local:Watermark.Hint="khanneli-local-launcher-minecraft (по умолчанию)" />
 
-                <TextBlock FontWeight="Bold" Margin="0,0,0,4"
-                           Text="{Binding Source={x:Static loc:Loc.Instance}, Path=[Settings.IncludeFoldersLabel]}" />
-                <TextBox x:Name="IncludeFoldersTextBox" Padding="4" Margin="0,0,0,16"
-                         AcceptsReturn="True" TextWrapping="Wrap" Height="60" local:Watermark.Hint="mods" />
+                        <TextBlock FontWeight="Bold" Margin="0,0,0,4"
+                                   Text="{Binding Source={x:Static loc:Loc.Instance}, Path=[Settings.IncludeFoldersLabel]}" />
+                        <TextBox x:Name="IncludeFoldersTextBox" Padding="4" Margin="0,0,0,16"
+                                 AcceptsReturn="True" TextWrapping="Wrap" Height="60" local:Watermark.Hint="mods" />
 
-                <TextBlock FontWeight="Bold" Margin="0,0,0,4"
-                           Text="{Binding Source={x:Static loc:Loc.Instance}, Path=[Settings.ExcludeModsLabel]}" />
-                <TextBlock Margin="0,0,0,4" TextWrapping="Wrap" Foreground="{DynamicResource MutedTextBrush}"
-                           Text="{Binding Source={x:Static loc:Loc.Instance}, Path=[Settings.ExcludeModsHint]}" />
-                <TextBox x:Name="ServerExcludeModsTextBox" Padding="4" Margin="0,0,0,4"
-                         AcceptsReturn="True" TextWrapping="Wrap" Height="100"
-                         VerticalScrollBarVisibility="Auto" local:Watermark.Hint="better_tab-2.2.1+26.1-fabric.jar" />
-                <Button HorizontalAlignment="Left" Margin="0,0,0,16" Padding="10,4" Click="PickExcludedMods_Click"
-                        Content="{Binding Source={x:Static loc:Loc.Instance}, Path=[Settings.PickExcludedModsButton]}" />
+                        <TextBlock FontWeight="Bold" Margin="0,0,0,4"
+                                   Text="{Binding Source={x:Static loc:Loc.Instance}, Path=[Settings.ExcludeModsLabel]}" />
+                        <TextBlock Margin="0,0,0,4" TextWrapping="Wrap" Foreground="{DynamicResource MutedTextBrush}"
+                                   Text="{Binding Source={x:Static loc:Loc.Instance}, Path=[Settings.ExcludeModsHint]}" />
+                        <TextBox x:Name="ServerExcludeModsTextBox" Padding="4" Margin="0,0,0,4"
+                                 AcceptsReturn="True" TextWrapping="Wrap" Height="100"
+                                 VerticalScrollBarVisibility="Auto" local:Watermark.Hint="better_tab-2.2.1+26.1-fabric.jar" />
+                        <Button HorizontalAlignment="Left" Margin="0,0,0,16" Padding="10,4" Click="PickExcludedMods_Click"
+                                Content="{Binding Source={x:Static loc:Loc.Instance}, Path=[Settings.PickExcludedModsButton]}" />
 
-                <TextBlock FontWeight="Bold" Margin="0,0,0,4"
-                           Text="{Binding Source={x:Static loc:Loc.Instance}, Path=[Settings.MaxBackupsLabel]}" />
-                <TextBox x:Name="MaxBackupsToKeepTextBox" Padding="4" Margin="0,0,0,16" Width="80" HorizontalAlignment="Left"
-                         local:Watermark.Hint="5" />
+                        <TextBlock FontWeight="Bold" Margin="0,0,0,4"
+                                   Text="{Binding Source={x:Static loc:Loc.Instance}, Path=[Settings.MaxBackupsLabel]}" />
+                        <TextBox x:Name="MaxBackupsToKeepTextBox" Padding="4" Width="80" HorizontalAlignment="Left"
+                                 local:Watermark.Hint="5" />
+                    </StackPanel>
+                </Border>
 
-                <TextBlock FontWeight="Bold" FontSize="14" Margin="0,8,0,4"
-                           Text="{Binding Source={x:Static loc:Loc.Instance}, Path=[Settings.GuidesHeader]}" />
-                <TextBlock TextWrapping="Wrap" Foreground="{DynamicResource MutedTextBrush}" Margin="0,0,0,8"
-                           Text="{Binding Source={x:Static loc:Loc.Instance}, Path=[Settings.GuidesHint]}" />
+                <!-- Карточка "Инструкции" -->
+                <Border Style="{StaticResource Card}" Margin="0,0,0,12">
+                    <StackPanel>
+                        <TextBlock Style="{StaticResource SectionHeading}"
+                                   Text="{Binding Source={x:Static loc:Loc.Instance}, Path=[Settings.GuidesCardHeader]}" />
+                        <TextBlock TextWrapping="Wrap" Foreground="{DynamicResource MutedTextBrush}" Margin="0,0,0,10"
+                                   Text="{Binding Source={x:Static loc:Loc.Instance}, Path=[Settings.GuidesHint]}" />
 
-                <Grid Margin="0,0,0,4">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*" />
-                        <ColumnDefinition Width="Auto" />
-                    </Grid.ColumnDefinitions>
-                    <TextBlock Grid.Column="0" FontWeight="Bold" VerticalAlignment="Center"
-                               Text="{Binding Source={x:Static loc:Loc.Instance}, Path=[Settings.ClientGuideShortHeader]}" />
-                    <Button x:Name="ClientGuideShortEditButton" Grid.Column="1" Padding="10,4"
-                            Click="ToggleGuideEdit_Click" Tag="ClientShort"
-                            Content="{Binding Source={x:Static loc:Loc.Instance}, Path=[Settings.EditButton]}" />
-                </Grid>
-                <TextBox x:Name="ClientGuideShortTextBox" Padding="4" Margin="0,0,0,12" IsReadOnly="True"
-                         AcceptsReturn="True" TextWrapping="Wrap" Height="80" VerticalScrollBarVisibility="Auto" />
+                        <Grid Margin="0,0,0,4">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" FontWeight="Bold" VerticalAlignment="Center"
+                                       Text="{Binding Source={x:Static loc:Loc.Instance}, Path=[Settings.ClientGuideShortHeader]}" />
+                            <Button x:Name="ClientGuideShortEditButton" Grid.Column="1" Padding="10,4"
+                                    Click="ToggleGuideEdit_Click" Tag="ClientShort"
+                                    Content="{Binding Source={x:Static loc:Loc.Instance}, Path=[Settings.EditButton]}" />
+                        </Grid>
+                        <TextBox x:Name="ClientGuideShortTextBox" Padding="4" Margin="0,0,0,12" IsReadOnly="True"
+                                 AcceptsReturn="True" TextWrapping="Wrap" Height="80" VerticalScrollBarVisibility="Auto" />
 
-                <Grid Margin="0,0,0,4">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*" />
-                        <ColumnDefinition Width="Auto" />
-                    </Grid.ColumnDefinitions>
-                    <TextBlock Grid.Column="0" FontWeight="Bold" VerticalAlignment="Center"
-                               Text="{Binding Source={x:Static loc:Loc.Instance}, Path=[Settings.ClientGuideFullHeader]}" />
-                    <Button x:Name="ClientGuideFullEditButton" Grid.Column="1" Padding="10,4"
-                            Click="ToggleGuideEdit_Click" Tag="ClientFull"
-                            Content="{Binding Source={x:Static loc:Loc.Instance}, Path=[Settings.EditButton]}" />
-                </Grid>
-                <TextBox x:Name="ClientGuideFullTextBox" Padding="4" Margin="0,0,0,12" IsReadOnly="True"
-                         AcceptsReturn="True" TextWrapping="Wrap" Height="140" VerticalScrollBarVisibility="Auto" />
+                        <Grid Margin="0,0,0,4">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" FontWeight="Bold" VerticalAlignment="Center"
+                                       Text="{Binding Source={x:Static loc:Loc.Instance}, Path=[Settings.ClientGuideFullHeader]}" />
+                            <Button x:Name="ClientGuideFullEditButton" Grid.Column="1" Padding="10,4"
+                                    Click="ToggleGuideEdit_Click" Tag="ClientFull"
+                                    Content="{Binding Source={x:Static loc:Loc.Instance}, Path=[Settings.EditButton]}" />
+                        </Grid>
+                        <TextBox x:Name="ClientGuideFullTextBox" Padding="4" Margin="0,0,0,12" IsReadOnly="True"
+                                 AcceptsReturn="True" TextWrapping="Wrap" Height="140" VerticalScrollBarVisibility="Auto" />
 
-                <Grid Margin="0,0,0,4">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*" />
-                        <ColumnDefinition Width="Auto" />
-                    </Grid.ColumnDefinitions>
-                    <TextBlock Grid.Column="0" FontWeight="Bold" VerticalAlignment="Center"
-                               Text="{Binding Source={x:Static loc:Loc.Instance}, Path=[Settings.AdminGuideShortHeader]}" />
-                    <Button x:Name="AdminGuideShortEditButton" Grid.Column="1" Padding="10,4"
-                            Click="ToggleGuideEdit_Click" Tag="AdminShort"
-                            Content="{Binding Source={x:Static loc:Loc.Instance}, Path=[Settings.EditButton]}" />
-                </Grid>
-                <TextBox x:Name="AdminGuideShortTextBox" Padding="4" Margin="0,0,0,12" IsReadOnly="True"
-                         AcceptsReturn="True" TextWrapping="Wrap" Height="80" VerticalScrollBarVisibility="Auto" />
+                        <Grid Margin="0,0,0,4">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" FontWeight="Bold" VerticalAlignment="Center"
+                                       Text="{Binding Source={x:Static loc:Loc.Instance}, Path=[Settings.AdminGuideShortHeader]}" />
+                            <Button x:Name="AdminGuideShortEditButton" Grid.Column="1" Padding="10,4"
+                                    Click="ToggleGuideEdit_Click" Tag="AdminShort"
+                                    Content="{Binding Source={x:Static loc:Loc.Instance}, Path=[Settings.EditButton]}" />
+                        </Grid>
+                        <TextBox x:Name="AdminGuideShortTextBox" Padding="4" Margin="0,0,0,12" IsReadOnly="True"
+                                 AcceptsReturn="True" TextWrapping="Wrap" Height="80" VerticalScrollBarVisibility="Auto" />
 
-                <Grid Margin="0,0,0,4">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*" />
-                        <ColumnDefinition Width="Auto" />
-                    </Grid.ColumnDefinitions>
-                    <TextBlock Grid.Column="0" FontWeight="Bold" VerticalAlignment="Center"
-                               Text="{Binding Source={x:Static loc:Loc.Instance}, Path=[Settings.AdminGuideFullHeader]}" />
-                    <Button x:Name="AdminGuideFullEditButton" Grid.Column="1" Padding="10,4"
-                            Click="ToggleGuideEdit_Click" Tag="AdminFull"
-                            Content="{Binding Source={x:Static loc:Loc.Instance}, Path=[Settings.EditButton]}" />
-                </Grid>
-                <TextBox x:Name="AdminGuideFullTextBox" Padding="4" Margin="0,0,0,12" IsReadOnly="True"
-                         AcceptsReturn="True" TextWrapping="Wrap" Height="140" VerticalScrollBarVisibility="Auto" />
+                        <Grid Margin="0,0,0,4">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" FontWeight="Bold" VerticalAlignment="Center"
+                                       Text="{Binding Source={x:Static loc:Loc.Instance}, Path=[Settings.AdminGuideFullHeader]}" />
+                            <Button x:Name="AdminGuideFullEditButton" Grid.Column="1" Padding="10,4"
+                                    Click="ToggleGuideEdit_Click" Tag="AdminFull"
+                                    Content="{Binding Source={x:Static loc:Loc.Instance}, Path=[Settings.EditButton]}" />
+                        </Grid>
+                        <TextBox x:Name="AdminGuideFullTextBox" Padding="4" Margin="0,0,0,12" IsReadOnly="True"
+                                 AcceptsReturn="True" TextWrapping="Wrap" Height="140" VerticalScrollBarVisibility="Auto" />
 
-                <Grid Margin="0,0,0,4">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*" />
-                        <ColumnDefinition Width="Auto" />
-                    </Grid.ColumnDefinitions>
-                    <TextBlock Grid.Column="0" FontWeight="Bold" VerticalAlignment="Center"
-                               Text="{Binding Source={x:Static loc:Loc.Instance}, Path=[Settings.ClientGuideManualHeader]}" />
-                    <Button x:Name="ClientGuideManualEditButton" Grid.Column="1" Padding="10,4"
-                            Click="ToggleGuideEdit_Click" Tag="ClientManual"
-                            Content="{Binding Source={x:Static loc:Loc.Instance}, Path=[Settings.EditButton]}" />
-                </Grid>
-                <TextBox x:Name="ClientGuideManualTextBox" Padding="4" Margin="0,0,0,12" IsReadOnly="True"
-                         AcceptsReturn="True" TextWrapping="Wrap" Height="140" VerticalScrollBarVisibility="Auto" />
+                        <Grid Margin="0,0,0,4">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" FontWeight="Bold" VerticalAlignment="Center"
+                                       Text="{Binding Source={x:Static loc:Loc.Instance}, Path=[Settings.ClientGuideManualHeader]}" />
+                            <Button x:Name="ClientGuideManualEditButton" Grid.Column="1" Padding="10,4"
+                                    Click="ToggleGuideEdit_Click" Tag="ClientManual"
+                                    Content="{Binding Source={x:Static loc:Loc.Instance}, Path=[Settings.EditButton]}" />
+                        </Grid>
+                        <TextBox x:Name="ClientGuideManualTextBox" Padding="4" Margin="0,0,0,12" IsReadOnly="True"
+                                 AcceptsReturn="True" TextWrapping="Wrap" Height="140" VerticalScrollBarVisibility="Auto" />
 
-                <Grid Margin="0,0,0,4">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*" />
-                        <ColumnDefinition Width="Auto" />
-                    </Grid.ColumnDefinitions>
-                    <TextBlock Grid.Column="0" FontWeight="Bold" VerticalAlignment="Center"
-                               Text="{Binding Source={x:Static loc:Loc.Instance}, Path=[Settings.AdminGuideManualHeader]}" />
-                    <Button x:Name="AdminGuideManualEditButton" Grid.Column="1" Padding="10,4"
-                            Click="ToggleGuideEdit_Click" Tag="AdminManual"
-                            Content="{Binding Source={x:Static loc:Loc.Instance}, Path=[Settings.EditButton]}" />
-                </Grid>
-                <TextBox x:Name="AdminGuideManualTextBox" Padding="4" Margin="0,0,0,16" IsReadOnly="True"
-                         AcceptsReturn="True" TextWrapping="Wrap" Height="140" VerticalScrollBarVisibility="Auto" />
+                        <Grid Margin="0,0,0,4">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" FontWeight="Bold" VerticalAlignment="Center"
+                                       Text="{Binding Source={x:Static loc:Loc.Instance}, Path=[Settings.AdminGuideManualHeader]}" />
+                            <Button x:Name="AdminGuideManualEditButton" Grid.Column="1" Padding="10,4"
+                                    Click="ToggleGuideEdit_Click" Tag="AdminManual"
+                                    Content="{Binding Source={x:Static loc:Loc.Instance}, Path=[Settings.EditButton]}" />
+                        </Grid>
+                        <TextBox x:Name="AdminGuideManualTextBox" Padding="4" IsReadOnly="True"
+                                 AcceptsReturn="True" TextWrapping="Wrap" Height="140" VerticalScrollBarVisibility="Auto" />
+                    </StackPanel>
+                </Border>
 
                 <TextBlock x:Name="ErrorText" Foreground="Red" TextWrapping="Wrap"
-                           Margin="0,8,0,0" Visibility="Collapsed" />
+                           Margin="0,4,0,0" Visibility="Collapsed" />
             </StackPanel>
         </ScrollViewer>
 
-        <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,12,0,0">
+        <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,16,0,0">
             <Button Padding="12,6" Margin="0,0,8,0" IsCancel="True" Click="CancelButton_Click"
                     Content="{Binding Source={x:Static loc:Loc.Instance}, Path=[Common.Cancel]}" />
             <Button Padding="12,6" IsDefault="True" Click="SaveButton_Click" Style="{StaticResource AccentButton}"

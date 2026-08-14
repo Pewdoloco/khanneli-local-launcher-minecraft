@@ -6,47 +6,51 @@
         xmlns:local="clr-namespace:VanillaLauncher.Client.UI"
         xmlns:loc="clr-namespace:VanillaLauncher.Client.UI.Localization"
         mc:Ignorable="d"
-        Title="Инструкция" Height="600" Width="620"
+        Title="Инструкция" Height="640" Width="660" MinHeight="420" MinWidth="480"
         WindowStartupLocation="CenterOwner">
-    <Grid Margin="16">
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="*" />
-        </Grid.RowDefinitions>
+    <Grid Margin="20">
+        <Border Style="{StaticResource Card}">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
 
-        <!--
-          Крупный, явно выделенный переключатель роли — чтобы не спутать, чью инструкцию
-          читаешь. Из клиентского окна доступна только инструкция игрока (AdminRoleRadio
-          скрывается в code-behind, см. конструктор) — Admin-инструкция про пароль/публикацию
-          обычному игроку не нужна. Из Admin-окна доступны обе роли.
-        -->
-        <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,12" HorizontalAlignment="Center">
-            <RadioButton x:Name="ClientRoleRadio" GroupName="GuideRole" Margin="0,0,24,0"
-                         Checked="RoleOrLength_Changed">
-                <TextBlock Text="{Binding Source={x:Static loc:Loc.Instance}, Path=[Guide.RoleUser]}" FontSize="20" FontWeight="Bold" />
-            </RadioButton>
-            <RadioButton x:Name="AdminRoleRadio" GroupName="GuideRole"
-                         Checked="RoleOrLength_Changed">
-                <TextBlock Text="{Binding Source={x:Static loc:Loc.Instance}, Path=[Guide.RoleAdmin]}" FontSize="20" FontWeight="Bold" />
-            </RadioButton>
-        </StackPanel>
+                <!--
+                  Крупный, явно выделенный переключатель роли — чтобы не спутать, чью инструкцию
+                  читаешь. Из клиентского окна доступна только инструкция игрока (AdminRoleRadio
+                  скрывается в code-behind, см. конструктор) — Admin-инструкция про пароль/публикацию
+                  обычному игроку не нужна. Из Admin-окна доступны обе роли.
+                -->
+                <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,14" HorizontalAlignment="Center">
+                    <RadioButton x:Name="ClientRoleRadio" GroupName="GuideRole" Margin="0,0,24,0"
+                                 Checked="RoleOrLength_Changed">
+                        <TextBlock Text="{Binding Source={x:Static loc:Loc.Instance}, Path=[Guide.RoleUser]}" FontSize="20" FontWeight="Bold" />
+                    </RadioButton>
+                    <RadioButton x:Name="AdminRoleRadio" GroupName="GuideRole"
+                                 Checked="RoleOrLength_Changed">
+                        <TextBlock Text="{Binding Source={x:Static loc:Loc.Instance}, Path=[Guide.RoleAdmin]}" FontSize="20" FontWeight="Bold" />
+                    </RadioButton>
+                </StackPanel>
 
-        <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="0,0,0,12" HorizontalAlignment="Center">
-            <RadioButton x:Name="ShortRadio" GroupName="GuideLength" Margin="0,0,16,0"
-                         Content="{Binding Source={x:Static loc:Loc.Instance}, Path=[Guide.LengthShort]}"
-                         IsChecked="True" Checked="RoleOrLength_Changed" />
-            <RadioButton x:Name="FullRadio" GroupName="GuideLength" Margin="0,0,16,0"
-                         Content="{Binding Source={x:Static loc:Loc.Instance}, Path=[Guide.LengthFull]}"
-                         Checked="RoleOrLength_Changed" />
-            <RadioButton x:Name="ManualRadio" GroupName="GuideLength"
-                         Content="{Binding Source={x:Static loc:Loc.Instance}, Path=[Guide.LengthManual]}"
-                         Checked="RoleOrLength_Changed" />
-        </StackPanel>
+                <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="0,0,0,14" HorizontalAlignment="Center">
+                    <RadioButton x:Name="ShortRadio" GroupName="GuideLength" Margin="0,0,16,0"
+                                 Content="{Binding Source={x:Static loc:Loc.Instance}, Path=[Guide.LengthShort]}"
+                                 IsChecked="True" Checked="RoleOrLength_Changed" />
+                    <RadioButton x:Name="FullRadio" GroupName="GuideLength" Margin="0,0,16,0"
+                                 Content="{Binding Source={x:Static loc:Loc.Instance}, Path=[Guide.LengthFull]}"
+                                 Checked="RoleOrLength_Changed" />
+                    <RadioButton x:Name="ManualRadio" GroupName="GuideLength"
+                                 Content="{Binding Source={x:Static loc:Loc.Instance}, Path=[Guide.LengthManual]}"
+                                 Checked="RoleOrLength_Changed" />
+                </StackPanel>
 
-        <TextBox x:Name="GuideTextBox" Grid.Row="2"
-                 IsReadOnly="True" TextWrapping="Wrap" AcceptsReturn="True"
-                 VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled"
-                 FontFamily="Consolas" Padding="8" Background="White" BorderThickness="1" />
+                <TextBox x:Name="GuideTextBox" Grid.Row="2"
+                         IsReadOnly="True" TextWrapping="Wrap" AcceptsReturn="True"
+                         VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled"
+                         FontFamily="Consolas" Padding="8" BorderThickness="1" />
+            </Grid>
+        </Border>
     </Grid>
 </Window>

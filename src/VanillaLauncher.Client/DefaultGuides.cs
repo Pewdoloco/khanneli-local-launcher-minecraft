@@ -323,6 +323,27 @@ public static class DefaultGuides
         поиска), и только если не нашёл — предлагает выбрать вручную. Найденный путь
         сохраняется автоматически.
 
+        НАСТРОЙКА TAILSCALE (для доступа игроков без проброса портов)
+        Лаунчер сам ничего не знает про Tailscale — это отдельная бесплатная mesh-VPN
+        программа, которую многие используют вместо проброса портов на роутере: она даёт
+        серверу и каждому игроку стабильный приватный IP/имя, работающий из любой сети, без
+        настройки роутера.
+        1. Зарегистрируй аккаунт на tailscale.com, установи Tailscale на машину с сервером и
+           войди тем же аккаунтом.
+        2. Каждый игрок ставит Tailscale на свою машину и заходит через приглашение в твою
+           сеть (tailnet) — раздаётся ссылкой из админки tailscale.com или прямым инвайтом на
+           почту.
+        3. На машине с сервером узнай свой Tailscale-адрес (значок Tailscale в трее → Copy my
+           IP address, либо MagicDNS-имя вида your-pc.tailXXXXX.ts.net — оно читается легче).
+        4. Впиши этот адрес в поле «Адрес сервера» в AdminWindow (или сразу в server-ip
+           внутри server.properties — поле в AdminWindow читает и пишет туда же). Сообщи этот
+           же адрес игрокам для подключения в Minecraft.
+        5. Если играешь с ТОЙ ЖЕ машины, где стоит сервер — подключайся через localhost
+           (127.0.0.1), не через Tailscale-адрес: соединение через VPN-туннель с самим собой
+           даёт лишний пинг и заметные лаги без всякой причины на стороне сервера.
+        Частая причина «Сервер недоступен» и у тебя, и у игроков — Tailscale не запущен или
+        отключён от сети хотя бы на одном конце (проверь значок в трее на сервере и у игрока).
+
         КНОПКИ ADMIN-РЕЖИМА
         - «Запустить сервер» / «Остановить сервер» — обёртка над .bat-файлом сервера;
           остановка — штатная команда, дожидается корректного завершения.
@@ -392,6 +413,32 @@ public static class DefaultGuides
         - 422 "already exists" — релиз с таким номером версии уже есть в репозитории. Впиши
           другой номер версии в поле «Версия релиза».
 
+        ЧАСТЫЕ ОШИБКИ АДМИНИСТРАТОРА (не только публикация)
+        - «Сервер недоступен» и у тебя, и у игроков — почти всегда Tailscale (см. раздел
+          «Настройка Tailscale» выше): проверь, что он запущен и подключён к сети на машине с
+          сервером и у игрока. Реже — сам сервер просто не запущен, или в server.properties
+          server-ip указывает не туда (поле «Адрес сервера» в AdminWindow читает именно этот
+          файл).
+        - Синхронизация/пересоздание мира падает с «файл занят другим процессом»
+          (session.lock и подобные) — обычно разовая гонка (антивирус/индексатор на секунду
+          придержал файл сразу после остановки сервера). Попробуй ещё раз тем же нажатием —
+          как правило, со второго раза проходит без изменений в настройках.
+        - Панель «Ошибки» пустая, хотя сервер точно упал — классификатор ловит конкретные
+          маркеры уровня (ERROR/FATAL, таблицу Forge, стектрейс) и часть заголовков «голых»
+          Java-исключений без обёртки — но не гарантированно каждую форму краша. Смотри полный
+          вывод в «Консоли сервера» выше панели «Ошибки» — там есть всё, что панель могла не
+          показать.
+        - Низкий TPS / лаги без явных ошибок в консоли — если в моды сервера входит spark
+          (`spark-*.jar` в mods), команды `spark tps` и `spark health` прямо в поле ввода
+          команды консоли покажут текущий TPS и разбивку нагрузки по потокам; `spark profiler
+          start`/`stop` — более подробный профиль по вызовам. Ищи один мод с непропорционально
+          большой долей времени тика — это обычно и есть виновник.
+        - Сервер стартует, но у части игроков низкий FPS — это не серверная проблема (TPS
+          сервера ей не поможет), настройка клиента у каждого игрока своя. Если в сборке есть
+          Distant Horizons — его радиус LOD-прорисовки (Distant Horizons → настройки, слайдер
+          render distance) часто выставлен куда выше, чем нужно, и легко исчерпывает GPU
+          даже на мощных видеокартах — первое, что стоит проверить.
+
         АУДИТ МОДОВ ПЕРЕД ПУБЛИКАЦИЕЙ (проверка client/server)
         В окне «Выбрать моды из папки...» (Настройки → ServerExcludeMods) лаунчер теперь сам
         открывает каждый .jar и читает "environment" в fabric.mod.json — моды с честным
@@ -446,6 +493,29 @@ public static class DefaultGuides
         launcher first tries to find it itself (by folder name among the configured search
         roots), and only offers a manual picker if it doesn't find anything. A found path is
         saved automatically.
+
+        SETTING UP TAILSCALE (for player access without port forwarding)
+        The launcher itself knows nothing about Tailscale — it's a separate, free mesh VPN
+        app that many people use instead of forwarding ports on their router: it gives the
+        server and every player a stable private IP/name that works from any network, no
+        router configuration needed.
+        1. Create an account at tailscale.com, install Tailscale on the machine running the
+           server and sign in with that account.
+        2. Each player installs Tailscale on their own machine and joins your network
+           (tailnet) via an invite — shared as a link from the tailscale.com admin console or
+           a direct email invite.
+        3. On the server machine, find your Tailscale address (Tailscale tray icon → Copy my
+           IP address, or the MagicDNS name like your-pc.tailXXXXX.ts.net, which is easier to
+           read).
+        4. Enter this address in the "Server address" field in AdminWindow (or directly as
+           server-ip inside server.properties — the AdminWindow field reads/writes the same
+           place). Give the same address to players so they can connect in Minecraft.
+        5. If you're playing from the SAME machine the server runs on — connect via localhost
+           (127.0.0.1), not the Tailscale address: routing through the VPN tunnel back to
+           yourself adds noticeable extra ping/lag for no server-side reason at all.
+        A common cause of "Server unreachable" for you and for players alike is Tailscale not
+        running or disconnected on at least one end (check the tray icon on both the server
+        and the player's machine).
 
         ADMIN MODE BUTTONS
         - "Start Server" / "Stop Server" — a wrapper over the server's .bat file; stopping
@@ -521,6 +591,33 @@ public static class DefaultGuides
           through the built-in button — one commit is enough, then publishing will work.
         - 422 "already exists" — a release with that version number already exists in the
           repository. Enter a different version number in the "Release version" field.
+
+        COMMON ADMIN ERRORS (not just publishing)
+        - "Server unreachable" for both you and players — almost always Tailscale (see
+          "Setting Up Tailscale" above): check that it's running and connected on both the
+          server machine and the player's machine. Less often — the server just isn't
+          running, or server-ip in server.properties points somewhere wrong (the "Server
+          address" field in AdminWindow reads exactly that file).
+        - Sync/world recreation fails with "file in use by another process" (session.lock or
+          similar) — usually a one-off race (antivirus/search indexer briefly held the file
+          right after the server stopped). Try the same button again — it typically goes
+          through the second time without any config changes.
+        - The "Errors" panel is empty even though the server definitely crashed — the
+          classifier catches specific level markers (ERROR/FATAL, the Forge table, stack
+          traces) and some headers of "bare" Java exceptions without a wrapper — but not
+          every possible crash shape is guaranteed to match. Check the full output in "Server
+          console" above the "Errors" panel — it has everything the panel might have missed.
+        - Low TPS / lag with no obvious errors in the console — if spark is among the server
+          mods (`spark-*.jar` in mods), the `spark tps` and `spark health` commands typed
+          right into the console's command field show current TPS and a per-thread load
+          breakdown; `spark profiler start`/`stop` gives a more detailed call-level profile.
+          Look for one mod with a disproportionately large share of tick time — that's
+          usually the culprit.
+        - The server starts fine but some players get low FPS — that's not a server-side
+          problem (server TPS won't help), it's each player's own client settings. If Distant
+          Horizons is in the build — its LOD render distance (Distant Horizons → settings,
+          render distance slider) is often set much higher than needed and can exhaust GPU
+          headroom even on powerful graphics cards — the first thing worth checking.
 
         MOD AUDIT BEFORE PUBLISHING (client/server check)
         In the "Pick Mods from Folder..." window (Settings → ServerExcludeMods), the

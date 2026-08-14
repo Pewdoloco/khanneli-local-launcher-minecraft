@@ -23,6 +23,8 @@
     <Color x:Key="ButtonFaceHoverColor">#E2E2E6</Color>
     <Color x:Key="ButtonFacePressedColor">#D6D6DC</Color>
     <Color x:Key="GhostHoverColor">#E9E9EC</Color>
+    <Color x:Key="ScrollBarThumbColor">#C7C7CC</Color>
+    <Color x:Key="ScrollBarThumbHoverColor">#B0B0B6</Color>
 
     <SolidColorBrush x:Key="AccentBrush" Color="{StaticResource AccentColor}" />
     <SolidColorBrush x:Key="AccentHoverBrush" Color="{StaticResource AccentHoverColor}" />
@@ -37,6 +39,8 @@
     <SolidColorBrush x:Key="ButtonFaceHoverBrush" Color="{StaticResource ButtonFaceHoverColor}" />
     <SolidColorBrush x:Key="ButtonFacePressedBrush" Color="{StaticResource ButtonFacePressedColor}" />
     <SolidColorBrush x:Key="GhostHoverBrush" Color="{StaticResource GhostHoverColor}" />
+    <SolidColorBrush x:Key="ScrollBarThumbBrush" Color="{StaticResource ScrollBarThumbColor}" />
+    <SolidColorBrush x:Key="ScrollBarThumbHoverBrush" Color="{StaticResource ScrollBarThumbHoverColor}" />
     <SolidColorBrush x:Key="AccentForegroundBrush" Color="White" />
     <SolidColorBrush x:Key="SuccessBrush" Color="#1E8E3E" />
     <SolidColorBrush x:Key="DangerBrush" Color="#D93025" />

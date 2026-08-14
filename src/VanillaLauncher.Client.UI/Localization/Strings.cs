@@ -197,6 +197,11 @@ internal static class Strings
             "Настройки видны и редактируются только в Admin-режиме — обычный пользователь сюда не попадает. Поля со звёздочкой (",
             "Settings are only visible and editable in Admin Mode — regular players never see this screen. Fields marked with an asterisk ("),
         ["Settings.IntroAfterStar"] = (") обязательны для базовой работы лаунчера.", ") are required for the launcher to work."),
+        ["Settings.ClientCardHeader"] = ("Клиент", "Client"),
+        ["Settings.ServerCardHeader"] = ("Сервер", "Server"),
+        ["Settings.ConnectionCardHeader"] = ("Подключение", "Connection"),
+        ["Settings.PublishCardHeader"] = ("Публикация модпака", "Modpack Publishing"),
+        ["Settings.GuidesCardHeader"] = ("Инструкции", "Guides"),
         ["Settings.ProfileRootLabel"] = ("Путь клиентской сборки (ProfileRoot) *", "Client build path (ProfileRoot) *"),
         ["Settings.ClientFolderNameLabel"] = ("Ожидаемое имя папки сборки (для автопоиска)", "Expected build folder name (for auto-detection)"),
         ["Settings.ClientFolderNameHint"] = (

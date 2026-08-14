@@ -7,7 +7,7 @@
         xmlns:loc="clr-namespace:VanillaLauncher.Client.UI.Localization"
         mc:Ignorable="d"
         Title="{Binding Source={x:Static loc:Loc.Instance}, Path=[Common.AdminWindowTitle]}"
-        Height="920" Width="1040" MinHeight="700" MinWidth="820"
+        Height="920" Width="1040" MinHeight="920" MinWidth="900"
         WindowStartupLocation="CenterScreen"
         Closing="Window_Closing">
     <Grid Margin="20">

@@ -10,12 +10,21 @@
     <Color x:Key="SurfaceColor">#28282B</Color>
     <Color x:Key="BorderColor">#3A3A3F</Color>
     <Color x:Key="BorderHoverColor">#4C4C53</Color>
-    <Color x:Key="TextColor">#F2F2F3</Color>
+    <!-- Не чистый белый — на тёмном фоне #F2F2F3 читался слишком ярко/режуще (живой фидбек
+         пользователя после v1.22.0). #DADADC — тот же принцип, что у "off-white" текста в
+         большинстве тёмных UI (VS Code, GitHub Dark и т.д.): достаточно контраста для чтения,
+         но без ощущения "выжигает глаза". -->
+    <Color x:Key="TextColor">#DADADC</Color>
     <Color x:Key="MutedTextColor">#9A9AA1</Color>
     <Color x:Key="ButtonFaceColor">#333338</Color>
     <Color x:Key="ButtonFaceHoverColor">#3D3D43</Color>
     <Color x:Key="ButtonFacePressedColor">#47474D</Color>
     <Color x:Key="GhostHoverColor">#2E2E33</Color>
+    <!-- Только для тёмной темы — скроллбар (см. новый Style TargetType="ScrollBar" в
+         Styles.xaml) без этого выглядел светлым системным скроллбаром Windows поверх тёмного
+         фона (тот же живой фидбек — "белые рамки/скроллбары"). -->
+    <Color x:Key="ScrollBarThumbColor">#48484E</Color>
+    <Color x:Key="ScrollBarThumbHoverColor">#5A5A61</Color>
 
     <SolidColorBrush x:Key="AccentBrush" Color="{StaticResource AccentColor}" />
     <SolidColorBrush x:Key="AccentHoverBrush" Color="{StaticResource AccentHoverColor}" />
@@ -30,6 +39,8 @@
     <SolidColorBrush x:Key="ButtonFaceHoverBrush" Color="{StaticResource ButtonFaceHoverColor}" />
     <SolidColorBrush x:Key="ButtonFacePressedBrush" Color="{StaticResource ButtonFacePressedColor}" />
     <SolidColorBrush x:Key="GhostHoverBrush" Color="{StaticResource GhostHoverColor}" />
+    <SolidColorBrush x:Key="ScrollBarThumbBrush" Color="{StaticResource ScrollBarThumbColor}" />
+    <SolidColorBrush x:Key="ScrollBarThumbHoverBrush" Color="{StaticResource ScrollBarThumbHoverColor}" />
     <SolidColorBrush x:Key="AccentForegroundBrush" Color="White" />
     <SolidColorBrush x:Key="SuccessBrush" Color="#3DDC6E" />
     <SolidColorBrush x:Key="DangerBrush" Color="#FF6B62" />

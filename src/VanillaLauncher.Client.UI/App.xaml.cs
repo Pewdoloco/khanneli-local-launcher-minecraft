@@ -33,6 +33,21 @@ public partial class App : Application
         }
         catch { /* см. комментарий выше — язык/тема останутся дефолтными */ }
 
+        // Window.Background через implicit-стиль (TargetType="Window" в Styles.xaml) не
+        // подхватывает DynamicResource сам по себе — ни при live-переключении темы у уже
+        // открытого окна (см. ThemeManager.Apply, там та же проблема решена точечно через
+        // SetResourceReference по Application.Current.Windows), ни, как выяснилось, у ОКОН,
+        // СОЗДАННЫХ ПОСЛЕ переключения (GuideWindow/SettingsWindow и другие диалоги, открытые
+        // уже в тёмной теме, всё равно рисовались светлыми — ThemeManager.Apply просто не знал
+        // о них в момент вызова, они ещё не существовали). Централизованный фикс — один
+        // class handler на Window.Loaded для ЛЮБОГО окна приложения, а не точечные вызовы в
+        // каждом окне или только при переключении.
+        EventManager.RegisterClassHandler(
+            typeof(Window),
+            Window.LoadedEvent,
+            new RoutedEventHandler((sender, _) =>
+                ((Window)sender).SetResourceReference(Window.BackgroundProperty, "WindowBackgroundBrush")));
+
         base.OnStartup(e);
         DispatcherUnhandledException += OnDispatcherUnhandledException;
     }
